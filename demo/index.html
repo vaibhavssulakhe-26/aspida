@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TrustLens demo</title>
+  <style>
+    :root { --bg: #fbfbfc; --fg: #1f2328; --muted: #59636e; --border: #d0d7de; --card: #fff; color-scheme: light dark; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --border: #3d444d; --card: #161b22; } }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.6 system-ui, sans-serif; }
+    main { max-width: 860px; margin: 0 auto; padding: 32px 16px 80px; }
+    h1 { margin: 0 0 4px; } .muted { color: var(--muted); }
+    section { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin: 16px 0; }
+    h2 { font-size: 17px; margin: 0 0 8px; }
+    ul { margin: 0; padding-left: 20px; } li { margin: 6px 0; }
+    code { font-size: 13px; overflow-wrap: anywhere; }
+    nav a { margin-right: 12px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>TrustLens demo page</h1>
+  <p class="muted">Hover any link to see TrustLens' verdict. Every risky link points to a reserved <code>.test</code> or <code>.invalid</code> domain, which can never resolve, so nothing here can reach a real phishing site.</p>
+  <nav><a href="qr.html">QR demo</a> <a href="chat-mock.html">Chat demo</a> <a href="gmail-mock.html">Gmail demo</a> <a href="heavy.html">Heavy page</a></nav>
+
+  <section id="clean">
+    <h2>Real sites (expect "No known threats found")</h2>
+    <ul>
+      <li><a href="https://www.onlinesbi.sbi/">State Bank of India: onlinesbi.sbi</a></li>
+      <li><a href="https://www.hdfcbank.com/">HDFC Bank</a></li>
+      <li><a href="https://en.wikipedia.org/wiki/Phishing">Wikipedia: Phishing</a></li>
+      <li><a href="https://bit.ly/3xyzDemo">A bit.ly short link (shortener noted, not expanded)</a></li>
+    </ul>
+  </section>
+
+  <section id="feed">
+    <h2>Known malicious (bundled demo feed → warning page on click)</h2>
+    <ul>
+      <li><a id="feed-host" href="http://malicious.trustlens-demo.invalid/login">malicious.trustlens-demo.invalid/login</a></li>
+      <li><a id="feed-url" href="http://login-verify.trustlens-demo.invalid/hdfc/netbanking/login.php">HDFC NetBanking login (listed URL)</a></li>
+      <li><a href="https://upi-reward.trustlens-demo.invalid/claim?id=4921">Claim your UPI cashback</a></li>
+    </ul>
+  </section>
+
+  <section id="lookalike">
+    <h2>Lookalike domains (local checks)</h2>
+    <ul>
+      <li><a id="typo-visual" href="https://paypa1.test/signin">paypa1.test: digit 1 instead of l</a></li>
+      <li><a href="https://arnazon.test/your-orders">arnazon.test: "rn" pretending to be "m"</a></li>
+      <li><a href="https://flipkarrt.test/offer">flipkarrt.test: one extra letter</a></li>
+      <li><a id="homoglyph" href="https://xn--80ak6aa92e.test/">аррӏе.test: Cyrillic letters that look like "apple"</a></li>
+      <li><a href="https://xn--pypal-4ve.test/">pаypal.test: one Cyrillic "а" mixed into Latin</a></li>
+    </ul>
+  </section>
+
+  <section id="brand">
+    <h2>Brand claims on unrelated domains</h2>
+    <ul>
+      <li><a id="brand-sbi" href="https://sbi-kyc-login.test/update">SBI KYC update (sbi-kyc-login.test)</a></li>
+      <li><a href="https://hdfcbank-kyc.vercel.app.test/">HDFC KYC on a hosting-like subdomain</a></li>
+      <li><a href="https://irctc-refund.test/refund">IRCTC refund</a></li>
+      <li><a href="https://www.paypal.com.verify-account.test/">www.paypal.com.verify-account.test (brand in subdomain)</a></li>
+      <li><a href="https://phonepe-cashback.test/claim">PhonePe cashback</a></li>
+    </ul>
+  </section>
+
+  <section id="structure">
+    <h2>Structural tricks</h2>
+    <ul>
+      <li><a id="at-sign" href="https://www.google.com@192.0.2.10/login">https://www.google.com@192.0.2.10/login</a></li>
+      <li><a href="http://198.51.100.23/icici/netbanking">Raw IP address, plain http</a></li>
+      <li><a id="text-mismatch" href="https://account-update.test/session">www.icicibank.com</a> ← text shows one domain, link goes elsewhere</li>
+      <li><a href="https://a.b.c.secure.account-check.test:8443/verify">Many subdomains + unusual port</a></li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

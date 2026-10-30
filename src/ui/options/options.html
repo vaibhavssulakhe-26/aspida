@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TrustLens settings</title>
+  <link rel="stylesheet" href="options.css">
+  <script type="module" src="options.js"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>TrustLens</h1>
+      <p class="sub">All checks run on this device. Nothing you browse, read or receive is sent anywhere. <span id="version"></span></p>
+    </header>
+
+    <section aria-labelledby="h-features">
+      <h2 id="h-features">Features</h2>
+      <p class="hint">Each feature can be switched off on its own. Changes apply to newly loaded pages.</p>
+      <div id="features" class="toggles"></div>
+    </section>
+
+    <section aria-labelledby="h-feeds">
+      <h2 id="h-feeds">Threat feeds</h2>
+      <p class="hint">Feed files are downloaded from the listed hosts and matched locally. Your URLs are never sent to them.</p>
+      <div class="table-wrap"><table id="feeds">
+        <thead><tr><th>On</th><th>Feed</th><th>Status</th><th>Entries</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+      <form id="urlhaus-form" class="inline-form">
+        <label for="urlhaus-key">URLhaus Auth-Key</label>
+        <input id="urlhaus-key" type="password" autocomplete="off" spellcheck="false" placeholder="Free key from auth.abuse.ch">
+        <button type="submit">Save key</button>
+      </form>
+    </section>
+
+
+    <section aria-labelledby="h-allow">
+      <h2 id="h-allow">Allowlist</h2>
+      <p class="hint">Sites you trust. TrustLens skips every check for them, including feeds.</p>
+      <form id="allow-form" class="inline-form">
+        <label for="allow-input" class="sr-only">Domain</label>
+        <input id="allow-input" type="text" placeholder="example.com" autocomplete="off" spellcheck="false">
+        <button type="submit">Add</button>
+      </form>
+      <ul id="allowlist" class="chips"></ul>
+    </section>
+
+    <section aria-labelledby="h-stats">
+      <h2 id="h-stats">Local counters</h2>
+      <p class="hint">Counts only; no URLs or messages are kept.</p>
+      <dl id="stats" class="stats"></dl>
+    </section>
+
+    <section aria-labelledby="h-data">
+      <h2 id="h-data">Your data</h2>
+      <p class="hint">Removes settings, allowlist, counters and downloaded feeds. The bundled demo feed is reloaded.</p>
+      <button id="clear" class="danger" type="button">Clear all data</button>
+      <span id="clear-msg" class="hint" role="status"></span>
+    </section>
+  </main>
+</body>
+</html>

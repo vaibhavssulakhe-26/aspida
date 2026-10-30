@@ -1,0 +1,18 @@
+# Synthetic phishing-style URLs (made up; not live). Each must be flagged.
+https://sbi-login.xyz/
+https://onlinesbi-kyc-update.top/verify
+https://hdfcbank-kyc.vercel.app/login
+https://paytmkyc.in/update
+https://phonepe-reward.click/claim
+https://irctc-refund.online/refund
+https://amazon-prize.shop/winner
+https://flipkart-offer.site/login
+https://paypa1.com/signin
+https://arnazon.in/account
+https://xn--80ak6aa92e.com/
+https://www.paypal.com.verify-acct.ru/
+https://www.google.com@198.51.100.7/login
+http://203.0.113.9/icici/netbanking
+https://g00gle.com/
+https://micros0ft.com/office365
+https://icicibank.secure-login.support/

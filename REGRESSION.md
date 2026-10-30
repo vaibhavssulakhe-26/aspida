@@ -1,0 +1,61 @@
+# Regression checklist
+
+Run before starting and after finishing every milestone. A milestone is done
+only when every box below is green.
+
+## Automated
+
+- [ ] `npm test`: all unit tests pass (includes the top-10k false-positive sweep).
+- [ ] `CHROME_PATH=<chrome-for-testing> npm run smoke`: extension loads in
+      Chrome for Testing with no manifest errors, install warnings, runtime
+      errors, service-worker exceptions or console errors; every step in
+      `tools/smoke-steps/` passes; the privacy audit reports 0 unexpected
+      network requests.
+
+## Manual (Chrome, chrome://extensions → Load unpacked → repo root)
+
+- [ ] m1: Extension card shows no "Errors" button. Service worker "Inspect" console is clean.
+- [ ] m2: Toolbar icon opens the options page. Feed table shows "Bundled demo feed"
+      updated, OpenPhish / Phishing.Database updated within a minute (online), URLhaus
+      "Auth-Key not set" unless a key is saved.
+- [ ] m2: Visit `http://malicious.trustlens-demo.invalid/` → warning page, label
+      "Known malicious", evidence cites the host. "Go back" returns; "Proceed anyway"
+      leaves the page (DNS error is expected for .invalid) and does not loop.
+- [ ] m2: "Add to allowlist and continue" adds `trustlens-demo.invalid` to the
+      allowlist on the options page; remove it with ×.
+- [ ] m2: Turn off "Warning page" → the same URL is no longer intercepted.
+- [ ] m2: "Clear all data" (click twice) empties allowlist and counters; demo feed reloads.
+- [ ] m3: Serve the demo (`npm run demo` or `python3 -m http.server -d demo 8080`)
+      and open http://localhost:8080/. Hover each link: tooltip shows tier + cited
+      evidence; real sites say "No known threats found" (never "safe").
+- [ ] m3: Tooltip disappears on mouse-out, Escape and scroll; keyboard Tab focus shows it.
+- [ ] m3: Turn off "Link hover verdict" in options → tooltips stop without reload.
+- [ ] m3: http://localhost:8080/heavy.html scrolls smoothly; a link near the bottom shows a tooltip.
+- [ ] m3: Normal sites (e.g. github.com, wikipedia.org) behave normally; links unchanged.
+- [ ] m4: http://localhost:8080/qr.html: hover each QR → tooltip shows "QR code contains
+      (not opened)", the decoded text, and the verdict (High risk / Known malicious /
+      Suspicious / No known threats found). UPI code shows payee + amount note.
+- [ ] m4: Canvas QR and the cross-origin QR (other loopback host name) both decode.
+- [ ] m4: Hovering ordinary photos shows nothing. The tab never navigates to a decoded URL.
+- [ ] m4: Turn off "QR code hover" → no QR tooltips.
+- [ ] m5: http://localhost:8080/chat-mock.html: badges appear after the Jio, SBI and
+      malicious links only; "Simulate a new incoming message" adds a badge to the new
+      Amazon-lookalike link. Hovering a chat link shows the tooltip.
+- [ ] m5: Turn off "WhatsApp Web" → badges disappear without reload.
+- [ ] m5 (needs accounts, not automated): open a chat with a link on WhatsApp Web,
+      Telegram Web (/k/ and /a/) and an Instagram DM. Risky links get a badge. If not,
+      enable "Debug logging" and look for "no message container matched" in the
+      console, then update `src/content/sites/<site>.selectors.js`.
+- [ ] m5: Sending, replying and scrolling in those apps work normally.
+- [ ] m6: http://localhost:8080/gmail-mock.html: phishing email banner says "Known
+      malicious" and cites Reply-To → gmail.com, "claims to be HDFC Bank", the link
+      text mismatch and the feed-listed link; the colleague's email says "No known
+      threats found". Both mention what Gmail doesn't expose.
+- [ ] m6: Inbox rows are NOT coloured by default. Turn on "Gmail: inbox highlighting":
+      PayPal-lookalike row red, SBI-on-gmail.com row yellow, others unchanged. Turn it
+      off: colours removed.
+- [ ] m6 (needs an account, not automated): open a real email in Gmail; banner appears
+      above the body; replying, archiving and switching emails work normally. If no
+      banner, enable "Debug logging" and update `src/content/sites/gmail.selectors.js`.
+- [ ] m7: README, FEEDS, PRIVACY and DEMO match behaviour (permissions table equals
+      manifest.json; feed URLs equal src/config/feeds.js).

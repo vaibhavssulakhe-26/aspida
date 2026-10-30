@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TrustLens QR demo</title>
+  <style>
+    :root { --bg: #fbfbfc; --fg: #1f2328; --muted: #59636e; --border: #d0d7de; --card: #fff; color-scheme: light dark; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --border: #3d444d; --card: #161b22; } }
+    body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.6 system-ui, sans-serif; }
+    main { max-width: 900px; margin: 0 auto; padding: 32px 16px 80px; }
+    .muted { color: var(--muted); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+    figure { margin: 0; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+    figure img, figure canvas { width: 160px; height: 160px; display: block; image-rendering: pixelated; background: #fff; }
+    figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>QR code demo</h1>
+  <p class="muted">Hover a QR code. TrustLens decodes it locally, shows what it contains, and checks the link without opening it. <a href="index.html">Back to link demo</a></p>
+  <div class="grid">
+    <figure><img id="qr-highrisk" src="qr/qr-highrisk.png" alt="QR code"><figcaption>"Scan to verify your PayPal account"</figcaption></figure>
+    <figure><img id="qr-feed" src="qr/qr-feed.png" alt="QR code"><figcaption>"Pay your electricity bill"</figcaption></figure>
+    <figure><img id="qr-brand" src="qr/qr-brand.png" alt="QR code"><figcaption>"SBI KYC update"</figcaption></figure>
+    <figure><img id="qr-clean" src="qr/qr-clean.png" alt="QR code"><figcaption>Wikipedia article</figcaption></figure>
+    <figure><img id="qr-upi" src="qr/qr-upi.png" alt="QR code"><figcaption>"Scan to receive your refund" (UPI)</figcaption></figure>
+    <figure><canvas id="qr-canvas" width="240" height="240"></canvas><figcaption>Drawn on a &lt;canvas&gt;</figcaption></figure>
+    <figure><img id="qr-cross" alt="QR code"><figcaption>Cross-origin image (other host name)</figcaption></figure>
+  </div>
+</main>
+<script>
+  // Canvas copy of the brand QR.
+  const img = new Image();
+  img.onload = () => document.getElementById('qr-canvas').getContext('2d').drawImage(img, 0, 0, 240, 240);
+  img.src = 'qr/qr-brand.png';
+  // Same image from the "other" loopback host name, i.e. a different origin.
+  const other = location.hostname === 'localhost' ? '127.0.0.1' : 'localhost';
+  document.getElementById('qr-cross').src = `${location.protocol}//${other}:${location.port}/qr/qr-highrisk.png`;
+</script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+# Privacy
+
+TrustLens is designed so that **nothing you browse, read or receive leaves your
+device**.
+
+## What is analysed, and where
+
+Link URLs, link text, QR-code contents, chat links and the sender, Reply-To and
+links of an opened Gmail message are analysed **inside your browser**, by the
+extension's service worker, against lists stored on your device.
+
+TrustLens does **not**:
+
+- send any URL, message, email, sender or QR content to any server (no Safe
+  Browsing Lookup API, no per-URL API, no backend, no analytics, no telemetry,
+  no remote logging);
+- open, prefetch, `HEAD`/`GET`, or follow the target of any link or decoded QR
+  code, expand shorteners, or resolve redirects (tracking wrappers such as
+  `l.instagram.com/?u=` are read as text);
+- click, reply, send, or modify your messages or emails. Content scripts only
+  read the page and add Shadow-DOM overlays. When enabled, Gmail inbox
+  highlighting sets two inline styles on list rows and restores them when
+  turned off.
+
+The smoke test (`npm run smoke`) enforces the "never contacts a link target"
+rule. It records every network request from pages and the service worker and
+fails if any request goes to a hovered or scanned target.
+
+## Network requests TrustLens makes
+
+1. **Feed downloads**, to exactly these hosts (also the only `host_permissions`):
+   `raw.githubusercontent.com`, `openphish.com`, `urlhaus-api.abuse.ch` (only if
+   you add a key). These requests are sent without cookies or a referrer. Like any
+   download, they reveal your IP address and the time to that host. They contain
+   nothing about your browsing.
+2. **QR image bytes**, only when you hover an image hosted on a different site
+   than the page. The image is re-fetched without cookies or a referrer, so it
+   can be decoded locally. The page has already loaded that same image. The
+   decoded link itself is never requested.
+
+## What is stored (on this device only)
+
+| Data | Where | Cleared by |
+|---|---|---|
+| Settings, allowlist, URLhaus Auth-Key | `chrome.storage.local` (not `sync`, so nothing goes to your Google account) | Clear all data |
+| Feed entries | IndexedDB (extension origin) | Clear all data |
+| Feed status (time, counts, last error) | `chrome.storage.local` | Clear all data |
+| Detection counters (numbers only, no URLs) | `chrome.storage.local` | Clear all data |
+| "Already counted" set: truncated SHA-256 hashes, so the same link isn't counted twice | `chrome.storage.session` (gone when the browser closes) | Clear all data / browser exit |
+| "Proceed anyway" bypasses (per tab, registrable domain) | `chrome.storage.session` | closing the tab / browser exit |
+| Per-page verdict cache | content-script memory | leaving the page |
+
+**Clear all data** (options page, click twice) deletes all of the above and
+then reloads the bundled demo feed.
+
+## Visible to websites
+
+A web page can detect that TrustLens is installed by probing one of its
+web-accessible module files (see README, Limitations). Pages cannot read
+TrustLens' tooltips, badges or banners, which live in closed Shadow DOM roots,
+and TrustLens never injects anything into the page's own JavaScript world.

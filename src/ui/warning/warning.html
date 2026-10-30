@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TrustLens warning</title>
+  <link rel="stylesheet" href="warning.css">
+  <script type="module" src="warning.js"></script>
+</head>
+<body>
+  <main>
+    <p class="brand">TrustLens</p>
+    <h1 id="heading">This page was stopped before it loaded</h1>
+    <p class="lede">TrustLens found risk signals for the address below. Nothing from that site has been loaded.</p>
+    <p class="target"><span class="target-label">Address</span><code id="target"></code></p>
+    <div id="verdict"></div>
+    <div class="actions">
+      <button id="back" class="primary" type="button">Go back</button>
+      <button id="allow" type="button">Add to allowlist and continue</button>
+      <button id="proceed" class="quiet" type="button">Proceed anyway</button>
+    </div>
+    <p class="fine">Proceeding only affects this tab. TrustLens never opens or contacts the site for this check; it was matched against local feeds and local rules.</p>
+  </main>
+</body>
+</html>
