@@ -6,8 +6,9 @@ at the reserved `.test` / `.invalid` TLDs, so nothing can reach a real phishing 
 ## Setup (before going on stage)
 
 1. `chrome://extensions` → Developer mode → **Load unpacked** → repo folder.
-2. `npm run demo` (or `python3 -m http.server -d demo 8080`).
-3. Open http://localhost:8080/ and the Aspida settings (toolbar icon) in a second tab.
+2. `npm run demo` (or `python3 -m http.server -d demo -b 127.0.0.1 8080`). If it
+   says the port is in use, stop the old server or run `npm run demo -- 8081`.
+3. Open http://localhost:8080/ (or http://127.0.0.1:8080/) and the Aspida settings (toolbar icon) in a second tab.
 4. Optional: in settings, turn on **Gmail: inbox highlighting** for step 6.
 
 Kill switches: every feature is a checkbox in settings and applies instantly. If

@@ -25,8 +25,11 @@ only when every box below is green.
       allowlist on the options page; remove it with ×.
 - [ ] m2: Turn off "Warning page" → the same URL is no longer intercepted.
 - [ ] m2: "Clear all data" (click twice) empties allowlist and counters; demo feed reloads.
-- [ ] m3: Serve the demo (`npm run demo` or `python3 -m http.server -d demo 8080`)
-      and open http://localhost:8080/. Hover each link: tooltip shows tier + cited
+- [ ] m3: Serve the demo (`npm run demo` or `python3 -m http.server -d demo -b 127.0.0.1 8080`)
+      and open http://localhost:8080/. On Linux also open the chat and Gmail
+      demos via http://0.0.0.0:8080/ (the link plain `python3 -m http.server`
+      prints) and, with `npm run demo`, http://[::1]:8080/: badges and banners
+      must still appear. Hover each link: tooltip shows tier + cited
       evidence; real sites say "No known threats found" (never "safe").
 - [ ] m3: Tooltip disappears on mouse-out, Escape and scroll; keyboard Tab focus shows it.
 - [ ] m3: Turn off "Link hover verdict" in options → tooltips stop without reload.
