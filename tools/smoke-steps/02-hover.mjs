@@ -1,5 +1,5 @@
 // m3: hover tooltip on the demo page, live disable, heavy page.
-import { sleep, waitFor, overlayText, setSetting } from './helpers.mjs';
+import { sleep, waitFor, overlayText, setSetting, aspidaShadows } from './helpers.mjs';
 
 export default async function ({ browser, extId, base, fail }) {
   const page = await browser.newPage();
@@ -31,6 +31,26 @@ export default async function ({ browser, extId, base, fail }) {
   await expectHover('#homoglyph', /High risk.*apple\.com/, 'homoglyph tooltip');
   await expectHover('#text-mismatch', /shows icicibank\.com/, 'text mismatch tooltip');
   await expectHover('#at-sign', /High risk/, '@ tooltip');
+
+  // Verdicts only on hover/focus: nothing persistent is drawn next to links.
+  const persistent = (await aspidaShadows(page)).filter((s) => s.kind !== 'overlay');
+  if (persistent.length) fail(`persistent tags on a normal page: ${persistent.map((s) => s.text).join(' | ')}`);
+
+  // Keyboard focus shows the tooltip too.
+  await page.mouse.move(5, 5);
+  await page.$eval('#typo-visual', (e) => e.scrollIntoView({ block: 'center' }));
+  await sleep(300); // scrolling hides the tooltip by design
+  await page.focus('#typo-visual');
+  await waitFor(async () => /High risk/.test(await overlayText(page)), 'focus tooltip', 5000).catch(() => fail('no tooltip on keyboard focus'));
+  await page.evaluate(() => document.activeElement.blur());
+  await sleep(200);
+
+  // A hovered link that disappears (SPA re-render) must not leave its tooltip behind.
+  await expectHover('#feed-url', /Known malicious/, 'tooltip before removal');
+  // Replace in place so no other link slides under the pointer.
+  await page.$eval('#feed-url', (a) => a.replaceWith(Object.assign(document.createElement('span'), { textContent: a.textContent })));
+  await sleep(400);
+  if (await overlayText(page)) fail('tooltip stayed visible after its link was removed');
 
   // Host page untouched: no attributes or nodes added to links.
   const modified = await page.$$eval('a', (as) => as.filter((a) => a.attributes.length > 2 || a.children.length).length);

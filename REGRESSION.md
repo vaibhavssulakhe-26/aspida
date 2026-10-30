@@ -28,10 +28,11 @@ only when every box below is green.
 - [ ] m3: Serve the demo (`npm run demo` or `python3 -m http.server -d demo -b 127.0.0.1 8080`)
       and open http://localhost:8080/. On Linux also open the chat and Gmail
       demos via http://0.0.0.0:8080/ (the link plain `python3 -m http.server`
-      prints) and, with `npm run demo`, http://[::1]:8080/: badges and banners
-      must still appear. Hover each link: tooltip shows tier + cited
+      prints) and, with `npm run demo`, http://[::1]:8080/: chat hover
+      tooltips and Gmail banners must still appear. Hover each link: tooltip shows tier + cited
       evidence; the "Real site (control)" links (grouped at the bottom) say
-      "No known threats found" (never "safe").
+      "No known threats found" (never "safe"). No tag, label or badge is ever
+      shown next to a link without hovering or focusing it.
 - [ ] m3: `www.icicibank.com` link → tooltip "Link text shows icicibank.com but it
       opens account-update.test"; "SBI KYC update" → "claims to be SBI but the
       domain is not sbi.co.in". Clicking either never reaches a real site (DNS
@@ -46,12 +47,16 @@ only when every box below is green.
 - [ ] m4: Canvas QR and the cross-origin QR (other loopback host name) both decode.
 - [ ] m4: Hovering ordinary photos shows nothing. The tab never navigates to a decoded URL.
 - [ ] m4: Turn off "QR code hover" → no QR tooltips.
-- [ ] m5: http://localhost:8080/chat-mock.html: badges appear after the Jio, SBI and
-      malicious links only; "Simulate a new incoming message" adds a badge to the new
-      Amazon-lookalike link. Hovering a chat link shows the tooltip.
-- [ ] m5: Turn off "WhatsApp Web" → badges disappear without reload.
+- [ ] m5: http://localhost:8080/chat-mock.html: no badges by default. Hovering the
+      Jio, SBI and malicious links shows the tooltip with the tier; the control links
+      say "No known threats found".
+- [ ] m5: Turn on "Show inline badges in chat" → badges appear (without reload) after
+      the Jio, SBI and malicious links only; "Simulate a new incoming message" adds a
+      badge to the new Amazon-lookalike link. Turn it off → badges disappear.
+- [ ] m5: With inline badges on, turn off "WhatsApp Web" → badges disappear without reload.
 - [ ] m5 (needs accounts, not automated): open a chat with a link on WhatsApp Web,
-      Telegram Web (/k/ and /a/) and an Instagram DM. Risky links get a badge. If not,
+      Telegram Web (/k/ and /a/) and an Instagram DM. Hovering a risky link shows the
+      tooltip (with inline badges on, it also gets a badge). If not,
       enable "Debug logging" and look for "no message container matched" in the
       console, then update `src/content/sites/<site>.selectors.js`.
 - [ ] m5: Sending, replying and scrolling in those apps work normally.

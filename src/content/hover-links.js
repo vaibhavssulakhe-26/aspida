@@ -2,6 +2,8 @@
 //  - IntersectionObserver pre-checks links as they scroll into view, so the
 //    verdict is usually cached before the pointer arrives.
 //  - Tooltip on hover (and keyboard focus) renders tier + cited evidence.
+//    This is the only way a verdict appears next to a link: nothing is ever
+//    drawn beside links persistently (chat badges are a separate opt-in).
 // Read-only: never clicks, follows, prefetches or modifies links.
 
 import { verdictFor, cachedVerdict } from './link-scanner.js';
@@ -101,7 +103,13 @@ export function start() {
 
   observeLinks(document);
   const rescan = debounce(safe(() => observeLinks(document), 'rescan'), 600);
-  state.mo = new MutationObserver(() => state && state.observed < MAX_OBSERVED && rescan());
+  state.mo = new MutationObserver(() => {
+    if (!state) return;
+    // The hovered link was removed (SPA re-render): no mouseout will come, so
+    // don't leave its tooltip floating on the page.
+    if (state.current && !state.current.isConnected) hide();
+    if (state.observed < MAX_OBSERVED) rescan();
+  });
   state.mo.observe(document.documentElement, { childList: true, subtree: true });
   debug('hover-links started');
 }

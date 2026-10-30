@@ -33,7 +33,8 @@ demo server), use `npm run demo -- 8081`. Stage walkthrough: [DEMO.md](DEMO.md).
 | Typosquat / homoglyph / IDN lookalikes, brand claims (SBI, HDFC, ICICI, Paytm, PhonePe, Google Pay, IRCTC, Amazon, Flipkart, …) | everywhere | part of every check |
 | Threat-feed matching (OpenPhish, Phishing.Database, URLhaus*), local | everywhere | per feed (on; URLhaus off) |
 | QR code hover: decode locally, show contents, check the link, never open it; UPI payee shown | all http(s) pages | QR code hover (on) |
-| Chat link badges | WhatsApp Web, Telegram Web, Instagram DMs | one per app (on) |
+| Chat links: background pre-check so the hover verdict is instant | WhatsApp Web, Telegram Web, Instagram DMs | one per app (on) |
+| Inline risk badges next to chat links (verdicts are otherwise shown only on hover/focus) | same chat apps | Show inline badges in chat (**off**) |
 | Opened-email banner: sender, Reply-To (if visible), links | Gmail | Gmail: opened email (on) |
 | Inbox row highlighting from the listed sender (weak signal) | Gmail | Gmail: inbox highlighting (**off**) |
 | Warning page before loading known-malicious sites | navigation | Warning page (on), Warning page for High risk (on) |
@@ -78,7 +79,7 @@ IndexedDB, runs the pure pipeline, and returns a *verdict*:
   reasons: [{ id, category, weight, evidence, detail }], allowlisted }
 ```
 
-The tooltip, chat badge, Gmail banner and warning page all render that
+The tooltip, (optional) chat badge, Gmail banner and warning page all render that
 same shape with `src/ui/render.js`.
 
 **Signals → verdict.** Checks never decide the verdict. Each returns signals;
@@ -142,8 +143,8 @@ and no remote code: the extension-page CSP is `script-src 'self'`.
 - **Site selectors are not verified against live, logged-in sessions.** Gmail,
   WhatsApp, Telegram and Instagram selectors were written from those apps'
   known DOM structure and checked only on offline mocks (`demo/`), plus a
-  logged-out load of each real site to confirm nothing breaks. If badges or
-  banners don't appear, turn on *Debug logging* and update
+  logged-out load of each real site to confirm nothing breaks. If tooltips,
+  badges or banners don't appear, turn on *Debug logging* and update
   `src/content/sites/<site>.selectors.js`. Everything fails soft.
 - **Warning page timing.** `onBeforeNavigate` races the navigation; on a very
   fast connection a page may begin loading before the redirect to the warning
@@ -175,7 +176,7 @@ CHROME_PATH=/path/to/chrome-for-testing npm i && npm run smoke
 
 `npm run smoke` loads the unpacked extension in Chrome for Testing and drives
 every feature on the demo pages: feeds, warning page, hover, QR (in-page and
-service-worker paths), chat badges, Gmail banner and inbox highlighting, live
+service-worker paths), chat hover and opt-in chat badges, Gmail banner and inbox highlighting, live
 setting toggles, and feed-failure handling. It fails on any extension error,
 service-worker exception, page console error, or **any network request to a
 link or QR target that was only hovered or scanned** (a privacy audit). Manual

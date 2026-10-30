@@ -1,8 +1,9 @@
 // Chat link scanner, parameterised by a site selectors file. Watches the
-// message list, checks every link in messages, and puts a small Shadow-DOM
-// badge after links that show risk signals. Read-only: never clicks,
-// replies, sends, or edits messages. Selector misses are logged (debug) and
-// otherwise ignored.
+// message list and pre-checks every link in messages, so the hover tooltip
+// (hover-links.js) is instant. Only with the "Show inline badges in chat"
+// setting (off by default) does it also put a small Shadow-DOM badge after
+// risky links. Read-only: never clicks, replies, sends, or edits messages.
+// Selector misses are logged (debug) and otherwise ignored.
 
 import { verdictFor } from './link-scanner.js';
 import { inlineShadow } from '../ui/overlay.js';
@@ -43,11 +44,16 @@ function allMatches(selectors, root = document) {
 export function createChatScanner(site) {
   let state = null;
 
-  async function check(a) {
-    const href = httpHref(a);
-    if (!href) return;
+  function unbadge(a) {
+    state.badged.get(a)?.remove();
+    state.badged.delete(a);
+  }
+
+  async function check(a, href) {
     const verdict = await verdictFor(href, anchorText(a));
-    if (!state || !verdict || verdict.tier === 'none' || !a.isConnected) return;
+    // Chat apps recycle message elements: only badge if the anchor still
+    // points where it did when we checked it.
+    if (!state || !state.badges || !verdict || verdict.tier === 'none' || !a.isConnected || httpHref(a) !== href) return;
     if (state.badged.has(a)) return;
     const { host, root } = inlineShadow(a);
     host.title = `Aspida: ${verdict.label}. ${verdict.reasons[0]?.detail || ''}`;
@@ -64,28 +70,53 @@ export function createChatScanner(site) {
       }
       return;
     }
-    for (const a of allMatches(site.links)) {
-      if (state.seen.has(a)) continue;
-      state.seen.add(a);
-      check(a).catch((e) => debug(`${site.id}: check failed`, e));
+    // Drop badges whose link was removed or now points somewhere else.
+    for (const a of [...state.badged.keys()]) {
+      if (!a.isConnected || state.seen.get(a) !== httpHref(a)) unbadge(a);
     }
+    for (const a of allMatches(site.links)) {
+      const href = httpHref(a);
+      if (!href || state.seen.get(a) === href) continue;
+      state.seen.set(a, href);
+      unbadge(a);
+      check(a, href).catch((e) => debug(`${site.id}: check failed`, e));
+    }
+  }
+
+  function removeBadges() {
+    for (const host of state.badged.values()) host.remove();
+    state.badged.clear();
   }
 
   return {
     id: site.id,
-    start() {
+    start(settings) {
       if (state) return;
-      state = { seen: new WeakSet(), badged: new Map(), startedAt: Date.now(), reportedMiss: false };
+      state = { seen: new WeakMap(), badged: new Map(), badges: !!settings?.chatInlineBadges, startedAt: Date.now(), reportedMiss: false };
       const run = debounce(safe(scan, `${site.id} scan`), SCAN_DEBOUNCE_MS);
+      state.run = run;
+      // attributes/href: recycled message elements get a new href in place.
       state.mo = new MutationObserver(run);
-      state.mo.observe(document.documentElement, { childList: true, subtree: true, characterData: false });
+      state.mo.observe(document.documentElement, { childList: true, subtree: true, characterData: false, attributes: true, attributeFilter: ['href'] });
       run();
       debug(`${site.id}: chat scanner started`);
+    },
+    // Live settings change while running (inline badges on/off).
+    update(settings) {
+      if (!state) return;
+      const want = !!settings.chatInlineBadges;
+      if (want === state.badges) return;
+      state.badges = want;
+      if (!want) removeBadges();
+      else {
+        state.seen = new WeakMap(); // re-check everything (verdicts are cached)
+        state.run();
+      }
     },
     stop() {
       if (!state) return;
       state.mo.disconnect();
-      for (const host of state.badged.values()) host.remove();
+      removeBadges();
       state = null;
     },
   };

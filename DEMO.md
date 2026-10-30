@@ -58,11 +58,15 @@ Weights live in one file (`src/scoring/weights.js`).
 
 ## 4. Chats (demo/chat-mock.html)
 
-- Badges appear only next to the risky links (Jio recharge scam, SBI YONO, feed
-  match). The real-site control messages after the "Real sites (control)" divider
-  (cybercrime.gov.in, Google Photos) get none.
-- Click **Simulate a new incoming message** → the new Amazon-lookalike link gets a
-  badge within half a second (MutationObserver).
+- Nothing is drawn next to the links. Hover the Jio, SBI YONO or electricity-bill
+  link → the tooltip shows Suspicious / Known malicious with evidence, instantly
+  (chat links are pre-checked in the background). The real-site control messages
+  after the "Real sites (control)" divider (cybercrime.gov.in, Google Photos) say
+  "No known threats found".
+- Optional: turn on **Show inline badges in chat** in settings → small badges appear
+  next to the three risky links only. Click **Simulate a new incoming message** →
+  the new Amazon-lookalike link gets a badge within half a second
+  (MutationObserver). Turn the setting off again → badges removed.
 - Same code runs on WhatsApp Web / Telegram Web / Instagram DMs, with site
   selectors in `src/content/sites/`.
 

@@ -45,6 +45,8 @@ function apply(settings) {
       if (want && !running.has(mod)) {
         mod.start(settings);
         running.add(mod);
+      } else if (want) {
+        mod.update?.(settings);
       } else if (!want && running.has(mod)) {
         mod.stop();
         running.delete(mod);

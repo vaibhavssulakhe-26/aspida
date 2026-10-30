@@ -9,6 +9,7 @@ export const DEFAULT_SETTINGS = {
   chatWhatsApp: true,
   chatTelegram: true,
   chatInstagram: true,
+  chatInlineBadges: false, // persistent pill next to risky chat links (verdicts otherwise on hover only)
   gmailBanner: true, // banner on the opened email
   gmailInboxHighlight: false, // colour inbox rows (weak signal, opt-in)
   navigationGuard: true, // interstitial on known-malicious navigations
