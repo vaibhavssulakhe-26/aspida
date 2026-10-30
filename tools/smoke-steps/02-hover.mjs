@@ -1,5 +1,5 @@
 // m3: hover tooltip on the demo page, live disable, heavy page.
-import { sleep, waitFor, overlayText, setSetting, aspidaShadows } from './helpers.mjs';
+import { sleep, waitFor, overlayText, setSetting, aspidaShadows, tooltipState } from './helpers.mjs';
 
 export default async function ({ browser, extId, base, fail }) {
   const page = await browser.newPage();
@@ -31,6 +31,28 @@ export default async function ({ browser, extId, base, fail }) {
   await expectHover('#homoglyph', /High risk.*apple\.com/, 'homoglyph tooltip');
   await expectHover('#text-mismatch', /shows icicibank\.com/, 'text mismatch tooltip');
   await expectHover('#at-sign', /High risk/, '@ tooltip');
+
+  // Fade transition: checked by settled state, never by timing.
+  const settledOpen = await waitFor(async () => {
+    const st = await tooltipState(page);
+    return st && st.open && !st.running && !st.willChange ? st : null;
+  }, 'tooltip fade-in to settle', 3000).catch(() => null);
+  if (!settledOpen) fail(`tooltip fade-in did not settle: ${JSON.stringify(await tooltipState(page))}`);
+  else if (settledOpen.opacity !== '1' || settledOpen.transform !== 'none' || settledOpen.pointerEvents !== 'none') fail(`settled tooltip state wrong: ${JSON.stringify(settledOpen)}`);
+  // Quick moves between links reuse the panel and end on the last link's verdict.
+  for (const sel of ['#typo-visual', '#feed-host', '#homoglyph', '#feed-host']) {
+    await page.hover(sel);
+    await sleep(40);
+  }
+  await waitFor(async () => /Known malicious/.test(await overlayText(page)), 'tooltip after quick moves', 5000).catch(async () => fail(`quick link-to-link moves: got "${await overlayText(page)}"`));
+  const panels = (await aspidaShadows(page)).find((s) => s.kind === 'overlay')?.html.match(/class="tl-float"/g)?.length;
+  if (panels !== 1) fail(`expected one reused tooltip element, found ${panels}`);
+  await page.mouse.move(5, 5);
+  const settledClosed = await waitFor(async () => {
+    const st = await tooltipState(page);
+    return st && st.hidden && !st.open && !st.willChange ? st : null;
+  }, 'tooltip fade-out to settle', 3000).catch(() => null);
+  if (!settledClosed) fail(`tooltip fade-out did not end hidden: ${JSON.stringify(await tooltipState(page))}`);
 
   // Verdicts only on hover/focus: nothing persistent is drawn next to links.
   const persistent = (await aspidaShadows(page)).filter((s) => s.kind !== 'overlay');

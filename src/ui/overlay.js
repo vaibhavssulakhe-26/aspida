@@ -7,8 +7,13 @@ const HOST_ATTR = 'data-aspida-overlay';
 
 const OVERLAY_CSS = `
 :host { all: initial; }
-.tl-float { position: fixed; z-index: 2147483647; pointer-events: none; max-width: min(360px, calc(100vw - 16px)); }
+.tl-float { position: fixed; z-index: 2147483647; pointer-events: none; max-width: min(360px, calc(100vw - 16px));
+  opacity: 0; transform: translateY(4px); transition: opacity 90ms ease-in, transform 90ms ease-in; }
+.tl-float[data-open] { opacity: 1; transform: none; transition-duration: 140ms; transition-timing-function: ease-out; }
 .tl-float[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .tl-float, .tl-float[data-open] { transform: none; transition: opacity 50ms linear; }
+}
 `;
 
 let shared = null;
@@ -37,12 +42,33 @@ export function removeOverlay() {
   shared = null;
 }
 
+// Fade-and-lift durations; keep in sync with OVERLAY_CSS. The settle timer
+// runs once per show/hide (no animation loop) to drop will-change and to set
+// [hidden] after the fade-out.
+const FADE_IN_MS = 140;
+const FADE_OUT_MS = 90;
+
 // A floating panel placed next to a target rect, flipped/clamped to stay on
-// screen. Used by the link tooltip and the QR tooltip.
+// screen. Used by the link tooltip and the QR tooltip. The element is reused,
+// so moving from link to link retargets the running transition instead of
+// restarting it (no flicker). Only opacity and transform are animated, and
+// the position is set before the panel becomes visible (no jump).
 export class FloatingPanel {
   constructor(doc = document) {
     this.doc = doc;
     this.box = null;
+    this.settleTimer = null;
+  }
+
+  settle(ms, after) {
+    clearTimeout(this.settleTimer);
+    this.box.style.willChange = 'opacity, transform';
+    this.settleTimer = setTimeout(() => {
+      this.settleTimer = null;
+      if (!this.box) return;
+      this.box.style.willChange = '';
+      after?.();
+    }, ms + 20);
   }
 
   show(rect, content) {
@@ -67,13 +93,24 @@ export class FloatingPanel {
     top = Math.min(Math.max(gap, top), Math.max(gap, vh - h - gap));
     this.box.style.left = `${Math.round(left)}px`;
     this.box.style.top = `${Math.round(top)}px`;
+    if (!this.box.hasAttribute('data-open')) {
+      // offsetWidth above flushed the closed style, so this starts the fade-in.
+      this.box.setAttribute('data-open', '');
+      this.settle(FADE_IN_MS);
+    }
   }
 
   hide() {
-    if (this.box) this.box.hidden = true;
+    const box = this.box;
+    if (!box || box.hidden || !box.hasAttribute('data-open')) return;
+    box.removeAttribute('data-open');
+    this.settle(FADE_OUT_MS, () => {
+      if (!box.hasAttribute('data-open')) box.hidden = true;
+    });
   }
 
   destroy() {
+    clearTimeout(this.settleTimer);
     this.box?.remove();
     this.box = null;
   }

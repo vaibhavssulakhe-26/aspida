@@ -31,7 +31,7 @@ export async function aspidaShadows(page) {
     const out = [];
     for (const f of found) {
       const { outerHTML } = await cdp.send('DOM.getOuterHTML', { nodeId: f.nodeId });
-      const visible = outerHTML.replace(/<style>[\s\S]*?<\/style>/g, '').replace(/<div class="tl-float" [^>]*hidden[^>]*>[\s\S]*?<\/div>\s*(?=<|$)/g, '');
+      const visible = outerHTML.replace(/<style>[\s\S]*?<\/style>/g, '').replace(/<div class="tl-float"(?![^>]*data-open)[^>]*>[\s\S]*?<\/div>\s*(?=<|$)/g, '');
       out.push({ kind: f.kind, html: outerHTML, text: visible.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() });
     }
     return out;
@@ -44,8 +44,40 @@ export async function overlayText(page) {
   const all = await aspidaShadows(page);
   const o = all.find((s) => s.kind === 'overlay');
   if (!o) return '';
-  // Hidden tooltip => treat as no text.
-  return /class="tl-float"[^>]*hidden/.test(o.html) ? '' : o.text;
+  // Closed (fading out) or hidden tooltip => treat as no text. The open state
+  // is set synchronously on show, so this never depends on transition timing.
+  return /class="tl-float"(?![^>]*data-open)/.test(o.html) ? '' : o.text;
+}
+
+// Computed state of the tooltip element once its transition has settled:
+// { open, hidden, opacity, transform, willChange, pointerEvents } or null.
+export async function tooltipState(page) {
+  const cdp = await page.createCDPSession();
+  try {
+    const { root } = await cdp.send('DOM.getDocument', { depth: -1, pierce: true });
+    let nodeId = null;
+    const walk = (n) => {
+      if (nodeId) return;
+      const attrs = n.attributes || [];
+      for (let i = 0; i < attrs.length; i += 2) if (attrs[i] === 'class' && attrs[i + 1] === 'tl-float') nodeId = n.nodeId;
+      for (const c of [...(n.children || []), ...(n.shadowRoots || [])]) walk(c);
+    };
+    walk(root);
+    if (!nodeId) return null;
+    const { object } = await cdp.send('DOM.resolveNode', { nodeId });
+    const { result } = await cdp.send('Runtime.callFunctionOn', {
+      objectId: object.objectId,
+      returnByValue: true,
+      functionDeclaration: `function () {
+        const cs = getComputedStyle(this);
+        return { open: this.hasAttribute('data-open'), hidden: this.hidden, opacity: cs.opacity, transform: cs.transform,
+          willChange: this.style.willChange, pointerEvents: cs.pointerEvents, running: this.getAnimations().length };
+      }`,
+    });
+    return result.value;
+  } finally {
+    await cdp.detach();
+  }
 }
 
 export async function setSetting(browser, extId, patch) {

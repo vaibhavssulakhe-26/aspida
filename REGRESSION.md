@@ -42,8 +42,14 @@ only when every box below is green.
       domain is not sbi.co.in". Clicking either never reaches a real site (DNS
       error page for `.test`). Only "Real site (control)" links open real sites.
 - [ ] m3: Tooltip disappears on mouse-out, Escape and scroll; keyboard Tab focus shows it.
+- [ ] m3: Tooltip fades and lifts in (about 140 ms) and fades out (about 90 ms), with no
+      jump in position. Moving quickly from link to link does not flicker. With the OS
+      "reduce motion" setting on (or DevTools → Rendering → prefers-reduced-motion:
+      reduce) it only fades, without moving.
 - [ ] m3: Turn off "Link hover verdict" in options → tooltips stop without reload.
 - [ ] m3: http://localhost:8080/heavy.html scrolls smoothly; a link near the bottom shows a tooltip.
+      DevTools Performance recording while scrolling and hovering shows no long tasks
+      from the extension and no layout or paint caused by the tooltip fade.
 - [ ] m3: Normal sites (e.g. github.com, wikipedia.org) behave normally; links unchanged.
 - [ ] m4: http://localhost:8080/qr.html: hover each QR → tooltip shows "QR code contains
       (not opened)", the decoded text, and the verdict (High risk / Known malicious /
