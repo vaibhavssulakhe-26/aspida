@@ -43,6 +43,11 @@ export default async function ({ browser, base, extId, fail }) {
 
   await expect('#qr-highrisk', /not opened.*paypa1\.test.*High risk/);
   await expect('#qr-feed', /malicious\.aspida-demo\.invalid.*Known malicious/);
+  // Bare domain (no scheme): analysed as a site, shown exactly as encoded.
+  const bare = await expect('#qr-bare', /not opened.*paypa1\.test\/login.*High risk/);
+  if (/https:\/\/paypa1/.test(bare)) fail(`bare-domain QR should show the text as encoded: ${bare}`);
+  // Domain inside text: neutral note plus the verdict for that host.
+  await expect('#qr-textdomain', /Refund desk.*may open sbi-kyc-update\.test as a link.*Suspicious/);
   await expect('#qr-clean', /wikipedia\.org.*No known threats found/);
   await expect('#qr-upi', /UPI payment request.*sbi\.refund\.desk@okaxis/);
   await expect('#qr-canvas', /sbi-kyc-login\.test.*Suspicious/);

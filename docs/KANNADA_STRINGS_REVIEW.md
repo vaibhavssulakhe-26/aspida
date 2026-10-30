@@ -17,7 +17,7 @@ Rules for reviewers:
   Y") are **not** translated in this version and stay in English.
 
 Regenerate this file after changing either table: `node tools/kannada-review.mjs`.
-118 strings.
+119 strings.
 
 ## Verdict tiers
 
@@ -68,6 +68,7 @@ Regenerate this file after changing either table: `node tools/kannada-review.mjs
 | `qr.upiName` | Payee name in the code | ಕೋಡ್‌ನಲ್ಲಿರುವ ಸ್ವೀಕರಿಸುವವರ ಹೆಸರು |
 | `qr.upiAmount` | Amount | ಮೊತ್ತ |
 | `qr.notGiven` | (not given) | (ನೀಡಿಲ್ಲ) |
+| `qr.maybeLink` | This is not a full web address, but some scanner apps may open {host} as a link. The check below is for that site. | ಇದು ಪೂರ್ಣ ವೆಬ್ ವಿಳಾಸವಲ್ಲ, ಆದರೆ ಕೆಲವು ಸ್ಕ್ಯಾನರ್ ಆ್ಯಪ್‌ಗಳು {host} ಅನ್ನು ಲಿಂಕ್ ಆಗಿ ತೆರೆಯಬಹುದು. ಕೆಳಗಿನ ಪರಿಶೀಲನೆ ಆ ಸೈಟ್‌ಗಾಗಿ. |
 | `qr.upiNote` | Scanning this sends money; it never receives money. Check the UPI ID belongs to who you expect: the payee name in a QR code is chosen by whoever made it. | ಇದನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಿದರೆ ಹಣ ಕಳುಹಿಸಲಾಗುತ್ತದೆ; ಹಣ ಎಂದಿಗೂ ಬರುವುದಿಲ್ಲ. UPI ID ನೀವು ನಿರೀಕ್ಷಿಸಿದವರದ್ದೇ ಎಂದು ಪರಿಶೀಲಿಸಿ: QR ಕೋಡ್‌ನಲ್ಲಿನ ಹೆಸರನ್ನು ಅದನ್ನು ರಚಿಸಿದವರೇ ಆಯ್ಕೆ ಮಾಡುತ್ತಾರೆ. |
 
 ## Advice

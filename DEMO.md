@@ -68,6 +68,14 @@ reasons disappear without reloading.
   **High risk**. The tab never navigates.
 - Hover the **UPI** QR → payee `sbi.refund.desk@okaxis` and amount ₹4999, with the
   note "Scanning this sends money; it never receives money".
+- Hover the **bare domain** QR (encodes `paypa1.test/login`, no `https://`) →
+  shown exactly as `paypa1.test/login`, **High risk** (lookalike of paypal.com).
+  Phone scanner apps open bare domains as websites, so Aspida checks them as
+  `https://…` without opening them.
+- Hover the **text with a domain** QR (`Refund desk: sbi-kyc-update.test/claim`) →
+  the text, a neutral note "some scanner apps may open sbi-kyc-update.test as a
+  link", and **Suspicious** for that site. File names such as `notes.txt` or
+  `setup.exe` are never treated as domains (those suffixes are not TLDs).
 - The canvas and cross-origin QR codes decode too (the cross-origin one is
   decoded by the service worker from the image bytes).
 

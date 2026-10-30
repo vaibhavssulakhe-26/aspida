@@ -79,7 +79,9 @@ async function inspect(el) {
   if (!state || state.current !== el) return;
   if (result.status !== 'ok') return; // no QR (or unreadable): stay quiet
   const qr = classifyQrText(result.text);
-  const verdict = qr.type === 'url' ? await verdictFor(qr.url) : null;
+  // A bare domain is analysed with a scheme added; it is never opened or fetched.
+  const target = qr.type === 'url' ? qr.url : qr.maybeUrl;
+  const verdict = target ? await verdictFor(target) : null;
   if (!state || state.current !== el) return;
   state.panel.show(el.getBoundingClientRect(), renderQr({ qr, verdict }));
 }

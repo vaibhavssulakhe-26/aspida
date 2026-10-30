@@ -54,6 +54,9 @@ only when every box below is green.
 - [ ] m4: http://localhost:8080/qr.html: hover each QR → tooltip shows "QR code contains
       (not opened)", the decoded text, and the verdict (High risk / Known malicious /
       Suspicious / No known threats found). UPI code shows payee + amount note.
+- [ ] m4: Bare-domain QR (`paypa1.test/login`) → shown without a scheme, High risk.
+      "Text with a domain" QR → note that scanner apps may open sbi-kyc-update.test as a
+      link, plus Suspicious. Neither is ever opened or requested (smoke privacy audit).
 - [ ] m4: Canvas QR and the cross-origin QR (other loopback host name) both decode.
 - [ ] m4: Hovering ordinary photos shows nothing. The tab never navigates to a decoded URL.
 - [ ] m4: Turn off "QR code hover" → no QR tooltips.

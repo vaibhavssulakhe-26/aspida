@@ -35,6 +35,7 @@ export default {
   'qr.upiName': 'Payee name in the code',
   'qr.upiAmount': 'Amount',
   'qr.notGiven': '(not given)',
+  'qr.maybeLink': 'This is not a full web address, but some scanner apps may open {host} as a link. The check below is for that site.',
   'qr.upiNote': 'Scanning this sends money; it never receives money. Check the UPI ID belongs to who you expect: the payee name in a QR code is chosen by whoever made it.',
 
   // Extra advice shown with a verdict (keyed by signal id)

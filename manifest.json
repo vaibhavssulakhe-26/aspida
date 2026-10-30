@@ -60,6 +60,7 @@
         "src/platform/storage.js",
         "src/config/settings.js",
         "src/config/strings/*",
+        "src/config/tlds.js",
         "src/qr/decode.js",
         "src/core/qr-payload.js",
         "vendor/jsqr/jsQR.js",

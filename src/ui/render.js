@@ -101,7 +101,9 @@ export function renderEmailBanner(result, { doc = document, notes = [] } = {}) {
 }
 
 // QR tooltip. qr: classifyQrText() result; verdict: pipeline verdict for a
-// URL payload (or null). Without qr, renders a short "could not read" note.
+// URL payload, or for the domain-like part of a text payload (qr.maybeUrl),
+// or null. Shows the payload as written (a bare domain without the scheme
+// added for analysis). Without qr, renders a short "could not read" note.
 export function renderQr({ qr, verdict }, { doc = document } = {}) {
   if (!qr) {
     const root = rootEl(doc, 'tl-verdict tl-tier-none tl-mode-tooltip');
@@ -112,9 +114,10 @@ export function renderQr({ qr, verdict }, { doc = document } = {}) {
   }
   const wrap = el(doc, 'div', 'tl-qr');
   const shown = el(doc, 'div', 'tl-qr-payload');
-  shown.append(el(doc, 'span', 'tl-qr-title', t('qr.contains')), el(doc, 'code', 'tl-evidence', qr.type === 'url' ? qr.url : qr.text));
-  if (qr.type === 'url' && verdict) {
+  shown.append(el(doc, 'span', 'tl-qr-title', t('qr.contains')), el(doc, 'code', 'tl-evidence', qr.type === 'url' ? qr.display || qr.url : qr.text));
+  if ((qr.type === 'url' || qr.maybeUrl) && verdict) {
     const v = renderVerdict(verdict, { mode: 'tooltip', doc });
+    if (qr.type !== 'url') shown.append(el(doc, 'p', 'tl-note', t('qr.maybeLink', { host: qr.host })));
     v.prepend(shown);
     wrap.append(v);
     return wrap;
