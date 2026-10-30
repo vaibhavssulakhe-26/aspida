@@ -85,6 +85,36 @@ test('the Gmail module runs on both offline mail demos and on real Gmail only', 
   assert.ok(!matchesGmail(gmailSite, at('http://localhost:8080/mail.html')));
 });
 
+test('demo mailbox keeps the DOM contract the Gmail selectors read', () => {
+  assert.ok([].concat(demoGmail.pathPrefix).includes('/mail.html'), 'demo Gmail config must cover /mail.html');
+  // The demo reuses the real selectors, so checking against them checks both.
+  assert.deepEqual(demoGmail.inboxRow, gmailSite.inboxRow);
+  assert.deepEqual(demoGmail.inboxSender, gmailSite.inboxSender);
+  assert.ok(gmailSite.inboxRow.includes('tr.zA'));
+  assert.ok(gmailSite.inboxSender.includes('span.yP[email]'));
+  for (const sel of ['div.adn', 'h3.iw span[email]', 'span.gD[email]', 'table.ajC tr', 'div.a3s']) {
+    assert.ok([...gmailSite.message, ...gmailSite.sender, ...gmailSite.detailRows, ...gmailSite.body].includes(sel), `selector ${sel} still in gmail.selectors.js`);
+  }
+
+  const html = readFileSync(path.join(demoDir, 'mail.html'), 'utf8');
+  const rows = [...html.matchAll(/<tr\b([^>]*)>([\s\S]*?)<\/tr>/g)].filter((m) => /\bclass="[^"]*\bzA\b/.test(m[1]));
+  assert.equal(rows.length, 6, 'six inbox rows (tr.zA)');
+  for (const [, attrs, inner] of rows) {
+    const id = /\bid="([^"]+)"/.exec(attrs)?.[1];
+    const sender = /<span\b(?=[^>]*\bclass="[^"]*\byP\b)(?=[^>]*\bemail="([^"]+@[^"]+)")(?=[^>]*\bname="([^"]+)")[^>]*>/.exec(inner);
+    assert.ok(sender, `${id}: needs span.yP with email and name attributes`);
+    assert.ok(isReservedHost(sender[1].split('@')[1]), `${id}: sender domain must be reserved`);
+    const tpl = new RegExp(`<template id="mail-${/data-mail="([^"]+)"/.exec(attrs)[1]}">([\\s\\S]*?)</template>`).exec(html);
+    assert.ok(tpl, `${id}: has an email template`);
+    assert.match(tpl[1], /<div class="adn\b/, `${id}: opened mail uses div.adn`);
+    assert.match(tpl[1], /<h3 class="iw"><span class="gD" email="[^"]+" name="[^"]+"/, `${id}: h3.iw span.gD[email][name]`);
+    assert.match(tpl[1], /<div class="a3s">/, `${id}: body in div.a3s`);
+  }
+  assert.match(html, /<table class="ajC">/, 'one email shows the details table (Reply-To)');
+  assert.match(html, /Turn on <strong>Gmail: inbox highlighting<\/strong> in Aspida settings to see risk colours\./);
+  assert.doesNotMatch(html, /\bGoogle\b|<input[^>]+type="password"/i, 'no Google branding, no sign-in form');
+});
+
 // Reserved names (RFC 2606/6761) and documentation-only IPs (RFC 5737):
 // none of them can reach a real site.
 function isReservedHost(host) {

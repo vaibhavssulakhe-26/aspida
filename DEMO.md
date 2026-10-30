@@ -109,11 +109,22 @@ reasons disappear without reloading.
 
 ## 6b. Demo mailbox (demo/mail.html)
 
-A webmail-style inbox and reading pane with 6 synthetic emails, clearly labelled
-**"Aspida demo mailbox, not Gmail"** (no Google branding, no sign-in form). It uses
-the same DOM structure as Gmail, so the real Gmail module runs on it. Click an
-email to open it (or open `mail.html#kyc` etc. directly); each opened email gets
-one banner.
+**Aspmail**, a plain white webmail page of our own: the "Aspmail" wordmark with an
+**"Aspida demo, not real mail"** label, a search bar (does nothing), a sidebar
+(Compose, Inbox, Starred, Sent, Drafts; static) and an inbox list with checkbox,
+sender, subject + snippet and time (unread rows bold). No Google or Gmail logo or
+branding, no sign-in form, synthetic emails on reserved domains only. It keeps the
+DOM structure Gmail uses (`tr.zA` rows, `span.yP[email][name]`, `div.adn`,
+`h3.iw span.gD[email]`, `table.ajC`, `div.a3s`), so the real Gmail module runs on
+it unchanged.
+
+1. Click an email (or open `mail.html#kyc` etc. directly): the list is replaced by
+   the email with Aspida's banner above the body. **← Back to Inbox** returns.
+2. Inbox colours: open Aspida settings and turn on **Gmail: inbox highlighting**
+   (off by default; the page shows this hint too). Without reloading, the KYC and
+   OTP rows get a red left bar and pink tint, the parcel row a yellow bar and tint;
+   the three genuine rows stay white. Right after installing, the first colouring can
+   take a few seconds while feeds import.
 
 | Email | Banner | Reasons cited | Inbox row (highlighting on) |
 |---|---|---|---|
