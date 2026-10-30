@@ -5,7 +5,7 @@
   "description": "TrustLens: privacy-first phishing and link-risk signals for Chrome (MV3). No build step; npm is only used for tests.",
   "type": "module",
   "scripts": {
-    "test": "node --test tests/",
+    "test": "node --test tests/*.test.js",
     "smoke": "node tools/smoke-test.mjs",
     "demo": "node tools/demo-server.mjs 8080"
   },
