@@ -6,7 +6,7 @@
 // overwrite each other's status. 'dataEpoch' changes on "clear all data";
 // a refresh that started before a clear never writes its result after it.
 
-import { FEEDS } from '../config/feeds.js';
+import { FEEDS, feedEnabled, feedCategory } from '../config/feeds.js';
 import { parseFeed } from '../core/feed-parse.js';
 import { feedUrlKey, hostLookupChain } from '../core/url.js';
 import { getLocal, setLocal, getSettings, getSession, setSession } from '../platform/storage.js';
@@ -61,7 +61,7 @@ export async function refreshFeed(id, { force = false } = {}) {
   const feed = FEEDS.find((f) => f.id === id);
   if (!feed) throw new Error(`unknown feed ${id}`);
   const settings = await getSettings();
-  if (!settings.feeds[id]) return patchStatus(id, { error: null, disabled: true });
+  if (!feedEnabled(feed, settings)) return patchStatus(id, { error: null, disabled: true });
   const url = feedUrl(feed, settings);
   if (!url) return patchStatus(id, { error: 'Auth-Key not set', lastAttempt: Date.now(), disabled: false });
 
@@ -104,7 +104,7 @@ function isDue(feed, status) {
 export async function refreshDueFeeds() {
   const [settings, status] = await Promise.all([getSettings(), getFeedStatus()]);
   for (const feed of FEEDS) {
-    if (!settings.feeds[feed.id]) continue;
+    if (!feedEnabled(feed, settings)) continue;
     // Back off for an hour after a failure so a dead host isn't hammered.
     const st = status[feed.id];
     if (st?.error && Date.now() - (st.lastAttempt || 0) < 3600_000) continue;
@@ -116,14 +116,14 @@ export async function refreshDueFeeds() {
 export async function applyFeedToggles(settings) {
   const status = await getFeedStatus();
   for (const feed of FEEDS) {
-    if (!settings.feeds[feed.id] && status[feed.id]?.activeGen) {
+    if (!feedEnabled(feed, settings) && status[feed.id]?.activeGen) {
       await deleteGenerations(feed.id, null);
       await patchStatus(feed.id, { activeGen: 0, urls: 0, hosts: 0, disabled: true });
     }
   }
 }
 
-// Local lookup. Returns [{ source, kind, value }]. Never touches the network.
+// Local lookup. Returns [{ source, kind, value, category }]. Never touches the network.
 export async function lookup(rawUrl) {
   const [settings, status] = await Promise.all([getSettings(), getFeedStatus()]);
   let url;
@@ -144,11 +144,14 @@ export async function lookup(rawUrl) {
   const keys = [];
   for (const feed of FEEDS) {
     const st = status[feed.id];
-    if (!settings.feeds[feed.id] || !st?.activeGen) continue;
+    if (!feedEnabled(feed, settings) || !st?.activeGen) continue;
     for (const [kind, value] of candidates) keys.push([feed.id, st.activeGen, kind, value]);
   }
   const found = await findExisting(keys);
-  return found.map(([source, , kind, value]) => ({ source: FEEDS.find((f) => f.id === source)?.name || source, kind, value }));
+  return found.map(([source, , kind, value]) => {
+    const feed = FEEDS.find((f) => f.id === source);
+    return { source: feed?.name || source, kind, value, category: feedCategory(feed) };
+  });
 }
 
 export async function wipeFeeds() {

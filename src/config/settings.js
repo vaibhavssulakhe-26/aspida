@@ -15,11 +15,14 @@ export const DEFAULT_SETTINGS = {
   navigationGuard: true, // interstitial on known-malicious navigations
   blockHighRisk: true, // also interstitial on the "High risk" tier
   toolbarIcon: true, // toolbar icon colour follows the current site's verdict
+  softwareChecks: true, // cracked/pirated software signals (tooltip only)
   feeds: {
     sample: true, // bundled demo feed (offline)
     openphish: true,
     'phishing-database': true,
     urlhaus: false, // needs a free abuse.ch Auth-Key
+    'piracy-sample': true, // bundled pirated-software demo list (offline)
+    'hagezi-piracy': true,
   },
   urlhausAuthKey: '',
   debug: false, // verbose console.debug from content scripts

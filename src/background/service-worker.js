@@ -27,6 +27,7 @@ onTopPageChanged((d) => updateTabIcon(d).catch(() => {})); // tab closed mid-che
 onTabRemoved((tabId) => dropTab(tabId).catch(() => {}));
 
 onSettingsChanged((s) => {
+  invalidateContext(); // the reference context carries which checks are switched off
   applyFeedToggles(s).then(refreshDueFeeds).catch((e) => console.warn('Aspida feed toggle failed', e));
   refreshAllTabIcons(s).catch((e) => console.warn('Aspida toolbar icon refresh failed', e));
 });

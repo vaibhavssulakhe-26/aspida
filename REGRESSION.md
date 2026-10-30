@@ -94,5 +94,12 @@ only when every box below is green.
       sharp at normal and HiDPI zoom, in light and dark toolbars.
 - [ ] m8: Turn off "Toolbar icon reflects the current site" → all tabs normal without
       reload; turn on → colours return.
+- [ ] m9: index.html "Cracked / pirated software" section matches DEMO.md: listed host
+      → Suspicious with source name and the "official site or a trusted store" advice;
+      listed + keywords + .exe → still Suspicious; one keyword / "crack the interview" →
+      No known threats found. Clicking the listed host does not open the warning page.
+- [ ] m9: Feed table shows "HaGeZi's Anti-Piracy" updated (online) and the bundled
+      pirated-software demo list. Turn off "Cracked / pirated software" → software
+      reasons gone without reload; the two piracy lists are not downloaded while off.
 - [ ] m7: README, FEEDS, PRIVACY and DEMO match behaviour (permissions table equals
       manifest.json; feed URLs equal src/config/feeds.js).

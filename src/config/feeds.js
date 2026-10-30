@@ -6,6 +6,11 @@
 //         'domain-list' one hostname per line (Phishing.Database)
 //         'urlhaus-csv' URLhaus CSV export (quoted, '#' comments)
 //         'mixed'       bundled sample: URLs or hostnames, '#' comments
+//
+// category: 'phishing' (default; any hit = "Known malicious") or 'piracy'
+// (pirated-software lists; only the software check reads these hits).
+// requires: a settings flag that must also be on for the feed to be used
+// and downloaded.
 
 export const FEEDS = [
   {
@@ -42,7 +47,35 @@ export const FEEDS = [
     refreshHours: 6,
     license: 'abuse.ch fair-use terms; free Auth-Key required (abuse.ch/terms-of-use).',
   },
+  {
+    id: 'piracy-sample',
+    name: 'Bundled pirated-software demo list',
+    bundled: 'data/sample-piracy.txt',
+    format: 'domain-list',
+    category: 'piracy',
+    requires: 'softwareChecks',
+    refreshHours: 0,
+    license: 'Synthetic .test entries written for this project (MIT).',
+  },
+  {
+    id: 'hagezi-piracy',
+    name: "HaGeZi's Anti-Piracy (pirated software, warez)",
+    url: 'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/anti.piracy-onlydomains.txt',
+    format: 'domain-list',
+    category: 'piracy',
+    requires: 'softwareChecks',
+    refreshHours: 24, // ~1.1 MB, ~58k domains; upstream rebuilds several times a day
+    license: 'GPL-3.0 (HaGeZi dns-blocklists).',
+  },
 ];
+
+export const feedCategory = (feed) => feed?.category || 'phishing';
+
+// A feed is used (downloaded and looked up) only when its own toggle and its
+// required setting are both on.
+export function feedEnabled(feed, settings) {
+  return !!settings?.feeds?.[feed.id] && (!feed.requires || !!settings[feed.requires]);
+}
 
 export const FEED_ALARM = 'aspida-feed-refresh';
 export const FEED_ALARM_PERIOD_MINUTES = 60; // wake hourly; each feed refreshes when due

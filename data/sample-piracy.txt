@@ -1,0 +1,6 @@
+# Bundled pirated-software demo list (synthetic, offline).
+# Reserved .test names only; they never resolve. Used by demo/index.html
+# ("Cracked / pirated software" section) and the unit tests.
+crackzone-downloads.test
+free-keygen-hub.test
+warez-softvault.test

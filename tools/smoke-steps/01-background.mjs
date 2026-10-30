@@ -33,7 +33,7 @@ export default async function ({ browser, extId, fail }) {
 
   // Options page rendered its sections.
   const counts = await opts.evaluate(() => ({ toggles: document.querySelectorAll('#features input').length, feeds: document.querySelectorAll('#feeds tbody tr').length }));
-  if (counts.toggles < 8 || counts.feeds !== 4) fail(`options page incomplete: ${JSON.stringify(counts)}`);
+  if (counts.toggles < 8 || counts.feeds !== 6) fail(`options page incomplete: ${JSON.stringify(counts)}`);
 
   // Layout: Features left / Threat feeds right on wide screens, stacked on
   // narrow ones; Features first in tab order; no horizontal scrolling.

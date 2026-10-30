@@ -10,7 +10,7 @@ test('weight table and checks agree', () => {
   const used = new Set();
   for (const f of readdirSync(dir)) {
     const src = readFileSync(new URL(f, dir), 'utf8');
-    for (const m of src.matchAll(/signal\('([a-z_.]+)'/g)) used.add(m[1]);
+    for (const m of src.matchAll(/signal\('([a-z_.-]+)'/g)) used.add(m[1]);
   }
   for (const id of used) assert.ok(id in WEIGHTS, `missing weight for ${id}`);
   for (const id of Object.keys(WEIGHTS)) assert.ok(used.has(id), `unused weight ${id}`);

@@ -12,6 +12,7 @@ const MAX_PER_PAGE = 2000; // hard cap on distinct links analysed per page
 const cache = new Map(); // key -> verdict | Promise<verdict>
 let queue = []; // { key, item, resolve }
 let timer = null;
+let generation = 0; // bumped by clearVerdictCache(); stale replies aren't cached
 
 const keyOf = (url, text) => `${url}\n${text || ''}`;
 
@@ -20,6 +21,7 @@ async function flush() {
   const batch = queue.splice(0, BATCH_SIZE);
   if (queue.length) timer = setTimeout(flush, BATCH_DELAY_MS);
   if (!batch.length) return;
+  const gen = generation;
   let results = null;
   try {
     results = await send('analyze-urls', { items: batch.map((b) => b.item) });
@@ -28,8 +30,10 @@ async function flush() {
   }
   batch.forEach((b, i) => {
     const v = results?.[i] ?? null;
-    if (v) cache.set(b.key, v);
-    else cache.delete(b.key); // allow a retry later
+    if (gen === generation) {
+      if (v) cache.set(b.key, v);
+      else cache.delete(b.key); // allow a retry later
+    }
     b.resolve(v);
   });
 }
@@ -52,4 +56,10 @@ export function verdictFor(url, text) {
 export function cachedVerdict(url, text) {
   const v = cache.get(keyOf(url, text));
   return v && !(v instanceof Promise) ? v : undefined;
+}
+
+// Verdicts depend on settings and the allowlist; drop them when either changes.
+export function clearVerdictCache() {
+  generation++;
+  cache.clear();
 }

@@ -5,12 +5,12 @@ import { analyzeUrl, analyzeSender, combine } from '../core/pipeline.js';
 import { buildReference, parseDomainList } from '../core/reference.js';
 import { registrableDomain, unwrapRedirect } from '../core/url.js';
 import { lookup } from './feed-manager.js';
-import { getLocal, setLocal, getSession, setSession } from '../platform/storage.js';
+import { getLocal, setLocal, getSession, setSession, getSettings } from '../platform/storage.js';
 import { extensionUrl } from '../platform/browser.js';
 
 // Read-only cache of the reference context for this worker lifetime. Not
 // state: it is rebuilt from the packaged list + storage on every wake, and
-// dropped whenever the allowlist changes.
+// dropped whenever the allowlist or settings change.
 let ctxPromise = null;
 
 export function invalidateContext() {
@@ -18,11 +18,13 @@ export function invalidateContext() {
 }
 
 async function loadContext() {
-  const [text, allowlist] = await Promise.all([
+  const [text, allowlist, settings] = await Promise.all([
     fetch(extensionUrl('data/top-domains.txt')).then((r) => r.text()),
     getLocal('allowlist', []),
+    getSettings(),
   ]);
-  return buildReference({ topDomains: parseDomainList(text), allowlist });
+  const disabledChecks = settings.softwareChecks ? [] : ['software'];
+  return buildReference({ topDomains: parseDomainList(text), allowlist, disabledChecks });
 }
 
 export function getContext() {

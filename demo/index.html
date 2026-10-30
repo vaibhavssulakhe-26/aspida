@@ -64,6 +64,19 @@
       <li><a href="https://a.b.c.secure.account-check.test:8443/verify">Many subdomains + unusual port</a></li>
     </ul>
   </section>
+  <section id="software">
+    <h2>Cracked / pirated software (tooltip only, never a warning page)</h2>
+    <p class="muted">Hosts come from the bundled pirated-software demo list (<code>data/sample-piracy.txt</code>). This category tops out at Suspicious on its own.</p>
+    <ul>
+      <li><a id="sw-listed" href="https://crackzone-downloads.test/">crackzone-downloads.test</a>: listed host → Suspicious, with "use the official site" advice</li>
+      <li><a id="sw-all" href="https://crackzone-downloads.test/adobe-photoshop-2026-crack-keygen.exe">Adobe Photoshop 2026 crack + keygen (.exe)</a>: listed + keywords + .exe → still Suspicious</li>
+      <li><a id="sw-keywords" href="https://softvault-mirror.test/photoshop-crack-keygen.exe">Photoshop crack keygen download</a>: not listed; two keywords + .exe → Suspicious</li>
+      <li><a id="sw-one-word" href="https://softvault-mirror.test/office-activator">Office 2026 activator</a>: one keyword only → No known threats found</li>
+      <li><a id="sw-exe" href="https://downloads-mirror.test/files/setup.exe">setup.exe from an unknown site</a>: download alone → No known threats found (noted as a weak sign)</li>
+      <li><a id="sw-interview" href="https://careers-blog.test/crack-the-interview">How to crack the interview</a>: ordinary use of "crack" → No known threats found</li>
+    </ul>
+  </section>
+
   <section id="clean" data-controls>
     <h2>Real sites (control): these links open the real website</h2>
     <p class="muted">Controls only, kept apart from the phishing samples above. Expect "No known threats found" (the bit.ly link: shortener noted, not expanded).</p>

@@ -17,7 +17,8 @@ export function parseDomainList(text) {
   return out;
 }
 
-export function buildReference({ topDomains = [], allowlist = [], brands = BRANDS } = {}) {
+// disabledChecks: check ids switched off in settings (e.g. 'software').
+export function buildReference({ topDomains = [], allowlist = [], brands = BRANDS, disabledChecks = [] } = {}) {
   const top = new Set();
   const labelsByLength = new Map(); // len -> Set(label)
   const labelOwners = new Map(); // label -> first registrable domain seen (highest rank)
@@ -49,7 +50,7 @@ export function buildReference({ topDomains = [], allowlist = [], brands = BRAND
     }
   }
   const allow = new Set(allowlist.map((a) => normalizeHost(a)).filter(Boolean));
-  return { top, brandDomains, labelsByLength, labelOwners, labelRank, brands, allowlist: allow };
+  return { top, brandDomains, labelsByLength, labelOwners, labelRank, brands, allowlist: allow, disabledChecks: new Set(disabledChecks) };
 }
 
 // True when the host is covered by the user allowlist (exact host or any

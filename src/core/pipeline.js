@@ -20,6 +20,7 @@ const KEEP_ON_WELL_KNOWN = new Set(['feed.url_match', 'shortener.known']);
 function runChecks(checks, input, ctx) {
   const out = [];
   for (const c of checks) {
+    if (ctx?.disabledChecks?.has(c.id)) continue;
     try {
       out.push(...c.check(input, ctx));
     } catch {

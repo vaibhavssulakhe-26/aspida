@@ -46,12 +46,14 @@ const ALLOWED_REQUESTS = [
   /^http:\/\/(127\.0\.0\.1|localhost):\d+\//, // demo server
   /^http:\/\/[a-z0-9-]+\.localhost:\d+\//, // demo server under *.localhost names (toolbar icon demo)
   /^https:\/\/raw\.githubusercontent\.com\/(openphish|Phishing-Database)\//, // feeds
+  /^https:\/\/raw\.githubusercontent\.com\/hagezi\/dns-blocklists\/main\/wildcard\/anti\.piracy-onlydomains\.txt$/, // pirated-software list
   /^https:\/\/openphish\.com\//,
   /^https:\/\/urlhaus-api\.abuse\.ch\//,
   // Deliberate navigations made by step 01 (typed-URL / "Proceed anyway" tests):
   /^http:\/\/malicious\.aspida-demo\.invalid\/login$/,
   /^http:\/\/paypa1\.aspida-demo\.invalid\/$/,
   /^https:\/\/paypa1\.test\/signin$/,
+  /^https:\/\/crackzone-downloads\.test\/$/, // step 09: piracy-listed site is not intercepted
   /^chrome:\/\//,
   /^about:/,
 ];

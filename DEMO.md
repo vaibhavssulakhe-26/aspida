@@ -39,6 +39,21 @@ anything misbehaves, untick it.
 Talking point: every line cites the exact fragment that triggered it.
 Weights live in one file (`src/scoring/weights.js`).
 
+### Cracked / pirated software (same page, section "Cracked / pirated software")
+
+| Link | Tooltip |
+|---|---|
+| `crackzone-downloads.test` | **Suspicious**: "Listed in the pirated-software category (source: Bundled pirated-software demo list)", plus "This site is listed as distributing cracked or pirated software, which commonly comes bundled with malware. Avoid downloading from it. Use the official site or a trusted store." |
+| "Adobe Photoshop 2026 crack + keygen (.exe)" | **Suspicious** (listed + keywords + .exe): the category never reaches High risk by itself |
+| "Photoshop crack keygen download" (`softvault-mirror.test`, not listed) | **Suspicious**: words "crack, keygen" + direct .exe download |
+| "Office 2026 activator" | No known threats found (one word isn't enough) |
+| "setup.exe from an unknown site" | No known threats found; the .exe download is listed as a weak sign |
+| "How to crack the interview" | No known threats found |
+
+Clicking `crackzone-downloads.test` is **not** stopped by the warning page (DNS
+error for `.test` is expected). Turn off "Cracked / pirated software" and the
+reasons disappear without reloading.
+
 ## 2. Warning page
 
 - Click **malicious.aspida-demo.invalid/login** → interstitial, **Known malicious**,

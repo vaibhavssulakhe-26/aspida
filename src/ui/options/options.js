@@ -10,6 +10,7 @@ const FEATURES = [
   ['navigationGuard', 'Warning page', 'Stop navigations to known-malicious sites (threat-feed matches) with a warning page.'],
   ['blockHighRisk', 'Warning page for High risk', 'Also stop navigations that local checks rate "High risk" (lookalike domains etc.).'],
   ['toolbarIcon', 'Toolbar icon reflects the current site', 'Colour the Aspida toolbar icon from a local check of the page you are on: green no known threats found, orange suspicious, red high risk or known malicious.'],
+  ['softwareChecks', 'Cracked / pirated software', 'Mention in the hover verdict when a site is on a pirated-software list, or a link looks like a cracked download. Tooltip only, never a warning page.'],
   ['chatWhatsApp', 'WhatsApp Web', 'Pre-check links in WhatsApp Web chats so the hover verdict is instant.'],
   ['chatTelegram', 'Telegram Web', 'Pre-check links in Telegram Web chats so the hover verdict is instant.'],
   ['chatInstagram', 'Instagram DMs', 'Pre-check links in Instagram direct messages so the hover verdict is instant.'],

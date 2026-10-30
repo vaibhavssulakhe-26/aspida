@@ -48,6 +48,7 @@ export function renderVerdict(verdict, { mode = 'tooltip', doc = document, maxRe
     if (reasons.length > maxReasons) list.append(el(doc, 'li', 'tl-more', `+${reasons.length - maxReasons} more`));
     root.append(list);
   }
+  for (const a of verdict.advice || []) root.append(el(doc, 'p', 'tl-note tl-advice', a));
   if (verdict.tier === 'none') root.append(el(doc, 'p', 'tl-note', NONE_NOTE));
   return root;
 }

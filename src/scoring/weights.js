@@ -43,6 +43,12 @@ export const WEIGHTS = {
   'sender.freemail_brand': 45, // brand claim from gmail.com etc.
   'sender.reply_to_mismatch': 30,
   'sender.lookalike_domain': 70,
+
+  // Cracked / pirated software. Together these must stay below the High
+  // threshold (a test enforces it): tooltip only, never a warning page.
+  'software.piracy-list': 35, // host on a pirated-software list
+  'software.piracy-keywords': 20, // 2+ of crack, keygen, activator, ...
+  'software.risky-download': 10, // .exe/.msi/.zip/.iso/.scr/.apk off well-known sites
 };
 
 // Score is the sum of distinct signal weights, capped at 100.
@@ -62,6 +68,13 @@ export const TIER_LABELS = {
   suspicious: 'Suspicious',
   high: 'High risk',
   malicious: 'Known malicious',
+};
+
+// Extra advice shown with a verdict when one of these signals is present.
+// Never "safe"; doesn't claim the site itself carries malware.
+export const ADVICE = {
+  'software.piracy-list':
+    'This site is listed as distributing cracked or pirated software, which commonly comes bundled with malware. Avoid downloading from it. Use the official site or a trusted store.',
 };
 
 // Toolbar icon tooltip (per tab). "normal" = page not checked (not a web

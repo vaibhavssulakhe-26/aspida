@@ -2,7 +2,8 @@
 // starts the enabled modules for this site, and stops/starts them live when
 // settings change. Site modules are picked by hostname.
 
-import { getSettings, onSettingsChanged } from '../platform/storage.js';
+import { getSettings, onSettingsChanged, onLocalChanged } from '../platform/storage.js';
+import { clearVerdictCache } from './link-scanner.js';
 import { isExtensionAlive } from '../platform/messaging.js';
 import { setDebug, debug } from './util.js';
 import * as hoverLinks from './hover-links.js';
@@ -61,7 +62,11 @@ export async function start() {
   if (!isExtensionAlive()) return;
   let current = await getSettings();
   apply(current);
-  onSettingsChanged((s) => apply((current = s)));
+  onSettingsChanged((s) => {
+    clearVerdictCache();
+    apply((current = s));
+  });
+  onLocalChanged((keys) => keys.includes('allowlist') && clearVerdictCache());
   // SPA route changes (no reload): re-check page tests now and then.
   let lastPath = location.pathname;
   setInterval(() => {

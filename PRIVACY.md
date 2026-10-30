@@ -32,7 +32,8 @@ fails if any request goes to a hovered or scanned target.
 
 1. **Feed downloads**, to exactly these hosts (also the only `host_permissions`):
    `raw.githubusercontent.com`, `openphish.com`, `urlhaus-api.abuse.ch` (only if
-   you add a key). These requests are sent without cookies or a referrer. Like any
+   you add a key). The pirated-software list (HaGeZi Anti-Piracy) also comes
+   from `raw.githubusercontent.com`. These requests are sent without cookies or a referrer. Like any
    download, they reveal your IP address and the time to that host. They contain
    nothing about your browsing.
 2. **QR image bytes**, only when you hover an image hosted on a different site
