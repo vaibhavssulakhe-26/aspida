@@ -14,26 +14,27 @@
       <p class="sub">All checks run on this device. Nothing you browse, read or receive is sent anywhere. <span id="version"></span></p>
     </header>
 
-    <section aria-labelledby="h-features">
-      <h2 id="h-features">Features</h2>
-      <p class="hint">Each feature can be switched off on its own. Changes apply to newly loaded pages.</p>
-      <div id="features" class="toggles"></div>
-    </section>
+    <div class="columns">
+      <section id="features-section" aria-labelledby="h-features">
+        <h2 id="h-features">Features</h2>
+        <p class="hint">Each feature can be switched off on its own. Changes apply right away, without reloading pages.</p>
+        <div id="features" class="toggles"></div>
+      </section>
 
-    <section aria-labelledby="h-feeds">
-      <h2 id="h-feeds">Threat feeds</h2>
-      <p class="hint">Feed files are downloaded from the listed hosts and matched locally. Your URLs are never sent to them.</p>
-      <div class="table-wrap"><table id="feeds">
-        <thead><tr><th>On</th><th>Feed</th><th>Status</th><th>Entries</th><th></th></tr></thead>
-        <tbody></tbody>
-      </table></div>
-      <form id="urlhaus-form" class="inline-form">
-        <label for="urlhaus-key">URLhaus Auth-Key</label>
-        <input id="urlhaus-key" type="password" autocomplete="off" spellcheck="false" placeholder="Free key from auth.abuse.ch">
-        <button type="submit">Save key</button>
-      </form>
-    </section>
-
+      <section id="feeds-section" aria-labelledby="h-feeds">
+        <h2 id="h-feeds">Threat feeds</h2>
+        <p class="hint">Feed files are downloaded from the listed hosts and matched locally. Your URLs are never sent to them.</p>
+        <div class="table-wrap"><table id="feeds">
+          <thead><tr><th>On</th><th>Feed</th><th>Status</th><th>Entries</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+        <form id="urlhaus-form" class="inline-form">
+          <label for="urlhaus-key">URLhaus Auth-Key</label>
+          <input id="urlhaus-key" type="password" autocomplete="off" spellcheck="false" placeholder="Free key from auth.abuse.ch">
+          <button type="submit">Save key</button>
+        </form>
+      </section>
+    </div>
 
     <section aria-labelledby="h-allow">
       <h2 id="h-allow">Allowlist</h2>

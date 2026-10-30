@@ -35,6 +35,28 @@ export default async function ({ browser, extId, fail }) {
   const counts = await opts.evaluate(() => ({ toggles: document.querySelectorAll('#features input').length, feeds: document.querySelectorAll('#feeds tbody tr').length }));
   if (counts.toggles < 8 || counts.feeds !== 4) fail(`options page incomplete: ${JSON.stringify(counts)}`);
 
+  // Layout: Features left / Threat feeds right on wide screens, stacked on
+  // narrow ones; Features first in tab order; no horizontal scrolling.
+  const layout = () => opts.evaluate(() => {
+    const f = document.getElementById('features-section').getBoundingClientRect();
+    const t = document.getElementById('feeds-section').getBoundingClientRect();
+    const a = document.querySelector('section[aria-labelledby="h-allow"]').getBoundingClientRect();
+    const focusables = [...document.querySelectorAll('input, button')];
+    return {
+      sideBySide: Math.abs(f.top - t.top) < 2 && f.right <= t.left,
+      stacked: t.top >= f.bottom,
+      allowBelow: a.top >= Math.max(f.bottom, t.bottom),
+      hScroll: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      featuresFirst: focusables[0]?.closest('section')?.id === 'features-section',
+    };
+  });
+  await opts.setViewport({ width: 1280, height: 900 });
+  const wide = await layout();
+  if (!wide.sideBySide || !wide.allowBelow || wide.hScroll || !wide.featuresFirst) fail(`options wide layout: ${JSON.stringify(wide)}`);
+  await opts.setViewport({ width: 600, height: 900 });
+  const narrow = await layout();
+  if (!narrow.stacked || !narrow.allowBelow || narrow.hScroll) fail(`options narrow layout: ${JSON.stringify(narrow)}`);
+
   // Interstitial on a known-malicious navigation.
   const tab = await browser.newPage();
   await tab.goto('http://malicious.aspida-demo.invalid/login').catch(() => {});

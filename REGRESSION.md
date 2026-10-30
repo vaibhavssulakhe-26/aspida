@@ -15,6 +15,10 @@ only when every box below is green.
 ## Manual (Chrome, chrome://extensions → Load unpacked → repo root)
 
 - [ ] m1: Extension card shows no "Errors" button. Service worker "Inspect" console is clean.
+- [ ] m2: Options page layout: on a wide window Features is the left column and
+      Threat feeds the right; Allowlist, counters and "Clear all data" follow below
+      at full width. On a narrow window everything is one column. Tab starts in
+      Features. Check light and dark mode.
 - [ ] m2: Toolbar icon opens the options page. Feed table shows "Bundled demo feed"
       updated, OpenPhish / Phishing.Database updated within a minute (online), URLhaus
       "Auth-Key not set" unless a key is saved.
