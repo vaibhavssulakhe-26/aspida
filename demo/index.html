@@ -21,18 +21,8 @@
 <body>
 <main>
   <h1>Aspida demo page</h1>
-  <p class="muted">Hover any link to see Aspida's verdict. Every risky link points to a reserved <code>.test</code> or <code>.invalid</code> domain, which can never resolve, so nothing here can reach a real phishing site.</p>
+  <p class="muted">Hover any link to see Aspida's verdict. Every sample link points to a reserved <code>.test</code> or <code>.invalid</code> domain (or a documentation-only IP address), which can never resolve, so clicking one cannot reach any real site. The text of a link may name a real bank; its destination never is one. Only the separate "Real site (control)" links at the bottom open real websites.</p>
   <nav><a href="qr.html">QR demo</a> <a href="chat-mock.html">Chat demo</a> <a href="gmail-mock.html">Gmail demo</a> <a href="heavy.html">Heavy page</a></nav>
-
-  <section id="clean">
-    <h2>Real sites (expect "No known threats found")</h2>
-    <ul>
-      <li><a href="https://www.onlinesbi.sbi/">State Bank of India: onlinesbi.sbi</a></li>
-      <li><a href="https://www.hdfcbank.com/">HDFC Bank</a></li>
-      <li><a href="https://en.wikipedia.org/wiki/Phishing">Wikipedia: Phishing</a></li>
-      <li><a href="https://bit.ly/3xyzDemo">A bit.ly short link (shortener noted, not expanded)</a></li>
-    </ul>
-  </section>
 
   <section id="feed">
     <h2>Known malicious (bundled demo feed → warning page on click)</h2>
@@ -57,7 +47,7 @@
   <section id="brand">
     <h2>Brand claims on unrelated domains</h2>
     <ul>
-      <li><a id="brand-sbi" href="https://sbi-kyc-login.test/update">SBI KYC update (sbi-kyc-login.test)</a></li>
+      <li><a id="brand-sbi" href="https://sbi-kyc-update.test/update">SBI KYC update</a></li>
       <li><a href="https://hdfcbank-kyc.vercel.app.test/">HDFC KYC on a hosting-like subdomain</a></li>
       <li><a href="https://irctc-refund.test/refund">IRCTC refund</a></li>
       <li><a href="https://www.paypal.com.verify-account.test/">www.paypal.com.verify-account.test (brand in subdomain)</a></li>
@@ -72,6 +62,16 @@
       <li><a href="http://198.51.100.23/icici/netbanking">Raw IP address, plain http</a></li>
       <li><a id="text-mismatch" href="https://account-update.test/session">www.icicibank.com</a> ← text shows one domain, link goes elsewhere</li>
       <li><a href="https://a.b.c.secure.account-check.test:8443/verify">Many subdomains + unusual port</a></li>
+    </ul>
+  </section>
+  <section id="clean" data-controls>
+    <h2>Real sites (control): these links open the real website</h2>
+    <p class="muted">Controls only, kept apart from the phishing samples above. Expect "No known threats found" (the bit.ly link: shortener noted, not expanded).</p>
+    <ul>
+      <li><a data-control="real" href="https://www.onlinesbi.sbi/">Real site (control): onlinesbi.sbi</a></li>
+      <li><a data-control="real" href="https://www.hdfcbank.com/">Real site (control): hdfcbank.com</a></li>
+      <li><a data-control="real" href="https://en.wikipedia.org/wiki/Phishing">Real site (control): Wikipedia, Phishing</a></li>
+      <li><a data-control="real" href="https://bit.ly/3xyzDemo">Real site (control): a bit.ly short link</a></li>
     </ul>
   </section>
 </main>

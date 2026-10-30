@@ -70,3 +70,39 @@ test('demo server: loopback on IPv4 and IPv6, correct MIME types, exact-case pat
     for (const s of servers) s.close();
   }
 });
+
+// Reserved names (RFC 2606/6761) and documentation-only IPs (RFC 5737):
+// none of them can reach a real site.
+function isReservedHost(host) {
+  const h = host.toLowerCase().replace(/\.$/, '');
+  if (/\.(test|invalid|example|localhost)$/.test(h)) return true;
+  if (/^(.+\.)?example\.(com|net|org)$/.test(h)) return true;
+  return /^(192\.0\.2|198\.51\.100|203\.0\.113)\.\d{1,3}$/.test(h);
+}
+
+test('demo sample links never point at a real site; real-site controls are labelled and grouped last', () => {
+  for (const page of pages) {
+    const html = readFileSync(path.join(demoDir, page), 'utf8');
+    // Anchors in markup only; links built by scripts are checked below.
+    const markup = html.replace(/<script>[\s\S]*?<\/script>/g, (m) => ' '.repeat(m.length));
+    const marker = markup.indexOf('data-controls');
+    for (const m of markup.matchAll(/<a\b([^>]*)>/g)) {
+      const href = /\bhref\s*=\s*"([^"]*)"/.exec(m[1])?.[1] || '';
+      if (!/^https?:/i.test(href)) continue;
+      const control = /\bdata-control\s*=\s*"real"/.test(m[1]);
+      const where = `${page}: ${href}`;
+      if (control) {
+        assert.ok(marker !== -1 && m.index > marker, `${where}: control link must sit in the data-controls group`);
+      } else {
+        assert.ok(isReservedHost(new URL(href).hostname), `${where}: sample link must use a reserved test domain (or mark it data-control="real")`);
+        assert.ok(marker === -1 || m.index < marker, `${where}: sample link placed among the real-site controls`);
+      }
+    }
+    // URLs built by inline scripts (heavy.html, chat "new message").
+    for (const s of html.matchAll(/<script>([\s\S]*?)<\/script>/g)) {
+      for (const u of s[1].matchAll(/https?:\/\/([^/"'`\s:]+)/g)) {
+        assert.ok(isReservedHost(u[1].replace(/\$\{[^}]*\}/g, 'x')), `${page}: script builds a link to ${u[0]}`);
+      }
+    }
+  }
+});

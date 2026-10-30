@@ -15,7 +15,7 @@
     for (let i = 0; i < 5000; i++) {
       const a = document.createElement('a');
       a.id = `l${i}`;
-      a.href = i % 50 === 0 ? `https://sbi-offer-${i}.test/login` : `https://example-${i}.org/page/${i}`;
+      a.href = i % 50 === 0 ? `https://sbi-offer-${i}.test/login` : `https://site-${i}.example/page/${i}`;
       a.textContent = `Link ${i}: ${a.href}`;
       frag.append(a);
     }

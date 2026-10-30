@@ -30,7 +30,12 @@ only when every box below is green.
       demos via http://0.0.0.0:8080/ (the link plain `python3 -m http.server`
       prints) and, with `npm run demo`, http://[::1]:8080/: badges and banners
       must still appear. Hover each link: tooltip shows tier + cited
-      evidence; real sites say "No known threats found" (never "safe").
+      evidence; the "Real site (control)" links (grouped at the bottom) say
+      "No known threats found" (never "safe").
+- [ ] m3: `www.icicibank.com` link → tooltip "Link text shows icicibank.com but it
+      opens account-update.test"; "SBI KYC update" → "claims to be SBI but the
+      domain is not sbi.co.in". Clicking either never reaches a real site (DNS
+      error page for `.test`). Only "Real site (control)" links open real sites.
 - [ ] m3: Tooltip disappears on mouse-out, Escape and scroll; keyboard Tab focus shows it.
 - [ ] m3: Turn off "Link hover verdict" in options → tooltips stop without reload.
 - [ ] m3: http://localhost:8080/heavy.html scrolls smoothly; a link near the bottom shows a tooltip.

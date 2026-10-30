@@ -1,7 +1,11 @@
 # Demo script (about 5 minutes)
 
-Everything below works **offline**. Every risky link and QR code in `demo/` points
-at the reserved `.test` / `.invalid` TLDs, so nothing can reach a real phishing site.
+Everything below works **offline**. Every sample link and QR code in `demo/` points
+at the reserved `.test` / `.invalid` / `.example` names (or documentation-only IPs),
+so clicking one can never reach a real site, even when its text names a real bank.
+The only links to real websites are labelled **Real site (control)**
+(`data-control="real"`) and grouped at the end of each page. `tests/demo.test.js`
+fails if a sample link ever points at a real domain.
 
 ## Setup (before going on stage)
 
@@ -16,16 +20,20 @@ anything misbehaves, untick it.
 
 ## 1. Hover verdicts (demo/index.html)
 
-- Hover **onlinesbi.sbi** → "No known threats found". It never says "safe", and it
-  adds a reminder to stay careful.
+- In the **Real sites (control)** section at the bottom, hover
+  **Real site (control): onlinesbi.sbi** → "No known threats found". It never says
+  "safe", and it adds a reminder to stay careful.
 - Hover **paypa1.test** → **High risk**: *"paypa1.test" is visually similar to
   "paypal.com"*, citing `paypa1.test`.
 - Hover **аррӏе.test** → **High risk**: Cyrillic look-alike of apple.com, showing the
   real punycode `xn--80ak6aa92e.test`.
-- Hover **SBI KYC update** → **Suspicious**: *claims to be SBI but the domain is not
+- Hover **SBI KYC update** (opens `https://sbi-kyc-update.test/update`) →
+  **Suspicious**: *"sbi-kyc-update.test" claims to be SBI but the domain is not
   sbi.co.in*.
-- Hover the link whose text is `www.icicibank.com` → *Link text shows icicibank.com
-  but it opens account-update.test*.
+- Hover the link whose text is `www.icicibank.com` (opens
+  `https://account-update.test/session`) → *Link text shows icicibank.com but it
+  opens account-update.test*. Clicking it ends on Chrome's "site can't be reached"
+  page: `.test` never resolves.
 - Hover `https://www.google.com@192.0.2.10/login` → the "@" trick is explained.
 
 Talking point: every line cites the exact fragment that triggered it.
@@ -51,7 +59,8 @@ Weights live in one file (`src/scoring/weights.js`).
 ## 4. Chats (demo/chat-mock.html)
 
 - Badges appear only next to the risky links (Jio recharge scam, SBI YONO, feed
-  match). Real links (cybercrime.gov.in, Google Photos) get none.
+  match). The real-site control messages after the "Real sites (control)" divider
+  (cybercrime.gov.in, Google Photos) get none.
 - Click **Simulate a new incoming message** → the new Amazon-lookalike link gets a
   badge within half a second (MutationObserver).
 - Same code runs on WhatsApp Web / Telegram Web / Instagram DMs, with site

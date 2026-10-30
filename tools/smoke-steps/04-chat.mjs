@@ -6,6 +6,8 @@ const badges = async (page) => (await aspidaShadows(page)).filter((s) => s.kind 
 export default async function ({ browser, extId, base, fail }) {
   const page = await browser.newPage();
   await page.goto(`${base}/chat-mock.html`);
+  const linksHtml = () => page.$$eval('#main a', (as) => as.map((a) => a.outerHTML));
+  const originalLinks = await linksHtml();
   const initial = await waitFor(async () => {
     const b = await badges(page);
     return b.length >= 3 ? b : null;
@@ -25,8 +27,8 @@ export default async function ({ browser, extId, base, fail }) {
   await waitFor(async () => (await badges(page)).length === 4, 'badge on new message', 6000).catch(() => fail('no badge on simulated new message'));
 
   // Message text and links themselves untouched.
-  const hrefs = await page.$$eval('#main a', (as) => as.map((a) => `${a.getAttribute('href')}|${a.attributes.length}`));
-  if (hrefs.some((h) => !h.endsWith('|2') && !h.endsWith('|1'))) fail(`chat links modified: ${hrefs}`);
+  const nowLinks = (await linksHtml()).slice(0, originalLinks.length);
+  if (nowLinks.join() !== originalLinks.join()) fail(`chat links modified: ${nowLinks}`);
 
   // Disable → badges removed live.
   await setSetting(browser, extId, { chatWhatsApp: false });
