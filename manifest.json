@@ -59,6 +59,7 @@
         "src/platform/messaging.js",
         "src/platform/storage.js",
         "src/config/settings.js",
+        "src/config/strings/*",
         "src/qr/decode.js",
         "src/core/qr-payload.js",
         "vendor/jsqr/jsQR.js",

@@ -1,6 +1,6 @@
 // Maps a page verdict to the toolbar icon state and title. Pure.
 
-import { TOOLBAR_TITLES } from './weights.js';
+import { translate } from '../config/strings/index.js';
 
 export const ICON_STATES = ['normal', 'green', 'orange', 'red'];
 
@@ -18,9 +18,9 @@ export function iconStateForVerdict(verdict) {
   return tier ? STATE_BY_TIER[tier] : 'normal';
 }
 
-export function iconTitleForVerdict(verdict) {
-  const tier = knownTier(verdict);
-  return tier ? TOOLBAR_TITLES[tier] : TOOLBAR_TITLES.normal;
+// lang: interface language ('en', 'kn'); unknown -> English.
+export function iconTitleForVerdict(verdict, lang = 'en') {
+  return translate(lang, `toolbar.${knownTier(verdict) || 'normal'}`);
 }
 
 // Icon paths from the extension root, keyed by size, for the toolbar action.

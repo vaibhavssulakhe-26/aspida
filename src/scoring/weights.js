@@ -1,6 +1,7 @@
 // THE weight table. Every signal id a check can emit must be listed here;
 // tests enforce that. Checks read their weight from here and the scorer
 // reads thresholds from here. Change numbers in this file only.
+// Wording is in src/config/strings/ (translatable), not here.
 //
 // (A .js module rather than .json so it can carry these comments and load
 // without JSON-module import attributes in the service worker.)
@@ -62,27 +63,10 @@ export const MALICIOUS_CATEGORIES = new Set(['feed']);
 
 export const TIERS = ['none', 'suspicious', 'high', 'malicious'];
 
-// User-visible wording. Never "safe".
-export const TIER_LABELS = {
-  none: 'No known threats found',
-  suspicious: 'Suspicious',
-  high: 'High risk',
-  malicious: 'Known malicious',
-};
+// Tier names and all other interface wording live in the string tables
+// (src/config/strings/en.js, kn.js), keyed by these ids: 'tier.<tier>',
+// 'toolbar.<tier>' and 'advice.<signal id>'. Never "safe".
 
-// Extra advice shown with a verdict when one of these signals is present.
-// Never "safe"; doesn't claim the site itself carries malware.
-export const ADVICE = {
-  'software.piracy-list':
-    'This site is listed as distributing cracked or pirated software, which commonly comes bundled with malware. Avoid downloading from it. Use the official site or a trusted store.',
-};
-
-// Toolbar icon tooltip (per tab). "normal" = page not checked (not a web
-// page, setting off, or the check failed). Never "safe".
-export const TOOLBAR_TITLES = {
-  normal: 'Aspida settings',
-  none: 'Aspida: No known threats found for this site (click for settings)',
-  suspicious: 'Aspida: Suspicious signs on this site (click for settings)',
-  high: 'Aspida: High risk site (click for settings)',
-  malicious: 'Aspida: Known malicious site (click for settings)',
-};
+// Signals that add extra advice to a verdict (text: 'advice.<id>' strings).
+// The advice never claims the site itself carries malware.
+export const ADVICE_SIGNALS = new Set(['software.piracy-list']);

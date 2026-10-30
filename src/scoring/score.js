@@ -1,10 +1,13 @@
 // Turns a list of signals into a verdict. The only place tiers are decided.
 
-import { THRESHOLDS, MALICIOUS_CATEGORIES, TIER_LABELS, TIERS, ADVICE } from './weights.js';
+import { THRESHOLDS, MALICIOUS_CATEGORIES, TIERS, ADVICE_SIGNALS } from './weights.js';
+import en from '../config/strings/en.js';
 
 // Returns { tier, label, score, reasons, advice } where reasons are the
 // signals, de-duplicated by id+evidence and sorted strongest first, and
-// advice is the extra guidance (weights.js ADVICE) for the signals present.
+// advice lists the signal ids that carry extra guidance (ADVICE_SIGNALS;
+// the UI shows the 'advice.<id>' string). label is the English tier name,
+// for logs and tests; interfaces render 'tier.<tier>' in their language.
 export function score(signals = []) {
   const seen = new Set();
   const reasons = [];
@@ -28,8 +31,8 @@ export function score(signals = []) {
   else if (value >= THRESHOLDS.high) tier = 'high';
   else if (value >= THRESHOLDS.suspicious) tier = 'suspicious';
 
-  const advice = [...new Set(reasons.filter((r) => Object.hasOwn(ADVICE, r.id)).map((r) => ADVICE[r.id]))];
-  return { tier, label: TIER_LABELS[tier], score: value, reasons, advice };
+  const advice = [...new Set(reasons.filter((r) => ADVICE_SIGNALS.has(r.id)).map((r) => r.id))];
+  return { tier, label: en[`tier.${tier}`], score: value, reasons, advice };
 }
 
 // Worst of several verdict tiers (e.g. an email's sender + all its links).

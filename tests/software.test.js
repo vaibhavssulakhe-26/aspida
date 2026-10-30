@@ -3,7 +3,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { analyzeUrl } from '../src/core/pipeline.js';
 import { parseFeed } from '../src/core/feed-parse.js';
-import { WEIGHTS, THRESHOLDS, ADVICE } from '../src/scoring/weights.js';
+import { WEIGHTS, THRESHOLDS } from '../src/scoring/weights.js';
+import en from '../src/config/strings/en.js';
 import { score } from '../src/scoring/score.js';
 import { FEEDS, feedEnabled } from '../src/config/feeds.js';
 import { DEFAULT_SETTINGS, mergeSettings } from '../src/config/settings.js';
@@ -21,11 +22,12 @@ test('a listed host gets software.piracy-list, Suspicious, never Known malicious
   assert.ok(!ids(v).some((id) => id.startsWith('feed.')), 'piracy hits must not become feed signals');
   const r = v.reasons.find((x) => x.id === 'software.piracy-list');
   assert.equal(r.detail, 'Listed in the pirated-software category (source: Bundled pirated-software demo list)');
-  assert.deepEqual(v.advice, [ADVICE['software.piracy-list']]);
+  assert.deepEqual(v.advice, ['software.piracy-list']);
 });
 
 test('advice wording: no "safe", no "illegal", no claim that the site itself has malware', () => {
-  const a = ADVICE['software.piracy-list'];
+  const a = en['advice.software.piracy-list'];
+  assert.equal(a, 'This site is listed as distributing cracked or pirated software, which commonly comes bundled with malware. Avoid downloading from it. Use the official site or a trusted store.');
   assert.doesNotMatch(a, /\bsafe\b|illegal/i);
   assert.doesNotMatch(a, /this site (has|contains|is infected)/i);
   assert.match(a, /Use the official site or a trusted store/);

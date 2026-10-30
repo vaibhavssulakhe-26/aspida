@@ -142,6 +142,11 @@ the normal icon straight away; turn it on and the icons come back.
 
 ## 8. Settings page
 
+- Language: pick **ಕನ್ನಡ** in the top-right dropdown. The settings page switches
+  at once; hover a link on the demo page or open the demo mailbox: tier names,
+  banner text and advice are in Kannada, the reasons stay in English (by design).
+  The toolbar tooltip and warning page follow too. Switch back to English the
+  same way. (Kannada strings are a DRAFT pending native-speaker review.)
 - Feed table: OpenPhish (~300 URLs) and Phishing.Database (~392k domains) with
   last-updated times. URLhaus needs an abuse.ch key.
 - Allowlist, local counters (numbers only), **Clear all data**.

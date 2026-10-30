@@ -3,7 +3,9 @@
 // if the user explicitly picks "Proceed anyway" or "Add site to allowlist".
 import { send } from '../../platform/messaging.js';
 import { closeCurrentTab } from '../../platform/browser.js';
+import { getSettings, onSettingsChanged } from '../../platform/storage.js';
 import { renderVerdict, VERDICT_CSS } from '../render.js';
+import { t, setLanguage } from '../../config/strings/index.js';
 
 const target = new URLSearchParams(location.search).get('url') || '';
 const isHttp = /^https?:\/\//i.test(target);
@@ -11,15 +13,26 @@ const isHttp = /^https?:\/\//i.test(target);
 const style = document.createElement('style');
 style.textContent = VERDICT_CSS;
 document.head.append(style);
-document.getElementById('target').textContent = target || '(missing address)';
+let verdict = null;
+
+// Static text carries data-i18n keys; re-run when the language setting changes.
+function render(lang) {
+  document.documentElement.lang = setLanguage(lang);
+  for (const e of document.querySelectorAll('[data-i18n]')) e.textContent = t(e.dataset.i18n);
+  document.getElementById('target').textContent = target || t('warning.missingAddress');
+  if (!verdict) return;
+  const heading = { malicious: 'warning.headingMalicious', high: 'warning.headingHigh' }[verdict.tier];
+  if (heading) document.getElementById('heading').textContent = t(heading);
+  document.getElementById('verdict').replaceChildren(renderVerdict(verdict, { mode: 'page' }));
+}
 
 async function show() {
+  const settings = await getSettings();
+  render(settings.uiLanguage);
+  onSettingsChanged((s) => render(s.uiLanguage));
   if (!isHttp) return;
-  const verdict = await send('analyze-url', { url: target });
-  if (!verdict) return;
-  if (verdict.tier === 'malicious') document.getElementById('heading').textContent = 'Known malicious site blocked';
-  else if (verdict.tier === 'high') document.getElementById('heading').textContent = 'High-risk site stopped';
-  document.getElementById('verdict').replaceChildren(renderVerdict(verdict, { mode: 'page' }));
+  verdict = await send('analyze-url', { url: target });
+  render((await getSettings()).uiLanguage); // re-read: the language may have changed meanwhile
 }
 
 function goBack() {

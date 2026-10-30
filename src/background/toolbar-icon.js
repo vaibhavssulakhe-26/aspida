@@ -16,7 +16,7 @@ export async function updateTabIcon({ tabId, url }, settings) {
     verdict = await analyzeOne(url).catch(() => null);
   }
   // Rejects if the tab closed in the meantime; callers ignore that.
-  await setTabAction(tabId, iconPaths(iconStateForVerdict(verdict)), iconTitleForVerdict(verdict));
+  await setTabAction(tabId, iconPaths(iconStateForVerdict(verdict)), iconTitleForVerdict(verdict, settings.uiLanguage));
 }
 
 // After install/startup, a settings change or an allowlist change. With the

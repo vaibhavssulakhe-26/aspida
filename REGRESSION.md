@@ -101,5 +101,11 @@ only when every box below is green.
 - [ ] m9: Feed table shows "HaGeZi's Anti-Piracy" updated (online) and the bundled
       pirated-software demo list. Turn off "Cracked / pirated software" → software
       reasons gone without reload; the two piracy lists are not downloaded while off.
+- [ ] m10: Settings → language ಕನ್ನಡ: the settings page switches without reload, both
+      columns fit (no sideways scroll at wide or narrow width; feed table buttons not
+      clipped). Demo tooltips, the demo mailbox banner, the toolbar tooltip and the
+      warning page show Kannada tier names and text; reasons stay English; "No known
+      threats found" is ತಿಳಿದಿರುವ ಯಾವುದೇ ಅಪಾಯ ಕಂಡುಬಂದಿಲ್ಲ (never ಸುರಕ್ಷಿತ). Kannada glyphs
+      render (no boxes). Switch back to English: everything returns without reload.
 - [ ] m7: README, FEEDS, PRIVACY and DEMO match behaviour (permissions table equals
       manifest.json; feed URLs equal src/config/feeds.js).

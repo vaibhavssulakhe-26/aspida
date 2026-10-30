@@ -42,6 +42,7 @@ demo server), use `npm run demo -- 8081`. Stage walkthrough: [DEMO.md](DEMO.md).
 | Cracked / pirated software: host on a pirated-software list (HaGeZi Anti-Piracy, bundled demo list), 2+ cracked-software words (crack, keygen, activator, …), or a direct .exe/.msi/.zip/.iso/.scr/.apk download from an unknown site. Suspicious at most on its own, tooltip only, never a warning page | all http(s) pages | Cracked / pirated software (on) |
 | Toolbar icon colour for the current page: green no known threats found, orange suspicious, red high risk / known malicious, black not checked (non-web pages) | toolbar | Toolbar icon reflects the current site (on) |
 | Settings, feed status, allowlist, local counters, clear all data | options page | n/a |
+| Interface language: English or Kannada (ಕನ್ನಡ, **DRAFT** translation) for tier names, buttons, settings, warning page, tooltip/banner text and advice. Reason sentences from the checks stay in English | options page dropdown | English |
 
 \* URLhaus requires a free abuse.ch Auth-Key since 2025; see [FEEDS.md](FEEDS.md).
 
@@ -57,7 +58,8 @@ src/
                reference context, feed parsers, QR payload classification, pipeline
   checks/      pure, one module per check, each: check(input, ctx) -> Signal[]
     index.js   the check registry (the extension point)
-  scoring/     weights.js (THE weight table + thresholds + wording), score.js, icon-state.js
+  scoring/     weights.js (THE weight table + thresholds), score.js, icon-state.js
+  config/strings/  en.js, kn.js (interface text, t() with English fallback)
   config/      brands, lists (shorteners, odd TLDs, freemail…), feeds, settings
   background/  service-worker (entry), analyzer, feed-manager, navigation-guard, toolbar-icon, qr-fetch
   content/     loader (classic) -> main (ES module) -> hover-links, qr-hover, chat, gmail
@@ -167,6 +169,17 @@ and no remote code: the extension-page CSP is `script-src 'self'`.
   tooltip's "cracked or pirated software" wording can be broader than a given
   site deserves; the evidence names the list. Popular piracy sites in the top
   10k are never flagged (see FEEDS.md).
+- **Kannada interface is a DRAFT.** The Kannada strings
+  (`src/config/strings/kn.js`) are a machine-assisted draft awaiting review by a
+  native speaker ([docs/KANNADA_STRINGS_REVIEW.md](docs/KANNADA_STRINGS_REVIEW.md)).
+  Only the interface is translated: the reason sentences produced by the checks
+  (e.g. "Link text shows X but it opens Y") stay in English, and detection
+  itself is English/Latin-script only. Kannada text uses locally installed
+  fonts (Noto Sans Kannada, Nirmala UI, Tunga); no web fonts are loaded.
+- **First minute after install.** While Phishing.Database (~392k hosts) is being
+  written to IndexedDB, a hover that lands during the bulk write can take a few
+  seconds (up to ~5 s measured) to show its tooltip. Afterwards lookups take a
+  few milliseconds. Load the extension a minute before a demo.
 - **Extension fingerprinting.** Because content modules are web-accessible, a
   page can detect that Aspida is installed by probing a known file path.
   `use_dynamic_url` would prevent this but breaks the modules' relative imports

@@ -103,7 +103,9 @@ function isDue(feed, status) {
 // Called on install/startup and by the hourly alarm.
 export async function refreshDueFeeds() {
   const [settings, status] = await Promise.all([getSettings(), getFeedStatus()]);
-  for (const feed of FEEDS) {
+  // Bundled (offline) lists first, so they never wait behind a large download.
+  const ordered = [...FEEDS.filter((f) => f.bundled), ...FEEDS.filter((f) => !f.bundled)];
+  for (const feed of ordered) {
     if (!feedEnabled(feed, settings)) continue;
     // Back off for an hour after a failure so a dead host isn't hammered.
     const st = status[feed.id];

@@ -42,3 +42,11 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .stats dd { margin: 0; font-size: 20px; font-weight: 650; font-variant-numeric: tabular-nums; }
 .pill { display: inline-block; padding: 1px 8px; border-radius: 10px; border: 1px solid var(--border); font-size: 12px; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.lang { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.lang select { font: inherit; padding: 4px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); color: var(--fg); }
+/* Kannada interface: local fonts only (no web fonts are loaded). */
+html:lang(kn) body, html:lang(kn) button, html:lang(kn) input, html:lang(kn) select { font-family: "Noto Sans Kannada", "Nirmala UI", "Tunga", "Kedage", system-ui, sans-serif; }
+html:lang(kn) body { line-height: 1.6; }
+html:lang(kn) th { white-space: normal; }
+html:lang(kn) td.num { white-space: normal; }

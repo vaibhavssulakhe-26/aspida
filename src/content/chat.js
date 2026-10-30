@@ -8,6 +8,7 @@
 import { verdictFor } from './link-scanner.js';
 import { inlineShadow } from '../ui/overlay.js';
 import { renderBadge } from '../ui/render.js';
+import { t } from '../config/strings/index.js';
 import { safe, debounce, debug, anchorText, httpHref } from './util.js';
 
 const SCAN_DEBOUNCE_MS = 350;
@@ -56,7 +57,7 @@ export function createChatScanner(site) {
     if (!state || !state.badges || !verdict || verdict.tier === 'none' || !a.isConnected || httpHref(a) !== href) return;
     if (state.badged.has(a)) return;
     const { host, root } = inlineShadow(a);
-    host.title = `Aspida: ${verdict.label}. ${verdict.reasons[0]?.detail || ''}`;
+    host.title = t('badge.title', { label: t(`tier.${verdict.tier}`), detail: verdict.reasons[0]?.detail || '' });
     root.append(renderBadge(verdict));
     state.badged.set(a, host);
   }

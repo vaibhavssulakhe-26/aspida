@@ -2,13 +2,14 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { analyzeUrl, analyzeSender, combine } from '../src/core/pipeline.js';
 import { score } from '../src/scoring/score.js';
-import { WEIGHTS, TIER_LABELS, THRESHOLDS } from '../src/scoring/weights.js';
+import { WEIGHTS, THRESHOLDS, TIERS } from '../src/scoring/weights.js';
+import en from '../src/config/strings/en.js';
 import { makeCtx, TOP, readData } from './helpers.js';
 
 const ctx = makeCtx();
 
 test('wording never says "safe"', () => {
-  for (const l of Object.values(TIER_LABELS)) assert.doesNotMatch(l, /safe/i);
+  for (const tier of TIERS) assert.doesNotMatch(en[`tier.${tier}`], /safe/i);
   assert.equal(analyzeUrl('https://example.com/', ctx).label, 'No known threats found');
 });
 

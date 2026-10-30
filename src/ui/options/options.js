@@ -3,30 +3,27 @@
 import { getSettings, updateSettings, getLocal, onLocalChanged } from '../../platform/storage.js';
 import { send } from '../../platform/messaging.js';
 import { manifestVersion } from '../../platform/browser.js';
+import { t, setLanguage, LANGUAGES } from '../../config/strings/index.js';
 
+// Feature switches in display order. Labels and descriptions are the
+// 'feature.<key>' and 'feature.<key>.desc' strings.
 const FEATURES = [
-  ['hoverVerdict', 'Link hover verdict', 'Show a verdict tooltip when you hover a link on any web page.'],
-  ['qrHover', 'QR code hover', 'Decode QR codes in images on hover and check the link inside, without opening it.'],
-  ['navigationGuard', 'Warning page', 'Stop navigations to known-malicious sites (threat-feed matches) with a warning page.'],
-  ['blockHighRisk', 'Warning page for High risk', 'Also stop navigations that local checks rate "High risk" (lookalike domains etc.).'],
-  ['toolbarIcon', 'Toolbar icon reflects the current site', 'Colour the Aspida toolbar icon from a local check of the page you are on: green no known threats found, orange suspicious, red high risk or known malicious.'],
-  ['softwareChecks', 'Cracked / pirated software', 'Mention in the hover verdict when a site is on a pirated-software list, or a link looks like a cracked download. Tooltip only, never a warning page.'],
-  ['chatWhatsApp', 'WhatsApp Web', 'Pre-check links in WhatsApp Web chats so the hover verdict is instant.'],
-  ['chatTelegram', 'Telegram Web', 'Pre-check links in Telegram Web chats so the hover verdict is instant.'],
-  ['chatInstagram', 'Instagram DMs', 'Pre-check links in Instagram direct messages so the hover verdict is instant.'],
-  ['chatInlineBadges', 'Show inline badges in chat', 'Also put a small risk badge next to risky links in the chats above, without hovering. Off by default.'],
-  ['gmailBanner', 'Gmail: opened email', 'Show a banner on an opened email with sender and link checks.'],
-  ['gmailInboxHighlight', 'Gmail: inbox highlighting', 'Colour inbox rows yellow/red from the sender name and address shown in the list. Weak signal; off by default.'],
-  ['debug', 'Debug logging', 'Log selector mismatches and timing to the page console (console.debug).'],
+  'hoverVerdict',
+  'qrHover',
+  'navigationGuard',
+  'blockHighRisk',
+  'toolbarIcon',
+  'softwareChecks',
+  'chatWhatsApp',
+  'chatTelegram',
+  'chatInstagram',
+  'chatInlineBadges',
+  'gmailBanner',
+  'gmailInboxHighlight',
+  'debug',
 ];
 
-const STAT_LABELS = [
-  ['suspicious', 'Suspicious seen'],
-  ['high', 'High risk seen'],
-  ['malicious', 'Known malicious seen'],
-  ['blocked', 'Navigations stopped'],
-  ['qrDecoded', 'QR codes decoded'],
-];
+const STATS = ['suspicious', 'high', 'malicious', 'blocked', 'qrDecoded'];
 
 const $ = (id) => document.getElementById(id);
 const el = (tag, props = {}, ...kids) => {
@@ -36,21 +33,36 @@ const el = (tag, props = {}, ...kids) => {
 };
 
 function ago(ts) {
-  if (!ts) return 'never';
+  if (!ts) return t('ago.never');
   const m = Math.round((Date.now() - ts) / 60000);
-  if (m < 1) return 'just now';
-  if (m < 60) return `${m} min ago`;
+  if (m < 1) return t('ago.now');
+  if (m < 60) return t('ago.minutes', { n: m });
   const h = Math.round(m / 60);
-  return h < 48 ? `${h} h ago` : `${Math.round(h / 24)} days ago`;
+  return h < 48 ? t('ago.hours', { n: h }) : t('ago.days', { n: Math.round(h / 24) });
 }
+
+// Static text in options.html carries data-i18n / data-i18n-placeholder keys.
+function applyLanguage(lang) {
+  const code = setLanguage(lang);
+  document.documentElement.lang = code;
+  for (const e of document.querySelectorAll('[data-i18n]')) e.textContent = t(e.dataset.i18n);
+  for (const e of document.querySelectorAll('[data-i18n-placeholder]')) e.placeholder = t(e.dataset.i18nPlaceholder);
+  $('lang-hint').hidden = code === 'en';
+  $('version').textContent = t('options.version', { v: manifestVersion() });
+  $('ui-language').value = code;
+  if (!clearArmed) $('clear').textContent = t('options.clear');
+}
+
+$('ui-language').replaceChildren(...LANGUAGES.map(({ code, name }) => el('option', { value: code, textContent: name, lang: code })));
+$('ui-language').addEventListener('change', () => updateSettings({ uiLanguage: $('ui-language').value }));
 
 async function renderFeatures() {
   const s = await getSettings();
   $('features').replaceChildren(
-    ...FEATURES.map(([key, label, desc]) => {
+    ...FEATURES.map((key) => {
       const input = el('input', { type: 'checkbox', checked: !!s[key], id: `f-${key}` });
       input.addEventListener('change', () => updateSettings({ [key]: input.checked }));
-      return el('div', { className: 'toggle' }, input, el('label', { htmlFor: `f-${key}`, textContent: label }), el('span', { className: 'desc', textContent: desc }));
+      return el('div', { className: 'toggle' }, input, el('label', { htmlFor: `f-${key}`, textContent: t(`feature.${key}`) }), el('span', { className: 'desc', textContent: t(`feature.${key}.desc`) }));
     }),
   );
   $('urlhaus-key').value = s.urlhausAuthKey || '';
@@ -61,25 +73,25 @@ async function renderFeeds() {
   if (!info) return;
   const rows = info.feeds.map((f) => {
     const st = info.status[f.id] || {};
-    const on = el('input', { type: 'checkbox', checked: !!s.feeds[f.id], ariaLabel: `Enable ${f.name}` });
+    const on = el('input', { type: 'checkbox', checked: !!s.feeds[f.id], ariaLabel: t('options.enableFeed', { name: f.name }) });
     on.addEventListener('change', () => updateSettings({ feeds: { [f.id]: on.checked } }));
     const status = el('td');
-    if (!s.feeds[f.id]) status.append(el('span', { className: 'small', textContent: 'Off' }));
+    if (!s.feeds[f.id]) status.append(el('span', { className: 'small', textContent: t('options.feedOff') }));
     else {
-      status.append(el('div', { textContent: st.lastSuccess ? `Updated ${ago(st.lastSuccess)}` : 'Not downloaded yet', className: st.lastSuccess ? 'okc' : '' }));
-      if (st.error) status.append(el('div', { className: 'err', textContent: `Last attempt failed: ${st.error}${st.lastSuccess ? ' (keeping last good copy)' : ''}` }));
+      status.append(el('div', { textContent: st.lastSuccess ? t('options.updated', { ago: ago(st.lastSuccess) }) : t('options.notDownloaded'), className: st.lastSuccess ? 'okc' : '' }));
+      if (st.error) status.append(el('div', { className: 'err', textContent: `${t('options.lastFailed', { error: st.error })}${st.lastSuccess ? ` ${t('options.keepingLast')}` : ''}` }));
     }
-    const refresh = el('button', { type: 'button', textContent: 'Refresh', disabled: !s.feeds[f.id] });
+    const refresh = el('button', { type: 'button', textContent: t('options.refresh'), disabled: !s.feeds[f.id] });
     refresh.addEventListener('click', async () => {
       refresh.disabled = true;
-      refresh.textContent = 'Refreshing…';
+      refresh.textContent = t('options.refreshing');
       try {
         await send('feed-refresh', { id: f.id });
       } finally {
         renderFeeds();
       }
     });
-    const count = st.activeGen ? `${(st.urls || 0).toLocaleString()} URLs, ${(st.hosts || 0).toLocaleString()} hosts` : '–';
+    const count = st.activeGen ? t('options.entries', { urls: (st.urls || 0).toLocaleString(), hosts: (st.hosts || 0).toLocaleString() }) : '–';
     return el('tr', {}, el('td', {}, on), el('td', {}, el('div', { textContent: f.name }), el('div', { className: 'small', textContent: f.license })), status, el('td', { className: 'num', textContent: count }), el('td', {}, refresh));
   });
   $('feeds').tBodies[0].replaceChildren(...rows);
@@ -90,17 +102,17 @@ async function renderAllowlist() {
   $('allowlist').replaceChildren(
     ...(list.length
       ? list.map((d) => {
-          const rm = el('button', { type: 'button', textContent: '×', ariaLabel: `Remove ${d}` });
+          const rm = el('button', { type: 'button', textContent: '×', ariaLabel: t('options.remove', { d }) });
           rm.addEventListener('click', () => send('allowlist-remove', { domain: d }));
           return el('li', {}, el('span', { textContent: d }), rm);
         })
-      : [el('li', { className: 'small', textContent: 'Empty' })]),
+      : [el('li', { className: 'small', textContent: t('options.empty') })]),
   );
 }
 
 async function renderStats() {
   const stats = (await send('stats')) || {};
-  $('stats').replaceChildren(...STAT_LABELS.map(([k, label]) => el('div', {}, el('dt', { textContent: label }), el('dd', { textContent: String(stats[k] || 0) }))));
+  $('stats').replaceChildren(...STATS.map((k) => el('div', {}, el('dt', { textContent: t(`stat.${k}`) }), el('dd', { textContent: String(stats[k] || 0) }))));
 }
 
 $('urlhaus-form').addEventListener('submit', async (e) => {
@@ -120,21 +132,21 @@ let clearArmed = false;
 $('clear').addEventListener('click', async () => {
   if (!clearArmed) {
     clearArmed = true;
-    $('clear').textContent = 'Click again to confirm';
+    $('clear').textContent = t('options.clearConfirm');
     $('clear-msg').textContent = '';
     setTimeout(() => {
       clearArmed = false;
-      $('clear').textContent = 'Clear all data';
+      $('clear').textContent = t('options.clear');
     }, 5000);
     return;
   }
   clearArmed = false;
   $('clear').disabled = true;
-  $('clear-msg').textContent = 'Clearing…';
+  $('clear-msg').textContent = t('options.clearing');
   await send('clear-all');
   $('clear').disabled = false;
-  $('clear').textContent = 'Clear all data';
-  $('clear-msg').textContent = 'All data cleared.';
+  $('clear').textContent = t('options.clear');
+  $('clear-msg').textContent = t('options.cleared');
   renderAll();
 });
 
@@ -142,10 +154,23 @@ function renderAll() {
   return Promise.all([renderFeatures(), renderFeeds(), renderAllowlist(), renderStats()]);
 }
 
-$('version').textContent = `Version ${manifestVersion()}.`;
-onLocalChanged((keys) => {
+let shownLanguage = null;
+onLocalChanged(async (keys) => {
+  if (keys.includes('settings')) {
+    const { uiLanguage } = await getSettings();
+    if (uiLanguage !== shownLanguage) {
+      shownLanguage = uiLanguage;
+      applyLanguage(uiLanguage);
+      renderAll();
+      return;
+    }
+  }
   if (keys.some((k) => k.startsWith('feedStatus:')) || keys.includes('settings')) renderFeeds();
   if (keys.includes('allowlist')) renderAllowlist();
   if (keys.includes('stats')) renderStats();
 });
-renderAll();
+getSettings().then(({ uiLanguage }) => {
+  shownLanguage = uiLanguage;
+  applyLanguage(uiLanguage);
+  renderAll();
+});

@@ -4,6 +4,7 @@
 
 import { getSettings, onSettingsChanged, onLocalChanged } from '../platform/storage.js';
 import { clearVerdictCache } from './link-scanner.js';
+import { setLanguage, getLanguage } from '../config/strings/index.js';
 import { isExtensionAlive } from '../platform/messaging.js';
 import { setDebug, debug } from './util.js';
 import * as hoverLinks from './hover-links.js';
@@ -40,6 +41,19 @@ const running = new Set();
 
 function apply(settings) {
   setDebug(settings.debug);
+  // New interface language: restart running modules so banners and badges
+  // are re-rendered (tooltips pick it up on the next hover).
+  const before = getLanguage();
+  if (setLanguage(settings.uiLanguage) !== before) {
+    for (const mod of [...running]) {
+      try {
+        mod.stop();
+      } catch (e) {
+        debug('module failed to stop', e);
+      }
+      running.delete(mod);
+    }
+  }
   for (const [key, mod, matches] of MODULES) {
     const want = !!settings[key] && matches();
     try {

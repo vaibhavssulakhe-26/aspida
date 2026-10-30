@@ -6,6 +6,7 @@
 import { send } from '../platform/messaging.js';
 import { blockShadowBefore } from '../ui/overlay.js';
 import { renderEmailBanner } from '../ui/render.js';
+import { t } from '../config/strings/index.js';
 import { safe, debounce, debug, anchorText, httpHref } from './util.js';
 
 const MAX_LINKS = 200;
@@ -100,8 +101,8 @@ export function createGmail(site) {
       return;
     }
     const notes = [];
-    if (!data.sender.replyTo) notes.push("Reply-To isn't shown in Gmail's normal view, so it wasn't checked. Open \"show details\" on the email to include it.");
-    notes.push('Gmail does not expose SPF/DKIM/DMARC results to extensions; this check uses the visible sender, links and Reply-To only.');
+    if (!data.sender.replyTo) notes.push(t('banner.replyToHidden'));
+    notes.push(t('banner.noAuthResults'));
     const { host, root } = blockShadowBefore(anchor);
     root.append(renderEmailBanner(result, { notes }));
     banners.set(msg, { host, signature });

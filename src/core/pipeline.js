@@ -11,7 +11,7 @@ import { URL_CHECKS, SENDER_CHECKS } from '../checks/index.js';
 import * as feedMatch from '../checks/feed-match.js';
 import { domainOfAddress } from '../checks/sender-checks.js';
 import { score, worstTier } from '../scoring/score.js';
-import { TIER_LABELS } from '../scoring/weights.js';
+import en from '../config/strings/en.js';
 
 // On well-known domains only these signals survive (exact-URL feed hits are
 // precise enough to trust even on big sites; shortener is informational).
@@ -31,7 +31,7 @@ function runChecks(checks, input, ctx) {
 }
 
 function allowlistedVerdict(base) {
-  return { ...base, tier: 'none', label: TIER_LABELS.none, score: 0, reasons: [], allowlisted: true };
+  return { ...base, tier: 'none', label: en['tier.none'], score: 0, reasons: [], allowlisted: true };
 }
 
 // extra.linkText: visible text of the anchor, when known (enables link-text check).
@@ -69,5 +69,5 @@ export function analyzeSender(sender, ctx, feedHits = []) {
 export function combine(verdicts) {
   const list = verdicts.filter(Boolean);
   const tier = worstTier(list.map((v) => v.tier));
-  return { tier, label: TIER_LABELS[tier], count: list.length };
+  return { tier, label: en[`tier.${tier}`], count: list.length };
 }
