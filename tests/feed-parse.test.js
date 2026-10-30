@@ -24,8 +24,8 @@ test('urlhaus-csv: url column, header and comments skipped, quotes handled', () 
 
 test('bundled sample feed parses and contains the demo hosts', () => {
   const r = parseFeed('mixed', readData('data/sample-feed.txt'));
-  assert.ok(r.hosts.includes('malicious.trustlens-demo.invalid'));
-  assert.ok(r.urls.includes('login-verify.trustlens-demo.invalid/hdfc/netbanking/login.php'));
+  assert.ok(r.hosts.includes('malicious.aspida-demo.invalid'));
+  assert.ok(r.urls.includes('login-verify.aspida-demo.invalid/hdfc/netbanking/login.php'));
 });
 
 test('garbage input never throws', () => {

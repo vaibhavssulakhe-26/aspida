@@ -44,5 +44,5 @@ export const FEEDS = [
   },
 ];
 
-export const FEED_ALARM = 'trustlens-feed-refresh';
+export const FEED_ALARM = 'aspida-feed-refresh';
 export const FEED_ALARM_PERIOD_MINUTES = 60; // wake hourly; each feed refreshes when due

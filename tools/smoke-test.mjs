@@ -48,8 +48,8 @@ const ALLOWED_REQUESTS = [
   /^https:\/\/openphish\.com\//,
   /^https:\/\/urlhaus-api\.abuse\.ch\//,
   // Deliberate navigations made by step 01 (typed-URL / "Proceed anyway" tests):
-  /^http:\/\/malicious\.trustlens-demo\.invalid\/login$/,
-  /^http:\/\/paypa1\.trustlens-demo\.invalid\/$/,
+  /^http:\/\/malicious\.aspida-demo\.invalid\/login$/,
+  /^http:\/\/paypa1\.aspida-demo\.invalid\/$/,
   /^https:\/\/paypa1\.test\/signin$/,
   /^chrome:\/\//,
   /^about:/,
@@ -57,7 +57,7 @@ const ALLOWED_REQUESTS = [
 
 // Every page/tab: collect uncaught exceptions and console errors.
 // Network failures for the reserved demo TLDs are expected and ignored.
-const IGNORED = [/ERR_NAME_NOT_RESOLVED/, /trustlens-demo\.invalid/, /phish-demo\.test/, /favicon\.ico/];
+const IGNORED = [/ERR_NAME_NOT_RESOLVED/, /aspida-demo\.invalid/, /phish-demo\.test/, /favicon\.ico/];
 browser.on('targetcreated', async (t) => {
   if (t.type() !== 'page') return;
   const p = await t.page().catch(() => null);

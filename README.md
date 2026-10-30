@@ -1,4 +1,4 @@
-# TrustLens
+# Aspida
 
 A privacy-first Chrome extension (Manifest V3) that tells you whether links,
 QR codes, chat messages and opened emails show phishing or social-engineering
@@ -126,7 +126,7 @@ the extension package. Those files are listed in `web_accessible_resources`.
 | host `https://raw.githubusercontent.com/*` | OpenPhish (redirect target) and Phishing.Database feed files. Chrome ignores paths in host permissions, so it can't be narrowed to the two repos | covered below |
 | host `https://openphish.com/*` | OpenPhish feed URL | |
 | host `https://urlhaus-api.abuse.ch/*` | URLhaus export (only with your Auth-Key) | |
-| content scripts on `http://*/*`, `https://*/*` | Link hover and QR hover everywhere, plus the chat and Gmail modules (which only activate on their sites). Chrome also treats these match patterns as host access for the extension's own requests; TrustLens uses that only to fetch the bytes of a QR **image** you hover on another site | "Read and change all your data on all websites" |
+| content scripts on `http://*/*`, `https://*/*` | Link hover and QR hover everywhere, plus the chat and Gmail modules (which only activate on their sites). Chrome also treats these match patterns as host access for the extension's own requests; Aspida uses that only to fetch the bytes of a QR **image** you hover on another site | "Read and change all your data on all websites" |
 
 There is no `tabs`, `scripting`, `cookies`, `webRequest` or `<all_urls>` permission,
 and no remote code: the extension-page CSP is `script-src 'self'`.
@@ -149,7 +149,7 @@ and no remote code: the extension-page CSP is `script-src 'self'`.
   page lands. Blocking webRequest, which would avoid this, is not available to
   MV3 extensions.
 - **Extension fingerprinting.** Because content modules are web-accessible, a
-  page can detect that TrustLens is installed by probing a known file path.
+  page can detect that Aspida is installed by probing a known file path.
   `use_dynamic_url` would prevent this but breaks the modules' relative imports
   in current Chrome, so it is off.
 - **Heuristics have false positives.** There are none on the Tranco top 10k (a
@@ -185,5 +185,4 @@ checks are in [REGRESSION.md](REGRESSION.md).
 - Tranco list (Le Pochat et al., NDSS 2019), list ID PYK6J: `data/top-domains.txt`
 - jsQR 1.4.0 by Cosmo Wolfe, Apache-2.0: `vendor/jsqr/`
 - Feeds: see [FEEDS.md](FEEDS.md)
-- TrustLens itself: MIT ([LICENSE](LICENSE))
-# aspida
+- Aspida itself: MIT ([LICENSE](LICENSE))

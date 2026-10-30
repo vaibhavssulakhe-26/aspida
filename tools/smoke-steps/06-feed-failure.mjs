@@ -18,7 +18,7 @@ export default async function ({ browser, extId, fail }) {
 
   const after = (await msg('feed-status')).status;
   if (after.sample?.activeGen !== before.sample?.activeGen) fail('sample feed changed by an unrelated failure');
-  const v = await msg('analyze-url', { url: 'http://malicious.trustlens-demo.invalid/' });
+  const v = await msg('analyze-url', { url: 'http://malicious.aspida-demo.invalid/' });
   if (v.tier !== 'malicious') fail('bundled feed stopped matching after a failed refresh');
 
   // The options page shows the error.

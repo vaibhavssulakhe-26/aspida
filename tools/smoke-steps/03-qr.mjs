@@ -13,7 +13,7 @@ export default async function ({ browser, base, extId, fail }) {
     return new Promise((r) => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(b); });
   }, `${base}/qr/qr-feed.png?cors`);
   const data = await viaSw(dataUrl);
-  if (data?.status !== 'ok' || !data.text.includes('trustlens-demo.invalid')) fail(`SW decode (data:) failed: ${JSON.stringify(data)}`);
+  if (data?.status !== 'ok' || !data.text.includes('aspida-demo.invalid')) fail(`SW decode (data:) failed: ${JSON.stringify(data)}`);
   const noImage = await viaSw(`${base}/index.html`);
   if (noImage?.status !== 'unsupported') fail(`SW decode of non-image should be unsupported: ${JSON.stringify(noImage)}`);
   const bad = await viaSw('javascript:alert(1)');
@@ -42,7 +42,7 @@ export default async function ({ browser, base, extId, fail }) {
   };
 
   await expect('#qr-highrisk', /not opened.*paypa1\.test.*High risk/);
-  await expect('#qr-feed', /malicious\.trustlens-demo\.invalid.*Known malicious/);
+  await expect('#qr-feed', /malicious\.aspida-demo\.invalid.*Known malicious/);
   await expect('#qr-clean', /wikipedia\.org.*No known threats found/);
   await expect('#qr-upi', /UPI payment request.*sbi\.refund\.desk@okaxis/);
   await expect('#qr-canvas', /sbi-kyc-login\.test.*Suspicious/);

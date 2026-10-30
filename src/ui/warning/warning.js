@@ -41,5 +41,5 @@ document.getElementById('allow').addEventListener('click', async () => {
   await proceed();
 });
 for (const id of ['proceed', 'allow']) document.getElementById(id).disabled = !isHttp;
-show().catch((e) => console.warn('TrustLens', e));
+show().catch((e) => console.warn('Aspida', e));
 document.getElementById('back').focus();

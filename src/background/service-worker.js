@@ -1,4 +1,4 @@
-// TrustLens service worker entry. Registers every listener synchronously at
+// Aspida service worker entry. Registers every listener synchronously at
 // top level (required for MV3 wake-ups) and keeps no state in globals.
 
 import { serve } from '../platform/messaging.js';
@@ -15,15 +15,15 @@ async function init() {
   await refreshDueFeeds();
 }
 
-onInstalled(() => init().catch((e) => console.warn('TrustLens init failed', e)));
-onStartup(() => init().catch((e) => console.warn('TrustLens init failed', e)));
-onAlarm(FEED_ALARM, () => refreshDueFeeds().catch((e) => console.warn('TrustLens feed refresh failed', e)));
+onInstalled(() => init().catch((e) => console.warn('Aspida init failed', e)));
+onStartup(() => init().catch((e) => console.warn('Aspida init failed', e)));
+onAlarm(FEED_ALARM, () => refreshDueFeeds().catch((e) => console.warn('Aspida feed refresh failed', e)));
 onActionClicked(() => openOptionsPage());
 
-onBeforeTopNavigate((d) => handleNavigation(d).catch((e) => console.warn('TrustLens navigation check failed', e)));
+onBeforeTopNavigate((d) => handleNavigation(d).catch((e) => console.warn('Aspida navigation check failed', e)));
 onTabRemoved((tabId) => dropTab(tabId).catch(() => {}));
 
-onSettingsChanged((s) => applyFeedToggles(s).then(refreshDueFeeds).catch((e) => console.warn('TrustLens feed toggle failed', e)));
+onSettingsChanged((s) => applyFeedToggles(s).then(refreshDueFeeds).catch((e) => console.warn('Aspida feed toggle failed', e)));
 onLocalChanged((keys) => {
   if (keys.includes('allowlist')) invalidateContext();
 });

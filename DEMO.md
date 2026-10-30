@@ -7,7 +7,7 @@ at the reserved `.test` / `.invalid` TLDs, so nothing can reach a real phishing 
 
 1. `chrome://extensions` → Developer mode → **Load unpacked** → repo folder.
 2. `npm run demo` (or `python3 -m http.server -d demo 8080`).
-3. Open http://localhost:8080/ and the TrustLens settings (toolbar icon) in a second tab.
+3. Open http://localhost:8080/ and the Aspida settings (toolbar icon) in a second tab.
 4. Optional: in settings, turn on **Gmail: inbox highlighting** for step 6.
 
 Kill switches: every feature is a checkbox in settings and applies instantly. If
@@ -32,7 +32,7 @@ Weights live in one file (`src/scoring/weights.js`).
 
 ## 2. Warning page
 
-- Click **malicious.trustlens-demo.invalid/login** → interstitial, **Known malicious**,
+- Click **malicious.aspida-demo.invalid/login** → interstitial, **Known malicious**,
   evidence "listed by Bundled demo feed".
 - Show **Go back**, **Add to allowlist and continue**, **Proceed anyway**. The page
   was stopped before anything loaded.

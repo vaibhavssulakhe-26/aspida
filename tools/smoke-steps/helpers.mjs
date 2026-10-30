@@ -11,10 +11,10 @@ export async function waitFor(fn, what, timeout = 15000) {
   throw new Error(`timed out waiting for ${what}`);
 }
 
-// Read the text of TrustLens' closed shadow roots via CDP (pierce:true sees
+// Read the text of Aspida's closed shadow roots via CDP (pierce:true sees
 // closed roots, page scripts and querySelector don't).
 // Returns [{ kind: 'overlay'|'badge'|'banner', html, text }]
-export async function trustlensShadows(page) {
+export async function aspidaShadows(page) {
   const cdp = await page.createCDPSession();
   try {
     const { root } = await cdp.send('DOM.getDocument', { depth: -1, pierce: true });
@@ -22,7 +22,7 @@ export async function trustlensShadows(page) {
     const walk = (n) => {
       const attrs = n.attributes || [];
       for (let i = 0; i < attrs.length; i += 2) {
-        const m = /^data-trustlens-(overlay|badge|banner)$/.exec(attrs[i]);
+        const m = /^data-aspida-(overlay|badge|banner)$/.exec(attrs[i]);
         if (m && n.shadowRoots?.length) found.push({ kind: m[1], nodeId: n.shadowRoots[0].nodeId });
       }
       for (const c of [...(n.children || []), ...(n.shadowRoots || []), ...(n.contentDocument ? [n.contentDocument] : [])]) walk(c);
@@ -41,7 +41,7 @@ export async function trustlensShadows(page) {
 }
 
 export async function overlayText(page) {
-  const all = await trustlensShadows(page);
+  const all = await aspidaShadows(page);
   const o = all.find((s) => s.kind === 'overlay');
   if (!o) return '';
   // Hidden tooltip => treat as no text.

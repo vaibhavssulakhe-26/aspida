@@ -1,6 +1,6 @@
 # Privacy
 
-TrustLens is designed so that **nothing you browse, read or receive leaves your
+Aspida is designed so that **nothing you browse, read or receive leaves your
 device**.
 
 ## What is analysed, and where
@@ -9,7 +9,7 @@ Link URLs, link text, QR-code contents, chat links and the sender, Reply-To and
 links of an opened Gmail message are analysed **inside your browser**, by the
 extension's service worker, against lists stored on your device.
 
-TrustLens does **not**:
+Aspida does **not**:
 
 - send any URL, message, email, sender or QR content to any server (no Safe
   Browsing Lookup API, no per-URL API, no backend, no analytics, no telemetry,
@@ -26,7 +26,7 @@ The smoke test (`npm run smoke`) enforces the "never contacts a link target"
 rule. It records every network request from pages and the service worker and
 fails if any request goes to a hovered or scanned target.
 
-## Network requests TrustLens makes
+## Network requests Aspida makes
 
 1. **Feed downloads**, to exactly these hosts (also the only `host_permissions`):
    `raw.githubusercontent.com`, `openphish.com`, `urlhaus-api.abuse.ch` (only if
@@ -55,7 +55,7 @@ then reloads the bundled demo feed.
 
 ## Visible to websites
 
-A web page can detect that TrustLens is installed by probing one of its
+A web page can detect that Aspida is installed by probing one of its
 web-accessible module files (see README, Limitations). Pages cannot read
-TrustLens' tooltips, badges or banners, which live in closed Shadow DOM roots,
-and TrustLens never injects anything into the page's own JavaScript world.
+Aspida's tooltips, badges or banners, which live in closed Shadow DOM roots,
+and Aspida never injects anything into the page's own JavaScript world.

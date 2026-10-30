@@ -24,9 +24,9 @@ export default async function ({ browser, extId, fail }) {
   // Bundled feed is loaded on install.
   await waitFor(async () => (await msg('feed-status')).status.sample?.activeGen, 'sample feed');
 
-  const v1 = await msg('analyze-url', { url: 'http://malicious.trustlens-demo.invalid/anything' });
+  const v1 = await msg('analyze-url', { url: 'http://malicious.aspida-demo.invalid/anything' });
   if (v1.tier !== 'malicious') fail(`feed host match expected malicious, got ${v1.tier}`);
-  const v2 = await msg('analyze-url', { url: 'https://login-verify.trustlens-demo.invalid/hdfc/netbanking/login.php' });
+  const v2 = await msg('analyze-url', { url: 'https://login-verify.aspida-demo.invalid/hdfc/netbanking/login.php' });
   if (v2.tier !== 'malicious') fail(`feed url match expected malicious, got ${v2.tier}`);
   const v3 = await msg('analyze-url', { url: 'https://www.wikipedia.org/' });
   if (v3.tier !== 'none') fail(`wikipedia expected none, got ${v3.tier}`);
@@ -37,13 +37,13 @@ export default async function ({ browser, extId, fail }) {
 
   // Interstitial on a known-malicious navigation.
   const tab = await browser.newPage();
-  await tab.goto('http://malicious.trustlens-demo.invalid/login').catch(() => {});
+  await tab.goto('http://malicious.aspida-demo.invalid/login').catch(() => {});
   await waitFor(() => tab.url().includes('/src/ui/warning/warning.html'), 'warning page');
   await tab.waitForSelector('#verdict .tl-label');
   const label = await tab.$eval('#verdict .tl-label', (e) => e.textContent);
   if (label !== 'Known malicious') fail(`warning page label: ${label}`);
   const evidence = await tab.$$eval('#verdict .tl-evidence', (es) => es.map((e) => e.textContent));
-  if (!evidence.includes('malicious.trustlens-demo.invalid')) fail(`warning page evidence missing: ${evidence}`);
+  if (!evidence.includes('malicious.aspida-demo.invalid')) fail(`warning page evidence missing: ${evidence}`);
 
   // Proceed anyway: navigates to the target and is not re-blocked.
   await tab.click('#proceed');
@@ -58,9 +58,9 @@ export default async function ({ browser, extId, fail }) {
   await tab3.close();
 
   const tab2 = await browser.newPage();
-  await tab2.goto('http://paypa1.trustlens-demo.invalid/').catch(() => {});
+  await tab2.goto('http://paypa1.aspida-demo.invalid/').catch(() => {});
   await sleep(1000);
-  // paypa1.trustlens-demo.invalid has no lookalike registrable domain: must NOT be blocked.
+  // paypa1.aspida-demo.invalid has no lookalike registrable domain: must NOT be blocked.
   if (tab2.url().includes('warning.html')) fail('non-risky .invalid host was blocked');
   await tab2.close();
 

@@ -65,7 +65,7 @@ export function renderEmailBanner(result, { doc = document, notes = [] } = {}) {
   const { summary, sender, links } = result;
   const root = el(doc, 'div', `tl-verdict tl-tier-${summary.tier} tl-mode-banner`);
   const head = el(doc, 'div', 'tl-head');
-  head.append(el(doc, 'span', 'tl-icon', TIER_ICON[summary.tier]), el(doc, 'span', 'tl-label', `TrustLens: ${summary.label}`));
+  head.append(el(doc, 'span', 'tl-icon', TIER_ICON[summary.tier]), el(doc, 'span', 'tl-label', `Aspida: ${summary.label}`));
   const linkList = (links || []).filter(Boolean);
   head.append(el(doc, 'span', 'tl-host', `sender + ${linkList.length} link${linkList.length === 1 ? '' : 's'} checked`));
   root.append(head);

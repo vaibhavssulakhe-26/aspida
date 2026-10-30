@@ -1,11 +1,11 @@
-# TrustLens bundled demo feed. Synthetic entries only, so the demo works
+# Aspida bundled demo feed. Synthetic entries only, so the demo works
 # offline. Hostnames use the reserved .test / .invalid TLDs (RFC 2606/6761)
 # and can never resolve to a real site.
 #
 # Hostnames: whole host is listed.
 phish-demo.test
-malicious.trustlens-demo.invalid
-sbi-kyc-update.trustlens-demo.invalid
+malicious.aspida-demo.invalid
+sbi-kyc-update.aspida-demo.invalid
 # Full URLs: only this exact path is listed.
-http://login-verify.trustlens-demo.invalid/hdfc/netbanking/login.php
-https://upi-reward.trustlens-demo.invalid/claim?id=4921
+http://login-verify.aspida-demo.invalid/hdfc/netbanking/login.php
+https://upi-reward.aspida-demo.invalid/claim?id=4921

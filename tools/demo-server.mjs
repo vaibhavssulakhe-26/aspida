@@ -29,7 +29,7 @@ export function createDemoServer() {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const port = Number(process.argv[2] || 8080);
   createDemoServer().listen(port, '127.0.0.1', () => {
-    console.log(`TrustLens demo: http://localhost:${port}/  (also http://127.0.0.1:${port}/)`);
+    console.log(`Aspida demo: http://localhost:${port}/  (also http://127.0.0.1:${port}/)`);
   });
   // Also answer on IPv6 loopback so "localhost" works whichever address Chrome picks.
   createDemoServer().listen(port, '::1').on('error', () => {});

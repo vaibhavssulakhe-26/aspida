@@ -50,7 +50,7 @@ export function createChatScanner(site) {
     if (!state || !verdict || verdict.tier === 'none' || !a.isConnected) return;
     if (state.badged.has(a)) return;
     const { host, root } = inlineShadow(a);
-    host.title = `TrustLens: ${verdict.label}. ${verdict.reasons[0]?.detail || ''}`;
+    host.title = `Aspida: ${verdict.label}. ${verdict.reasons[0]?.detail || ''}`;
     root.append(renderBadge(verdict));
     state.badged.set(a, host);
   }

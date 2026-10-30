@@ -7,7 +7,7 @@
 // If the worker dies mid-refresh the old generation stays active
 // ("keep the last good copy").
 
-const DB_NAME = 'trustlens';
+const DB_NAME = 'aspida';
 const DB_VERSION = 1;
 const STORE = 'entries';
 

@@ -8,7 +8,7 @@ export function setDebug(on) {
 }
 
 export function debug(...args) {
-  if (debugOn) console.debug('[TrustLens]', ...args);
+  if (debugOn) console.debug('[Aspida]', ...args);
 }
 
 // Wrap an event handler / callback so errors are swallowed (and logged in

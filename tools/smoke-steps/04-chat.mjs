@@ -1,7 +1,7 @@
 // m5: chat scanner on the offline WhatsApp-like mock.
-import { sleep, waitFor, trustlensShadows, setSetting } from './helpers.mjs';
+import { sleep, waitFor, aspidaShadows, setSetting } from './helpers.mjs';
 
-const badges = async (page) => (await trustlensShadows(page)).filter((s) => s.kind === 'badge').map((s) => s.text);
+const badges = async (page) => (await aspidaShadows(page)).filter((s) => s.kind === 'badge').map((s) => s.text);
 
 export default async function ({ browser, extId, base, fail }) {
   const page = await browser.newPage();
@@ -17,7 +17,7 @@ export default async function ({ browser, extId, base, fail }) {
   if (!/Suspicious|High risk/.test(joined)) fail(`heuristic badge missing: ${joined}`);
 
   // Badge is placed right after the risky link, nowhere else.
-  const placement = await page.evaluate(() => ['chat-sbi', 'chat-feed', 'chat-clean'].map((id) => document.getElementById(id).nextElementSibling?.hasAttribute('data-trustlens-badge') || false));
+  const placement = await page.evaluate(() => ['chat-sbi', 'chat-feed', 'chat-clean'].map((id) => document.getElementById(id).nextElementSibling?.hasAttribute('data-aspida-badge') || false));
   if (placement.join() !== 'true,true,false') fail(`badge placement wrong: ${placement}`);
 
   // New incoming message is picked up by the MutationObserver.

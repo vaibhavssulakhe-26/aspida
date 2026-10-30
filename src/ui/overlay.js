@@ -3,7 +3,7 @@
 
 import { VERDICT_CSS } from './render.js';
 
-const HOST_ATTR = 'data-trustlens-overlay';
+const HOST_ATTR = 'data-aspida-overlay';
 
 const OVERLAY_CSS = `
 :host { all: initial; }
@@ -82,7 +82,7 @@ export class FloatingPanel {
 // Block-level closed shadow root inserted before an element (Gmail banner).
 export function blockShadowBefore(beforeEl, doc = document) {
   const host = doc.createElement('div');
-  host.setAttribute('data-trustlens-banner', '');
+  host.setAttribute('data-aspida-banner', '');
   host.style.cssText = 'all: initial; display: block; margin: 0 0 8px;';
   const root = host.attachShadow({ mode: 'closed' });
   const style = doc.createElement('style');
@@ -96,7 +96,7 @@ export function blockShadowBefore(beforeEl, doc = document) {
 // Returns the shadow root to render into.
 export function inlineShadow(afterEl, doc = document) {
   const host = doc.createElement('span');
-  host.setAttribute('data-trustlens-badge', '');
+  host.setAttribute('data-aspida-badge', '');
   host.style.cssText = 'all: initial; display: inline; ';
   const root = host.attachShadow({ mode: 'closed' });
   const style = doc.createElement('style');

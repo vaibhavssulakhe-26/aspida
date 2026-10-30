@@ -1,7 +1,7 @@
 // m6: Gmail banner on the offline mock; inbox highlighting toggle.
-import { sleep, waitFor, trustlensShadows, setSetting } from './helpers.mjs';
+import { sleep, waitFor, aspidaShadows, setSetting } from './helpers.mjs';
 
-const banners = async (page) => (await trustlensShadows(page)).filter((s) => s.kind === 'banner').map((s) => s.text);
+const banners = async (page) => (await aspidaShadows(page)).filter((s) => s.kind === 'banner').map((s) => s.text);
 const rowStyles = (page) => page.$$eval('tr.zA', (rs) => Object.fromEntries(rs.map((r) => [r.id, r.getAttribute('style') || ''])));
 
 export default async function ({ browser, extId, base, fail }) {

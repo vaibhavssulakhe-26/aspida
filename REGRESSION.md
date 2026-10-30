@@ -18,10 +18,10 @@ only when every box below is green.
 - [ ] m2: Toolbar icon opens the options page. Feed table shows "Bundled demo feed"
       updated, OpenPhish / Phishing.Database updated within a minute (online), URLhaus
       "Auth-Key not set" unless a key is saved.
-- [ ] m2: Visit `http://malicious.trustlens-demo.invalid/` → warning page, label
+- [ ] m2: Visit `http://malicious.aspida-demo.invalid/` → warning page, label
       "Known malicious", evidence cites the host. "Go back" returns; "Proceed anyway"
       leaves the page (DNS error is expected for .invalid) and does not loop.
-- [ ] m2: "Add to allowlist and continue" adds `trustlens-demo.invalid` to the
+- [ ] m2: "Add to allowlist and continue" adds `aspida-demo.invalid` to the
       allowlist on the options page; remove it with ×.
 - [ ] m2: Turn off "Warning page" → the same URL is no longer intercepted.
 - [ ] m2: "Clear all data" (click twice) empties allowlist and counters; demo feed reloads.
