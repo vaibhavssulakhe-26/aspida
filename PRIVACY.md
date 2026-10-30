@@ -5,9 +5,11 @@ device**.
 
 ## What is analysed, and where
 
-Link URLs, link text, QR-code contents, chat links and the sender, Reply-To and
-links of an opened Gmail message are analysed **inside your browser**, by the
-extension's service worker, against lists stored on your device.
+Link URLs, link text, QR-code contents, chat links, the sender, Reply-To and
+links of an opened Gmail message, and (for the toolbar icon colour) the address
+of the page open in each tab are analysed **inside your browser**, by the
+extension's service worker, against lists stored on your device. The page
+address is not stored or logged; only the tab's icon and tooltip are set.
 
 Aspida does **not**:
 

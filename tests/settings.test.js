@@ -8,3 +8,8 @@ test('verdicts appear on hover only by default: inline chat badges are opt-in', 
   // Existing installs without the key get the default too.
   assert.equal(mergeSettings({ chatWhatsApp: true }).chatInlineBadges, false);
 });
+
+test('toolbar icon follows the site by default, including on existing installs', () => {
+  assert.equal(DEFAULT_SETTINGS.toolbarIcon, true);
+  assert.equal(mergeSettings({ hoverVerdict: false }).toolbarIcon, true);
+});

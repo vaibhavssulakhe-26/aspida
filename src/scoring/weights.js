@@ -63,3 +63,13 @@ export const TIER_LABELS = {
   high: 'High risk',
   malicious: 'Known malicious',
 };
+
+// Toolbar icon tooltip (per tab). "normal" = page not checked (not a web
+// page, setting off, or the check failed). Never "safe".
+export const TOOLBAR_TITLES = {
+  normal: 'Aspida settings',
+  none: 'Aspida: No known threats found for this site (click for settings)',
+  suspicious: 'Aspida: Suspicious signs on this site (click for settings)',
+  high: 'Aspida: High risk site (click for settings)',
+  malicious: 'Aspida: Known malicious site (click for settings)',
+};

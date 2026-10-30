@@ -14,6 +14,7 @@ export const DEFAULT_SETTINGS = {
   gmailInboxHighlight: false, // colour inbox rows (weak signal, opt-in)
   navigationGuard: true, // interstitial on known-malicious navigations
   blockHighRisk: true, // also interstitial on the "High risk" tier
+  toolbarIcon: true, // toolbar icon colour follows the current site's verdict
   feeds: {
     sample: true, // bundled demo feed (offline)
     openphish: true,

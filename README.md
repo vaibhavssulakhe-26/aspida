@@ -38,6 +38,7 @@ demo server), use `npm run demo -- 8081`. Stage walkthrough: [DEMO.md](DEMO.md).
 | Opened-email banner: sender, Reply-To (if visible), links | Gmail | Gmail: opened email (on) |
 | Inbox row highlighting from the listed sender (weak signal) | Gmail | Gmail: inbox highlighting (**off**) |
 | Warning page before loading known-malicious sites | navigation | Warning page (on), Warning page for High risk (on) |
+| Toolbar icon colour for the current page: green no known threats found, orange suspicious, red high risk / known malicious, black not checked (non-web pages) | toolbar | Toolbar icon reflects the current site (on) |
 | Settings, feed status, allowlist, local counters, clear all data | options page | n/a |
 
 \* URLhaus requires a free abuse.ch Auth-Key since 2025; see [FEEDS.md](FEEDS.md).
@@ -54,9 +55,9 @@ src/
                reference context, feed parsers, QR payload classification, pipeline
   checks/      pure, one module per check, each: check(input, ctx) -> Signal[]
     index.js   the check registry (the extension point)
-  scoring/     weights.js (THE weight table + thresholds + wording), score.js
+  scoring/     weights.js (THE weight table + thresholds + wording), score.js, icon-state.js
   config/      brands, lists (shorteners, odd TLDs, freemail…), feeds, settings
-  background/  service-worker (entry), analyzer, feed-manager, navigation-guard, qr-fetch
+  background/  service-worker (entry), analyzer, feed-manager, navigation-guard, toolbar-icon, qr-fetch
   content/     loader (classic) -> main (ES module) -> hover-links, qr-hover, chat, gmail
     sites/     ONE selectors file per site (gmail, whatsapp, telegram, instagram, demos)
   ui/          render.js (the single renderer), overlay.js (Shadow DOM), warning/, options/
@@ -124,11 +125,14 @@ the extension package. Those files are listed in `web_accessible_resources`.
 | `storage` | Settings, allowlist, counters, feed status | none |
 | `unlimitedStorage` | ~400k feed entries in IndexedDB must not be evicted | none |
 | `alarms` | Scheduled feed refresh while the worker sleeps | none |
-| `webNavigation` | `onBeforeNavigate` to show the warning page (blocking webRequest isn't available in MV3) | "Read your browsing history" |
+| `webNavigation` | `onBeforeNavigate` to show the warning page (blocking webRequest isn't available in MV3); `onCommitted` / `onHistoryStateUpdated` and `getFrame` to colour the toolbar icon from the current page's URL (which is how the icon works without the `tabs` permission) | "Read your browsing history" |
 | host `https://raw.githubusercontent.com/*` | OpenPhish (redirect target) and Phishing.Database feed files. Chrome ignores paths in host permissions, so it can't be narrowed to the two repos | covered below |
 | host `https://openphish.com/*` | OpenPhish feed URL | |
 | host `https://urlhaus-api.abuse.ch/*` | URLhaus export (only with your Auth-Key) | |
 | content scripts on `http://*/*`, `https://*/*` | Link hover and QR hover everywhere, plus the chat and Gmail modules (which only activate on their sites). Chrome also treats these match patterns as host access for the extension's own requests; Aspida uses that only to fetch the bytes of a QR **image** you hover on another site | "Read and change all your data on all websites" |
+
+Setting a tab's toolbar icon and tooltip (`chrome.action.setIcon` / `setTitle`)
+needs no permission.
 
 There is no `tabs`, `scripting`, `cookies`, `webRequest` or `<all_urls>` permission,
 and no remote code: the extension-page CSP is `script-src 'self'`.
@@ -150,6 +154,12 @@ and no remote code: the extension-page CSP is `script-src 'self'`.
   fast connection a page may begin loading before the redirect to the warning
   page lands. Blocking webRequest, which would avoid this, is not available to
   MV3 extensions.
+- **Toolbar icon.** It reflects the page's address only (the same local checks
+  as a link; the page content isn't read). Chrome clears tab icons on every
+  page load, so Aspida sets one on each commit; on a slow first check after
+  the browser starts, the default icon may show for a moment. A page shown
+  from a prerender, and very fast back-to-back navigations, can briefly keep
+  the previous page's colour until the next navigation.
 - **Extension fingerprinting.** Because content modules are web-accessible, a
   page can detect that Aspida is installed by probing a known file path.
   `use_dynamic_url` would prevent this but breaks the modules' relative imports

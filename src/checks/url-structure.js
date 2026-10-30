@@ -1,7 +1,7 @@
 // Structural URL red flags. Each is weak alone; the scorer combines them.
 
 import { signal } from './signal.js';
-import { tldOf, subdomainLabels } from '../core/url.js';
+import { tldOf, subdomainLabels, isLoopbackHost } from '../core/url.js';
 import { ODD_TLDS, CREDENTIAL_WORDS } from '../config/lists.js';
 
 export const id = 'url-structure';
@@ -20,7 +20,7 @@ function authorityOf(raw) {
 
 export function check({ url }) {
   const out = [];
-  if (url.isIp) {
+  if (url.isIp && !isLoopbackHost(url.host)) {
     out.push(signal('url.ip_host', 'structure', url.host, 'Link points to a raw IP address instead of a domain name'));
   }
   // "@" before the host means everything before it is ignored by the browser.

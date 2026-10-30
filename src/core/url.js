@@ -83,6 +83,13 @@ export function isIpHost(host) {
   return false;
 }
 
+// This machine (127.0.0.0/8, ::1, 0.0.0.0). Such a link can't reach a
+// remote site, so it isn't an "IP instead of a domain" phishing sign.
+export function isLoopbackHost(host) {
+  const h = normalizeHost(host);
+  return /^127(\.\d{1,3}){3}$/.test(h) || h === '::1' || h === '0.0.0.0';
+}
+
 // Registrable domain ("eTLD+1") using a compact suffix list. Hosting
 // platforms are treated as suffixes so each tenant is its own domain.
 // Second-level labels that ccTLDs commonly use as public suffixes

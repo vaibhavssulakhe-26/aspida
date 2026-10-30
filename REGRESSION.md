@@ -80,5 +80,13 @@ only when every box below is green.
 - [ ] m6 (needs an account, not automated): open a real email in Gmail; banner appears
       above the body; replying, archiving and switching emails work normally. If no
       banner, enable "Debug logging" and update `src/content/sites/gmail.selectors.js`.
+- [ ] m8: Pin Aspida. http://localhost:8080/toolbar.html: icon green, toolbar tooltip
+      "Aspida: No known threats found for this site" (never "safe"). amazon-deals.localhost
+      link → orange "Suspicious signs". paypa1.localhost link → warning page (normal icon)
+      → "Proceed anyway" → red "High risk site". Back button → icon follows the page.
+- [ ] m8: New tab page and the settings page show the normal (black) icon. Icons look
+      sharp at normal and HiDPI zoom, in light and dark toolbars.
+- [ ] m8: Turn off "Toolbar icon reflects the current site" → all tabs normal without
+      reload; turn on → colours return.
 - [ ] m7: README, FEEDS, PRIVACY and DEMO match behaviour (permissions table equals
       manifest.json; feed URLs equal src/config/feeds.js).

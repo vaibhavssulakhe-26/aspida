@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aspida demo: toolbar icon</title>
+  <style>
+    :root { --bg: #fbfbfc; --fg: #1f2328; --muted: #59636e; --border: #d0d7de; --card: #fff; color-scheme: light dark; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --border: #3d444d; --card: #161b22; } }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.6 system-ui, sans-serif; }
+    main { max-width: 860px; margin: 0 auto; padding: 32px 16px 80px; }
+    h1 { margin: 0 0 4px; } .muted { color: var(--muted); }
+    section { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin: 16px 0; }
+    h2 { font-size: 17px; margin: 0 0 8px; }
+    ul { margin: 0; padding-left: 20px; } li { margin: 6px 0; }
+    code { font-size: 13px; overflow-wrap: anywhere; }
+    #here { font-weight: 600; overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Toolbar icon demo</h1>
+  <p class="muted">Aspida colours its toolbar icon from a local check of the page you are on. Pin the extension (puzzle-piece menu → pin) so the icon is visible. Every "site" below is a <code>*.localhost</code> name: Chrome sends those to this computer, so this same demo server answers and nothing leaves your machine. The checker still sees the lookalike name.</p>
+  <p>You are on: <span id="here"></span></p>
+
+  <section id="states">
+    <h2>Open each link in this tab and watch the icon</h2>
+    <ul>
+      <li><a id="icon-green" href="http://localhost:8080/toolbar.html">localhost</a>: green, "No known threats found for this site"</li>
+      <li><a id="icon-orange" href="http://amazon-deals.localhost:8080/toolbar.html">amazon-deals.localhost</a>: orange, "Suspicious" (brand name on an unrelated domain)</li>
+      <li><a id="icon-red" href="http://paypa1.localhost:8080/toolbar.html">paypa1.localhost</a>: the warning page opens first (High risk); click "Proceed anyway" and the icon turns red</li>
+      <li>Normal (black) icon: open a new tab, the Aspida settings page or any non-web page, or turn off "Toolbar icon reflects the current site".</li>
+    </ul>
+  </section>
+  <p class="muted"><a href="index.html">Back to the main demo</a></p>
+</main>
+<script>
+  // Keep the demo links on whatever port this server uses.
+  document.getElementById('here').textContent = location.host;
+  for (const a of document.querySelectorAll('#states a')) {
+    const u = new URL(a.href);
+    u.port = location.port;
+    a.href = u.href;
+  }
+</script>
+</body>
+</html>

@@ -44,6 +44,7 @@ const ALLOWED_REQUESTS = [
   /^data:/,
   /^blob:/,
   /^http:\/\/(127\.0\.0\.1|localhost):\d+\//, // demo server
+  /^http:\/\/[a-z0-9-]+\.localhost:\d+\//, // demo server under *.localhost names (toolbar icon demo)
   /^https:\/\/raw\.githubusercontent\.com\/(openphish|Phishing-Database)\//, // feeds
   /^https:\/\/openphish\.com\//,
   /^https:\/\/urlhaus-api\.abuse\.ch\//,

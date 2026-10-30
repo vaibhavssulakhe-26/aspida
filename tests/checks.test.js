@@ -100,6 +100,10 @@ test('brand claim: no false positives on owners or unrelated words', () => {
 
 test('url structure signals', () => {
   assert.ok(ids(run(structure, 'http://10.0.0.1/')).includes('url.ip_host'));
+  // Loopback can't reach a remote site (the offline demo is served from it).
+  for (const u of ['http://127.0.0.1:8080/', 'http://127.1.2.3/', 'http://[::1]:8080/', 'http://0.0.0.0:8080/']) {
+    assert.ok(!ids(run(structure, u)).includes('url.ip_host'), u);
+  }
   assert.ok(ids(run(structure, 'https://www.google.com@evil.tld/')).includes('url.at_sign'));
   assert.equal(run(structure, 'https://www.google.com@evil.tld/').find((s) => s.id === 'url.at_sign').evidence, 'www.google.com@');
   assert.ok(ids(run(structure, 'https://a.b.c.d.evil.com/')).includes('url.many_subdomains'));

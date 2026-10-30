@@ -84,7 +84,24 @@ Weights live in one file (`src/scoring/weights.js`).
 - With the setting on: PayPal-lookalike sender row red, "SBI Alerts" from a
   gmail.com address yellow, real senders untouched. Untick → colours removed.
 
-## 7. Settings page
+## 7. Toolbar icon (demo/toolbar.html)
+
+Pin Aspida first (puzzle-piece menu → pin). Open http://localhost:8080/toolbar.html
+and follow its links in the same tab. The `*.localhost` names are answered by the
+same local demo server (Chrome resolves every `*.localhost` name to this machine),
+so this works offline.
+
+| Page | Icon | Toolbar tooltip |
+|---|---|---|
+| `localhost:8080/toolbar.html` | green | "Aspida: No known threats found for this site" |
+| `amazon-deals.localhost:8080/toolbar.html` | orange | "Aspida: Suspicious signs on this site" |
+| `paypa1.localhost:8080/toolbar.html` | warning page first (normal icon on it); after "Proceed anyway": red | "Aspida: High risk site" |
+| new tab, settings page, `chrome://` pages | normal (black) | "Aspida settings" |
+
+Turn off "Toolbar icon reflects the current site" and every tab goes back to
+the normal icon straight away; turn it on and the icons come back.
+
+## 8. Settings page
 
 - Feed table: OpenPhish (~300 URLs) and Phishing.Database (~392k domains) with
   last-updated times. URLhaus needs an abuse.ch key.

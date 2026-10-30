@@ -3,14 +3,16 @@
 
 import { serve } from '../platform/messaging.js';
 import { getLocal, setLocal, onSettingsChanged, onLocalChanged, clearAllStorage } from '../platform/storage.js';
-import { ensureAlarm, onAlarm, onInstalled, onStartup, onBeforeTopNavigate, onTabRemoved, onActionClicked, openOptionsPage } from '../platform/browser.js';
+import { ensureAlarm, onAlarm, onInstalled, onStartup, onBeforeTopNavigate, onTopPageChanged, onTabRemoved, onActionClicked, openOptionsPage } from '../platform/browser.js';
 import { FEEDS, FEED_ALARM, FEED_ALARM_PERIOD_MINUTES } from '../config/feeds.js';
 import { refreshDueFeeds, refreshFeed, getFeedStatus, applyFeedToggles, wipeFeeds, bumpDataEpoch } from './feed-manager.js';
 import { analyzeMany, analyzeOne, analyzeEmail, analyzeSenders, invalidateContext, allowlistKeyFor, bumpStat } from './analyzer.js';
 import { handleNavigation, addBypass, dropTab } from './navigation-guard.js';
 import { decodeQrFromUrl } from './qr-fetch.js';
+import { updateTabIcon, refreshAllTabIcons } from './toolbar-icon.js';
 
 async function init() {
+  refreshAllTabIcons().catch((e) => console.warn('Aspida toolbar icon refresh failed', e));
   await ensureAlarm(FEED_ALARM, FEED_ALARM_PERIOD_MINUTES);
   await refreshDueFeeds();
 }
@@ -21,11 +23,18 @@ onAlarm(FEED_ALARM, () => refreshDueFeeds().catch((e) => console.warn('Aspida fe
 onActionClicked(() => openOptionsPage());
 
 onBeforeTopNavigate((d) => handleNavigation(d).catch((e) => console.warn('Aspida navigation check failed', e)));
+onTopPageChanged((d) => updateTabIcon(d).catch(() => {})); // tab closed mid-check
 onTabRemoved((tabId) => dropTab(tabId).catch(() => {}));
 
-onSettingsChanged((s) => applyFeedToggles(s).then(refreshDueFeeds).catch((e) => console.warn('Aspida feed toggle failed', e)));
+onSettingsChanged((s) => {
+  applyFeedToggles(s).then(refreshDueFeeds).catch((e) => console.warn('Aspida feed toggle failed', e));
+  refreshAllTabIcons(s).catch((e) => console.warn('Aspida toolbar icon refresh failed', e));
+});
 onLocalChanged((keys) => {
-  if (keys.includes('allowlist')) invalidateContext();
+  if (keys.includes('allowlist')) {
+    invalidateContext();
+    refreshAllTabIcons().catch((e) => console.warn('Aspida toolbar icon refresh failed', e));
+  }
 });
 
 async function addToAllowlist(target) {

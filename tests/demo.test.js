@@ -75,7 +75,7 @@ test('demo server: loopback on IPv4 and IPv6, correct MIME types, exact-case pat
 // none of them can reach a real site.
 function isReservedHost(host) {
   const h = host.toLowerCase().replace(/\.$/, '');
-  if (/\.(test|invalid|example|localhost)$/.test(h)) return true;
+  if (h === 'localhost' || /\.(test|invalid|example|localhost)$/.test(h)) return true;
   if (/^(.+\.)?example\.(com|net|org)$/.test(h)) return true;
   return /^(192\.0\.2|198\.51\.100|203\.0\.113)\.\d{1,3}$/.test(h);
 }
