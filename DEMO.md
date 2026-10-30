@@ -84,6 +84,30 @@ Weights live in one file (`src/scoring/weights.js`).
 - With the setting on: PayPal-lookalike sender row red, "SBI Alerts" from a
   gmail.com address yellow, real senders untouched. Untick → colours removed.
 
+## 6b. Demo mailbox (demo/mail.html)
+
+A webmail-style inbox and reading pane with 6 synthetic emails, clearly labelled
+**"Aspida demo mailbox, not Gmail"** (no Google branding, no sign-in form). It uses
+the same DOM structure as Gmail, so the real Gmail module runs on it. Click an
+email to open it (or open `mail.html#kyc` etc. directly); each opened email gets
+one banner.
+
+| Email | Banner | Reasons cited | Inbox row (highlighting on) |
+|---|---|---|---|
+| `#kyc` "Final notice: complete KYC" from "SBI Alerts <alerts@onlinesbi.sbi>" `kyc-alerts@secure-notice.test` | **High risk** | name claims SBI but domain is secure-notice.test; name shows alerts@onlinesbi.sbi but mail is from kyc-alerts@secure-notice.test; replies go to gmail.com; link `onlinesbi-kyc.test` claims SBI; link text shows onlinesbi.sbi but opens onlinesbi-kyc.test; "verify" in the link | red |
+| `#parcel` "Parcel on hold: customs fee" from "India Post" `delivery@indiapost-parcel.test` | **Suspicious** | name claims India Post but domain is indiapost-parcel.test; link text shows bit.ly but opens ip-customs.test | yellow |
+| `#otp` "Payment of ₹9,999 pending: verify with OTP" from "Paytm Payments" `otp-verify@paytrn.test` | **High risk** | sender domain paytrn.test imitates paytm.com; name claims Paytm; link paytrn.test visually similar to paytm.com, claims Paytm, "verify" | red |
+| `#meeting` colleague's meeting notes (`northwind.example`) | No known threats found | none | unchanged |
+| `#newsletter` "The Weekly Byte" (`weeklybyte.example`) | No known threats found | none | unchanged |
+| `#order` "Your order CW-20417 has shipped" (`cartwheel.example`) | No known threats found | none | unchanged |
+
+Notes: the KYC email shows its Reply-To as if "show details" were open, so the
+Reply-To check is demonstrated; the others say Reply-To wasn't visible. The
+parcel lure's link *text* looks like a bit.ly short link while its destination is
+a reserved `.test` name; the separate "known shortener" signal only fires for
+real shortener domains, which the demo never links to. Urgent wording ("within
+24 hours") is part of the story only: Aspida doesn't score message text.
+
 ## 7. Toolbar icon (demo/toolbar.html)
 
 Pin Aspida first (puzzle-piece menu → pin). Open http://localhost:8080/toolbar.html

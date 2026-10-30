@@ -77,6 +77,12 @@ only when every box below is green.
 - [ ] m6: Inbox rows are NOT coloured by default. Turn on "Gmail: inbox highlighting":
       PayPal-lookalike row red, SBI-on-gmail.com row yellow, others unchanged. Turn it
       off: colours removed.
+- [ ] m6: http://localhost:8080/mail.html: header and tab title say "Aspida demo mailbox,
+      not Gmail". No banner until an email is opened. Open each email: KYC and OTP →
+      High risk, parcel → Suspicious, meeting / newsletter / order → "No known threats
+      found", with the reasons listed in DEMO.md §6b. With inbox highlighting on: KYC and
+      OTP rows red, parcel yellow, the rest unchanged; off → colours removed.
+      gmail-mock.html still works as above.
 - [ ] m6 (needs an account, not automated): open a real email in Gmail; banner appears
       above the body; replying, archiving and switching emails work normally. If no
       banner, enable "Debug logging" and update `src/content/sites/gmail.selectors.js`.

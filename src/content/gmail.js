@@ -35,8 +35,10 @@ function all(selectors, root) {
   return [];
 }
 
+// pathPrefix (optional): one prefix or a list of them.
 export function matchesGmail(site, loc = location) {
-  return site.hosts.includes(loc.hostname) && (!site.pathPrefix || loc.pathname.startsWith(site.pathPrefix));
+  const prefixes = site.pathPrefix ? [].concat(site.pathPrefix) : [''];
+  return site.hosts.includes(loc.hostname) && prefixes.some((p) => loc.pathname.startsWith(p));
 }
 
 // Reply-To from the details table, if the user has opened it.

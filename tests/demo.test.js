@@ -10,6 +10,8 @@ import { listenLoopback } from '../tools/demo-server.mjs';
 import { DEMO_HOSTS } from '../src/content/sites/demo-hosts.js';
 import demoChat from '../src/content/sites/demo-chat.selectors.js';
 import demoGmail from '../src/content/sites/demo-gmail.selectors.js';
+import gmailSite from '../src/content/sites/gmail.selectors.js';
+import { matchesGmail } from '../src/content/gmail.js';
 
 const demoDir = fileURLToPath(new URL('../demo/', import.meta.url));
 const pages = readdirSync(demoDir).filter((f) => f.endsWith('.html'));
@@ -69,6 +71,18 @@ test('demo server: loopback on IPv4 and IPv6, correct MIME types, exact-case pat
   } finally {
     for (const s of servers) s.close();
   }
+});
+
+test('the Gmail module runs on both offline mail demos and on real Gmail only', () => {
+  const at = (url) => new URL(url);
+  for (const u of ['http://localhost:8080/gmail-mock.html', 'http://127.0.0.1:8080/mail.html', 'http://[::1]:8080/mail.html#kyc', 'http://0.0.0.0:8080/mail.html']) {
+    assert.ok(matchesGmail(demoGmail, at(u)), u);
+  }
+  for (const u of ['http://localhost:8080/', 'http://localhost:8080/chat-mock.html', 'https://mail.example/mail.html', 'https://mail.google.com/mail/u/0/']) {
+    assert.ok(!matchesGmail(demoGmail, at(u)), u);
+  }
+  assert.ok(matchesGmail(gmailSite, at('https://mail.google.com/mail/u/0/#inbox')));
+  assert.ok(!matchesGmail(gmailSite, at('http://localhost:8080/mail.html')));
 });
 
 // Reserved names (RFC 2606/6761) and documentation-only IPs (RFC 5737):

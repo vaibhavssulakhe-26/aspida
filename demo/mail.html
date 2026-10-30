@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aspida demo mailbox, not Gmail</title>
+  <style>
+    :root { --bg: #f3f4f1; --bar: #2f3b36; --bar-fg: #f3f4f1; --card: #fff; --fg: #1d2420; --muted: #5d6762; --border: #d9ddd8;
+            --sel: #e3ebe6; --unread: #1d2420; --accent: #2f6f5a; color-scheme: light dark; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #151a17; --bar: #0d110f; --card: #1d2420; --fg: #e4e8e5; --muted: #9aa49f; --border: #333d38; --sel: #26332d; --unread: #fff; --accent: #7fc2a8; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.5 system-ui, sans-serif; }
+    header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 16px; background: var(--bar); color: var(--bar-fg); }
+    header strong { font-size: 16px; }
+    .demo-label { border: 1px dashed currentColor; border-radius: 6px; padding: 2px 8px; font-size: 12px; font-weight: 600; letter-spacing: .02em; }
+    header .note { font-size: 12px; opacity: .85; flex: 1 1 260px; }
+    header a { color: inherit; }
+    .layout { display: grid; grid-template-columns: minmax(280px, 2fr) minmax(0, 3fr); gap: 12px; padding: 12px 16px; max-width: 1280px; margin: 0 auto; }
+    @media (max-width: 820px) { .layout { grid-template-columns: 1fr; } }
+    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; min-width: 0; }
+    .panel h1 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    table.inbox { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    tr.zA { cursor: pointer; }
+    tr.zA td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; overflow: hidden; text-overflow: ellipsis; }
+    tr.zA td.who { width: 38%; font-weight: 600; white-space: nowrap; }
+    tr.zA .subj { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    tr.zA .snip { display: block; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    tr.zA.read td.who, tr.zA.read .subj { font-weight: 400; }
+    tr.zA[aria-selected="true"] { outline: 2px solid var(--accent); outline-offset: -2px; }
+    tr.zA:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+    #pane { padding: 16px 18px 24px; min-height: 320px; }
+    #pane .empty { color: var(--muted); }
+    h2.hP { font-size: 20px; font-weight: 500; margin: 0 0 12px; overflow-wrap: anywhere; }
+    .adn { border-top: 1px solid var(--border); padding-top: 12px; }
+    h3.iw { margin: 0; font-size: 14px; font-weight: 400; overflow-wrap: anywhere; }
+    .gD { font-weight: 600; }
+    .go { color: var(--muted); }
+    .details { margin: 6px 0 12px; font-size: 12px; color: var(--muted); }
+    table.ajC td { padding: 0 8px 0 0; vertical-align: top; overflow-wrap: anywhere; }
+    .a3s { overflow-wrap: anywhere; }
+    .a3s a { color: var(--accent); }
+    .tag { display: inline-block; font-size: 11px; color: var(--muted); border: 1px solid var(--border); border-radius: 4px; padding: 0 6px; margin-left: 6px; }
+  </style>
+</head>
+<body>
+<header>
+  <strong>Demo mailbox</strong>
+  <span class="demo-label">Aspida demo mailbox, not Gmail</span>
+  <span class="note">Synthetic emails for testing Aspida's email checks offline. Nothing here is real mail; every link points at a reserved <code>.test</code> / <code>.example</code> name that never resolves. <a href="index.html">Back to the demo</a></span>
+</header>
+
+<div class="layout">
+  <section class="panel" aria-label="Inbox">
+    <h1>Inbox (6)</h1>
+    <!-- Same structure Aspida's Gmail selectors read: tr.zA rows, sender in span.yP[email][name]. -->
+    <table class="inbox" role="grid" aria-label="Messages">
+      <tbody>
+        <tr class="zA" id="row-kyc" data-mail="kyc" tabindex="0"><td class="who"><span class="yP" email="kyc-alerts@secure-notice.test" name="SBI Alerts &lt;alerts@onlinesbi.sbi&gt;">SBI Alerts &lt;alerts@onlinesbi.sbi&gt;</span></td><td><span class="subj">Final notice: complete KYC in 24 hours</span><span class="snip">Your YONO and NetBanking access will be blocked</span></td></tr>
+        <tr class="zA" id="row-meeting" data-mail="meeting" tabindex="0"><td class="who"><span class="yP" email="ananya.rao@northwind.example" name="Ananya Rao">Ananya Rao</span></td><td><span class="subj">Notes from Tuesday's planning meeting</span><span class="snip">Action items and the Q4 timeline</span></td></tr>
+        <tr class="zA" id="row-parcel" data-mail="parcel" tabindex="0"><td class="who"><span class="yP" email="delivery@indiapost-parcel.test" name="India Post">India Post</span></td><td><span class="subj">Parcel on hold: customs fee of ₹48 due today</span><span class="snip">Pay within 12 hours or it returns to sender</span></td></tr>
+        <tr class="zA" id="row-newsletter" data-mail="newsletter" tabindex="0"><td class="who"><span class="yP" email="newsletter@weeklybyte.example" name="The Weekly Byte">The Weekly Byte</span></td><td><span class="subj">Issue 112: browser extensions, explained</span><span class="snip">This week: how extensions stay private</span></td></tr>
+        <tr class="zA" id="row-otp" data-mail="otp" tabindex="0"><td class="who"><span class="yP" email="otp-verify@paytrn.test" name="Paytm Payments">Paytm Payments</span></td><td><span class="subj">Payment of ₹9,999 pending: verify with OTP</span><span class="snip">Confirm this payment or it will be charged</span></td></tr>
+        <tr class="zA" id="row-order" data-mail="order" tabindex="0"><td class="who"><span class="yP" email="orders@cartwheel.example" name="Cartwheel Store">Cartwheel Store</span></td><td><span class="subj">Your order CW-20417 has shipped</span><span class="snip">Arriving Thursday</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="panel" aria-label="Reading pane">
+    <h1>Reading pane</h1>
+    <div id="pane" role="main"><p class="empty">Select an email.</p></div>
+  </section>
+</div>
+
+<!-- Email contents. A <template> is inert, so only the opened email is in the
+     page (like Gmail's reading pane) and Aspida sees one message at a time. -->
+
+<template id="mail-kyc">
+  <h2 class="hP">Final notice: complete KYC in 24 hours</h2>
+  <div class="adn ads">
+    <h3 class="iw"><span class="gD" email="kyc-alerts@secure-notice.test" name="SBI Alerts &lt;alerts@onlinesbi.sbi&gt;">SBI Alerts &lt;alerts@onlinesbi.sbi&gt;</span> <span class="go">&lt;kyc-alerts@secure-notice.test&gt;</span><span class="tag">phishing sample</span></h3>
+    <!-- As if "show details" were open, so Reply-To is visible to Aspida. -->
+    <div class="details">Details (as shown after opening "show details"):
+      <table class="ajC"><tbody>
+        <tr><td>from:</td><td><span email="kyc-alerts@secure-notice.test">SBI Alerts</span> &lt;kyc-alerts@secure-notice.test&gt;</td></tr>
+        <tr><td>reply-to:</td><td><span email="sbi.kyc.helpdesk@gmail.com">sbi.kyc.helpdesk@gmail.com</span></td></tr>
+      </tbody></table>
+    </div>
+    <div class="ii gt"><div class="a3s">
+      <p>Dear customer,</p>
+      <p>Your KYC is incomplete. Your YONO and NetBanking access will be <strong>blocked within 24 hours</strong> unless you update your PAN and Aadhaar details now:</p>
+      <p><a id="link-kyc" href="https://onlinesbi-kyc.test/verify">https://www.onlinesbi.sbi/kyc</a></p>
+      <p>Regards,<br>KYC Cell</p>
+    </div></div>
+  </div>
+</template>
+
+<template id="mail-meeting">
+  <h2 class="hP">Notes from Tuesday's planning meeting</h2>
+  <div class="adn ads">
+    <h3 class="iw"><span class="gD" email="ananya.rao@northwind.example" name="Ananya Rao">Ananya Rao</span> <span class="go">&lt;ananya.rao@northwind.example&gt;</span><span class="tag">genuine sample</span></h3>
+    <div class="ii gt"><div class="a3s">
+      <p>Hi team,</p>
+      <p>Thanks for a good session. I've put the action items and the Q4 timeline in the <a href="https://wiki.northwind.example/planning/q4-notes">Q4 planning notes</a>. The follow-up is on Monday; the <a href="https://calendar.northwind.example/event/2291">calendar invite</a> is out.</p>
+      <p>Ananya</p>
+    </div></div>
+  </div>
+</template>
+
+<template id="mail-parcel">
+  <h2 class="hP">Parcel on hold: customs fee of ₹48 due today</h2>
+  <div class="adn ads">
+    <h3 class="iw"><span class="gD" email="delivery@indiapost-parcel.test" name="India Post">India Post</span> <span class="go">&lt;delivery@indiapost-parcel.test&gt;</span><span class="tag">phishing sample</span></h3>
+    <div class="ii gt"><div class="a3s">
+      <p>Your parcel IN4472 is held at the sorting centre because of an unpaid customs fee of ₹48.</p>
+      <p><strong>Pay within 12 hours</strong> or the parcel will be returned to the sender:</p>
+      <p><a id="link-parcel" href="https://ip-customs.test/p/7Kq2">bit.ly/IP-customs-fee</a></p>
+    </div></div>
+  </div>
+</template>
+
+<template id="mail-newsletter">
+  <h2 class="hP">Issue 112: browser extensions, explained</h2>
+  <div class="adn ads">
+    <h3 class="iw"><span class="gD" email="newsletter@weeklybyte.example" name="The Weekly Byte">The Weekly Byte</span> <span class="go">&lt;newsletter@weeklybyte.example&gt;</span><span class="tag">genuine sample</span></h3>
+    <div class="ii gt"><div class="a3s">
+      <p>This week: how browser extensions can check links without sending your browsing anywhere, plus three reader questions.</p>
+      <p><a href="https://weeklybyte.example/issues/112">Read issue 112 online</a></p>
+      <p>You're receiving this because you subscribed. <a href="https://weeklybyte.example/preferences">Manage preferences</a> · <a href="https://weeklybyte.example/unsubscribe?u=demo">Unsubscribe</a></p>
+    </div></div>
+  </div>
+</template>
+
+<template id="mail-otp">
+  <h2 class="hP">Payment of ₹9,999 pending: verify with OTP</h2>
+  <div class="adn ads">
+    <h3 class="iw"><span class="gD" email="otp-verify@paytrn.test" name="Paytm Payments">Paytm Payments</span> <span class="go">&lt;otp-verify@paytrn.test&gt;</span><span class="tag">phishing sample</span></h3>
+    <div class="ii gt"><div class="a3s">
+      <p>A payment of ₹9,999 from your wallet is waiting for confirmation. If you did not make this payment, verify now with the OTP sent to your phone to cancel it:</p>
+      <p><a id="link-otp" href="https://paytrn.test/otp/verify">Verify payment</a></p>
+      <p>Do not share this email.</p>
+    </div></div>
+  </div>
+</template>
+
+<template id="mail-order">
+  <h2 class="hP">Your order CW-20417 has shipped</h2>
+  <div class="adn ads">
+    <h3 class="iw"><span class="gD" email="orders@cartwheel.example" name="Cartwheel Store">Cartwheel Store</span> <span class="go">&lt;orders@cartwheel.example&gt;</span><span class="tag">genuine sample</span></h3>
+    <div class="ii gt"><div class="a3s">
+      <p>Good news: your order CW-20417 (1 × desk lamp) is on its way and should arrive on Thursday.</p>
+      <p><a href="https://cartwheel.example/orders/CW-20417/track">Track your parcel</a> · <a href="https://cartwheel.example/help/returns">Returns and help</a></p>
+    </div></div>
+  </div>
+</template>
+
+<script>
+  // Opening an email swaps the reading pane's content, as webmail does.
+  const pane = document.getElementById('pane');
+  const rows = [...document.querySelectorAll('tr.zA')];
+  function open(id) {
+    const tpl = document.getElementById(`mail-${id}`);
+    if (!tpl) return;
+    pane.replaceChildren(tpl.content.cloneNode(true));
+    for (const r of rows) {
+      const sel = r.dataset.mail === id;
+      r.setAttribute('aria-selected', String(sel));
+      if (sel) r.classList.add('read');
+    }
+    if (location.hash !== `#${id}`) history.replaceState(null, '', `#${id}`);
+  }
+  for (const r of rows) {
+    r.addEventListener('click', () => open(r.dataset.mail));
+    r.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        open(r.dataset.mail);
+      }
+    });
+  }
+  addEventListener('hashchange', () => open(location.hash.slice(1)));
+  if (location.hash) open(location.hash.slice(1));
+</script>
+</body>
+</html>

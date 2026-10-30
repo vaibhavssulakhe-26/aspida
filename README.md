@@ -22,7 +22,8 @@ identity trust track).
    the bundled demo feed and top-domains list work offline immediately.
 
 Demo pages: `npm run demo` (or `python3 -m http.server -d demo -b 127.0.0.1 8080`),
-then open http://localhost:8080/. If port 8080 is taken (often by an earlier
+then open http://localhost:8080/ (the demo mailbox for email checks is
+http://localhost:8080/mail.html). If port 8080 is taken (often by an earlier
 demo server), use `npm run demo -- 8081`. Stage walkthrough: [DEMO.md](DEMO.md).
 
 ## What it does
