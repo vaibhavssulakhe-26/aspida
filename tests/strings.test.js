@@ -26,7 +26,8 @@ test('translations keep placeholders, are non-empty, and keep the product name',
 });
 
 test('never "safe": English nor Kannada (ಸುರಕ್ಷಿತ)', () => {
-  for (const v of Object.values(en)) assert.doesNotMatch(v, /\bsafe\b/i, v);
+  // "Google Safe Browsing" is a product name, not a verdict.
+  for (const v of Object.values(en)) assert.doesNotMatch(v.replace(/\bGoogle Safe Browsing\b/g, ''), /\bsafe\b/i, v);
   for (const v of Object.values(kn)) assert.doesNotMatch(v, /ಸುರಕ್ಷಿತ/, v);
 });
 

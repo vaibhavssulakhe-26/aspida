@@ -42,6 +42,7 @@ demo server), use `npm run demo -- 8081`. Stage walkthrough: [DEMO.md](DEMO.md).
 | Cracked / pirated software: host on a pirated-software list (HaGeZi Anti-Piracy, bundled demo list), 2+ cracked-software words (crack, keygen, activator, …), or a direct .exe/.msi/.zip/.iso/.scr/.apk download from an unknown site. Suspicious at most on its own, tooltip only, never a warning page | all http(s) pages | Cracked / pirated software (on) |
 | Toolbar icon colour for the current page: green no known threats found, orange suspicious, red high risk / known malicious, black not checked (non-web pages) | toolbar | Toolbar icon reflects the current site (on) |
 | Settings, feed status, allowlist, local counters, clear all data | options page | n/a |
+| "Report this link" on warning tooltips and the warning page: shows the exact URL (query/#fragment removed by default), Copy URL, and opens Google Safe Browsing (prefilled), Netcraft or cybercrime.gov.in in a new tab only when clicked; "Report a wrong warning" opens a prefilled GitHub issue or copies the details. Nothing is sent automatically | tooltips (risky tiers only), warning page | Report this link button (on) |
 | Interface language: English or Kannada (ಕನ್ನಡ, **DRAFT** translation) for tier names, buttons, settings, warning page, tooltip/banner text and advice. Reason sentences from the checks stay in English | options page dropdown | English |
 
 \* URLhaus requires a free abuse.ch Auth-Key since 2025; see [FEEDS.md](FEEDS.md).
@@ -136,7 +137,8 @@ the extension package. Those files are listed in `web_accessible_resources`.
 | content scripts on `http://*/*`, `https://*/*` | Link hover and QR hover everywhere, plus the chat and Gmail modules (which only activate on their sites). Chrome also treats these match patterns as host access for the extension's own requests; Aspida uses that only to fetch the bytes of a QR **image** you hover on another site | "Read and change all your data on all websites" |
 
 Setting a tab's toolbar icon and tooltip (`chrome.action.setIcon` / `setTitle`)
-needs no permission.
+needs no permission, and neither does opening a reporting site in a new tab
+(`chrome.tabs.create`, only when you click a destination under "Report this link").
 
 There is no `tabs`, `scripting`, `cookies`, `webRequest` or `<all_urls>` permission,
 and no remote code: the extension-page CSP is `script-src 'self'`.
@@ -169,6 +171,10 @@ and no remote code: the extension-page CSP is `script-src 'self'`.
   tooltip's "cracked or pirated software" wording can be broader than a given
   site deserves; the evidence names the list. Popular piracy sites in the top
   10k are never flagged (see FEEDS.md).
+- **"Report this link" in tooltips is mouse-first.** The tooltip floats over the
+  page, so keyboard focus can't move into it from a link; the report button there
+  is reached with the pointer. The warning page's report step is fully keyboard
+  operable, and once the tooltip's report step is open, Tab moves through it.
 - **Kannada interface is a DRAFT.** The Kannada strings
   (`src/config/strings/kn.js`) are a machine-assisted draft awaiting review by a
   native speaker ([docs/KANNADA_STRINGS_REVIEW.md](docs/KANNADA_STRINGS_REVIEW.md)).

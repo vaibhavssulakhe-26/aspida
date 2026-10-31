@@ -38,6 +38,7 @@ export default async function ({ browser, extId, base, fail }) {
     return st && st.open && !st.running && !st.willChange ? st : null;
   }, 'tooltip fade-in to settle', 3000).catch(() => null);
   if (!settledOpen) fail(`tooltip fade-in did not settle: ${JSON.stringify(await tooltipState(page))}`);
+  // The tooltip itself never takes the pointer (only its report button does).
   else if (settledOpen.opacity !== '1' || settledOpen.transform !== 'none' || settledOpen.pointerEvents !== 'none') fail(`settled tooltip state wrong: ${JSON.stringify(settledOpen)}`);
   // Quick moves between links reuse the panel and end on the last link's verdict.
   for (const sel of ['#typo-visual', '#feed-host', '#homoglyph', '#feed-host']) {

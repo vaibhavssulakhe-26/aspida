@@ -16,6 +16,7 @@ export const DEFAULT_SETTINGS = {
   blockHighRisk: true, // also interstitial on the "High risk" tier
   toolbarIcon: true, // toolbar icon colour follows the current site's verdict
   softwareChecks: true, // cracked/pirated software signals (tooltip only)
+  reportButton: true, // "Report this link" in risky tooltips and the warning page
   uiLanguage: 'en', // interface language: 'en' or 'kn' (draft); reasons stay English
   feeds: {
     sample: true, // bundled demo feed (offline)

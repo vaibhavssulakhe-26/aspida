@@ -41,6 +41,28 @@ export default {
   // Extra advice shown with a verdict (keyed by signal id)
   'advice.software.piracy-list': 'This site is listed as distributing cracked or pirated software, which commonly comes bundled with malware. Avoid downloading from it. Use the official site or a trusted store.',
 
+  // "Report this link" (risky tooltips and the warning page). Never "this is phishing", never "safe".
+  'report.button': 'Report this link',
+  'report.title': 'Report as suspicious',
+  'report.intro': 'Nothing is sent yet. The URL below leaves your browser only if you open a reporting site and submit it there.',
+  'report.urlLabel': 'URL to report',
+  'report.strip': 'Remove query string and #fragment (they can contain personal tokens)',
+  'report.copy': 'Copy URL',
+  'report.copied': 'URL copied.',
+  'report.copiedPaste': 'URL copied, paste it into the form.',
+  'report.copyFailed': 'Could not copy automatically. Select the URL above and copy it.',
+  'report.opensTab': 'Opens in a new tab:',
+  'report.safebrowsing': 'Google Safe Browsing',
+  'report.netcraft': 'Netcraft',
+  'report.cybercrime': 'cybercrime.gov.in (India)',
+  'report.helpline': 'Already lost money? In India, call the cybercrime helpline 1930 straight away.',
+  'report.wrongTitle': 'Report a wrong warning',
+  'report.wrongIssue': 'Open a GitHub issue',
+  'report.wrongCopy': 'Copy details',
+  'report.wrongCopied': 'Details copied (URL, tier and signal ids).',
+  'report.close': 'Close',
+  'report.openFailed': 'Could not open the page.',
+
   // Toolbar icon tooltip (per tab)
   'toolbar.normal': 'Aspida settings',
   'toolbar.none': 'Aspida: No known threats found for this site (click for settings)',
@@ -126,6 +148,8 @@ export default {
   'feature.toolbarIcon.desc': 'Colour the Aspida toolbar icon from a local check of the page you are on: green no known threats found, orange suspicious, red high risk or known malicious.',
   'feature.softwareChecks': 'Cracked / pirated software',
   'feature.softwareChecks.desc': 'Mention in the hover verdict when a site is on a pirated-software list, or a link looks like a cracked download. Tooltip only, never a warning page.',
+  'feature.reportButton': 'Report this link button',
+  'feature.reportButton.desc': 'Show "Report this link" in warning tooltips and the warning page. It only opens a reporting site in a new tab, or copies the URL, when you click; nothing is sent automatically.',
   'feature.chatWhatsApp': 'WhatsApp Web',
   'feature.chatWhatsApp.desc': 'Pre-check links in WhatsApp Web chats so the hover verdict is instant.',
   'feature.chatTelegram': 'Telegram Web',

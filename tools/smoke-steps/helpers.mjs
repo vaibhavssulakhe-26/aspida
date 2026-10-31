@@ -31,7 +31,7 @@ export async function aspidaShadows(page) {
     const out = [];
     for (const f of found) {
       const { outerHTML } = await cdp.send('DOM.getOuterHTML', { nodeId: f.nodeId });
-      const visible = outerHTML.replace(/<style>[\s\S]*?<\/style>/g, '').replace(/<div class="tl-float"(?![^>]*data-open)[^>]*>[\s\S]*?<\/div>\s*(?=<|$)/g, '');
+      const visible = outerHTML.replace(/<style>[\s\S]*?<\/style>/g, '').replace(/<div class="tl-float\b[^"]*"(?![^>]*data-open)[^>]*>[\s\S]*?<\/div>\s*(?=<|$)/g, '');
       out.push({ kind: f.kind, html: outerHTML, text: visible.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() });
     }
     return out;
@@ -46,7 +46,7 @@ export async function overlayText(page) {
   if (!o) return '';
   // Closed (fading out) or hidden tooltip => treat as no text. The open state
   // is set synchronously on show, so this never depends on transition timing.
-  return /class="tl-float"(?![^>]*data-open)/.test(o.html) ? '' : o.text;
+  return /class="tl-float\b[^"]*"(?![^>]*data-open)/.test(o.html) ? '' : o.text;
 }
 
 // Computed state of the tooltip element once its transition has settled:
@@ -59,7 +59,7 @@ export async function tooltipState(page) {
     const walk = (n) => {
       if (nodeId) return;
       const attrs = n.attributes || [];
-      for (let i = 0; i < attrs.length; i += 2) if (attrs[i] === 'class' && attrs[i + 1] === 'tl-float') nodeId = n.nodeId;
+      for (let i = 0; i < attrs.length; i += 2) if (attrs[i] === 'class' && attrs[i + 1].split(/\s+/).includes('tl-float')) nodeId = n.nodeId;
       for (const c of [...(n.children || []), ...(n.shadowRoots || [])]) walk(c);
     };
     walk(root);
@@ -88,4 +88,36 @@ export async function setSetting(browser, extId, patch) {
     await chrome.storage.local.set({ settings: { ...cur, ...patch, feeds: { ...(cur.feeds || {}), ...(patch.feeds || {}) } } });
   }, patch);
   await page.close();
+}
+
+// Centre of the first element inside Aspida's closed overlay whose class
+// list contains cls (CDP pierces closed roots), or null.
+export async function overlayPoint(page, cls) {
+  const cdp = await page.createCDPSession();
+  try {
+    const { root } = await cdp.send('DOM.getDocument', { depth: -1, pierce: true });
+    let nodeId = null;
+    const walk = (n) => {
+      if (nodeId) return;
+      const attrs = n.attributes || [];
+      for (let i = 0; i < attrs.length; i += 2) if (attrs[i] === 'class' && attrs[i + 1].split(/\s+/).includes(cls)) nodeId = n.nodeId;
+      for (const c of [...(n.children || []), ...(n.shadowRoots || [])]) walk(c);
+    };
+    walk(root);
+    if (!nodeId) return null;
+    const { model } = await cdp.send('DOM.getBoxModel', { nodeId }).catch(() => ({}));
+    if (!model) return null;
+    const [x1, y1, , , x3, y3] = model.border;
+    return { x: (x1 + x3) / 2, y: (y1 + y3) / 2 };
+  } finally {
+    await cdp.detach();
+  }
+}
+
+export async function clickOverlay(page, cls, { steps = 8 } = {}) {
+  const p = await overlayPoint(page, cls);
+  if (!p) return false;
+  await page.mouse.move(p.x, p.y, { steps });
+  await page.mouse.click(p.x, p.y);
+  return true;
 }

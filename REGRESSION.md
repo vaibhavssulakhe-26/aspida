@@ -46,6 +46,16 @@ only when every box below is green.
       jump in position. Moving quickly from link to link does not flicker. With the OS
       "reduce motion" setting on (or DevTools → Rendering → prefers-reduced-motion:
       reduce) it only fades, without moving.
+- [ ] m3: Report this link: hovering a Suspicious / High risk / Known malicious link shows
+      "Report this link"; clean links never do. Moving the pointer onto the button keeps
+      the tooltip; moving down past the tooltip to the next link still shows that link's
+      tooltip. The report step shows the URL with query/#fragment removed (untick → full
+      URL); Copy URL works; Safe Browsing opens prefilled in a new tab; Netcraft and
+      cybercrime.gov.in copy the URL ("paste it into the form") and open in a new tab;
+      Open a GitHub issue / Copy details work; Close and Escape close it. DevTools
+      Network (extension service worker) shows no request when clicking any of these.
+      Warning page: same button and step. Setting "Report this link button" off →
+      no button, without reload.
 - [ ] m3: Turn off "Link hover verdict" in options → tooltips stop without reload.
 - [ ] m3: http://localhost:8080/heavy.html scrolls smoothly; a link near the bottom shows a tooltip.
       DevTools Performance recording while scrolling and hovering shows no long tasks

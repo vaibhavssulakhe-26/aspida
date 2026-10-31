@@ -10,6 +10,9 @@ const OVERLAY_CSS = `
 .tl-float { position: fixed; z-index: 2147483647; pointer-events: none; max-width: min(360px, calc(100vw - 16px));
   opacity: 0; transform: translateY(4px); transition: opacity 90ms ease-in, transform 90ms ease-in; }
 .tl-float[data-open] { opacity: 1; transform: none; transition-duration: 140ms; transition-timing-function: ease-out; }
+/* The tooltip never blocks the page, except its "Report this link" button;
+   the opened report step (interactive) takes the pointer as a whole. */
+.tl-float[data-open] .tl-report-open, .tl-float.tl-interactive[data-open] { pointer-events: auto; }
 .tl-float[hidden] { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .tl-float, .tl-float[data-open] { transform: none; transition: opacity 50ms linear; }
@@ -71,7 +74,8 @@ export class FloatingPanel {
     }, ms + 20);
   }
 
-  show(rect, content) {
+  // interactive: the whole panel accepts the pointer while open (report step).
+  show(rect, content, { interactive = false } = {}) {
     const root = overlayRoot(this.doc);
     if (!this.box || !this.box.isConnected) {
       this.box = this.doc.createElement('div');
@@ -79,6 +83,7 @@ export class FloatingPanel {
       root.append(this.box);
     }
     this.box.replaceChildren(content);
+    this.box.classList.toggle('tl-interactive', interactive);
     this.box.hidden = false;
     this.box.style.left = '0px';
     this.box.style.top = '0px';
@@ -107,6 +112,12 @@ export class FloatingPanel {
     this.settle(FADE_OUT_MS, () => {
       if (!box.hasAttribute('data-open')) box.hidden = true;
     });
+  }
+
+  // True for events coming from this panel (they are retargeted to the
+  // overlay's host element outside the closed shadow root).
+  owns(node) {
+    return !!node && !!shared && node === shared.host;
   }
 
   destroy() {

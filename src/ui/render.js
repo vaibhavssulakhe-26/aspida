@@ -9,6 +9,7 @@
 // (src/config/strings/). Reason sentences from the checks stay in English.
 
 import { t, getLanguage } from '../config/strings/index.js';
+import { canReport, reportableUrl, destinationUrl, wrongWarningText, REPORT_DESTINATIONS } from '../core/report.js';
 
 export const TIER_ICON = { none: 'i', suspicious: '!', high: '!!', malicious: '✕' };
 
@@ -31,7 +32,8 @@ function el(doc, tag, cls, text) {
 
 // verdict: { tier, label, subject, hostUnicode, reasons[], allowlisted }
 // mode: 'tooltip' | 'banner' | 'page'
-export function renderVerdict(verdict, { mode = 'tooltip', doc = document, maxReasons = mode === 'tooltip' ? 3 : 20, title } = {}) {
+// report: { onOpen() } adds a "Report this link" button (risky tiers only).
+export function renderVerdict(verdict, { mode = 'tooltip', doc = document, maxReasons = mode === 'tooltip' ? 3 : 20, title, report } = {}) {
   const root = rootEl(doc, `tl-verdict tl-tier-${verdict.tier} tl-mode-${mode}`);
   root.setAttribute('role', 'status');
 
@@ -63,6 +65,93 @@ export function renderVerdict(verdict, { mode = 'tooltip', doc = document, maxRe
   }
   for (const id of verdict.advice || []) root.append(el(doc, 'p', 'tl-note tl-advice', t(`advice.${id}`)));
   if (verdict.tier === 'none') root.append(el(doc, 'p', 'tl-note', t('verdict.noneNote')));
+  if (report && canReport(verdict)) {
+    // In the header row, right under the link, so the pointer reaches it
+    // without crossing the rest of the tooltip.
+    const b = el(doc, 'button', 'tl-btn tl-report-open', t('report.button'));
+    b.type = 'button';
+    b.addEventListener('click', () => report.onOpen());
+    head.append(b);
+  }
+  return root;
+}
+
+// "Report this link" confirm step. Shows the exact URL that would be
+// reported; nothing is sent from here. Actions are callbacks so this stays
+// rendering only:
+//   copy(text) -> Promise<boolean>
+//   open(dest, url) -> Promise<boolean>   dest: a core/report.js destination
+//                                         id, or 'issue' (wrong warning)
+//   close()
+export function renderReportPanel(verdict, { copy, open, close, doc = document } = {}) {
+  const root = rootEl(doc, `tl-verdict tl-tier-${verdict.tier} tl-report`);
+  root.setAttribute('role', 'dialog');
+  root.setAttribute('aria-label', t('report.title'));
+  const head = el(doc, 'div', 'tl-head');
+  head.append(el(doc, 'span', 'tl-icon', TIER_ICON[verdict.tier]), el(doc, 'span', 'tl-label', t('report.title')));
+  root.append(head, el(doc, 'p', 'tl-note', t('report.intro')));
+
+  let url = reportableUrl(verdict.subject);
+  const shown = el(doc, 'code', 'tl-evidence tl-report-url', url);
+  shown.setAttribute('aria-label', t('report.urlLabel'));
+  const strip = el(doc, 'input');
+  strip.type = 'checkbox';
+  strip.checked = true;
+  strip.className = 'tl-report-strip';
+  strip.addEventListener('change', () => {
+    url = reportableUrl(verdict.subject, { strip: strip.checked });
+    shown.textContent = url;
+  });
+  const stripLabel = el(doc, 'label', 'tl-check');
+  stripLabel.append(strip, el(doc, 'span', '', t('report.strip')));
+  root.append(el(doc, 'span', 'tl-qr-title', t('report.urlLabel')), shown, stripLabel);
+
+  const status = el(doc, 'p', 'tl-note tl-report-status');
+  status.setAttribute('role', 'status');
+  const button = (text, cls, onClick) => {
+    const b = el(doc, 'button', `tl-btn ${cls}`, text);
+    b.type = 'button';
+    b.addEventListener('click', onClick);
+    return b;
+  };
+  const copyNow = async (okKey) => {
+    const ok = await copy(url);
+    status.textContent = t(ok ? okKey : 'report.copyFailed');
+    return ok;
+  };
+  const go = async (dest) => {
+    // Forms that can't be prefilled get the URL on the clipboard first.
+    if (!destinationUrl(dest, url)?.prefilled) await copyNow('report.copiedPaste');
+    if (!(await open(dest, url))) status.textContent = t('report.openFailed');
+  };
+
+  const copyRow = el(doc, 'div', 'tl-actions');
+  copyRow.append(button(t('report.copy'), 'tl-report-copy', () => copyNow('report.copied')));
+  const dests = el(doc, 'div', 'tl-actions');
+  for (const { id } of REPORT_DESTINATIONS) {
+    const b = button(t(`report.${id}`), 'tl-report-dest', () => go(id));
+    b.dataset.dest = id;
+    dests.append(b);
+  }
+  root.append(copyRow, el(doc, 'span', 'tl-qr-title', t('report.opensTab')), dests, el(doc, 'p', 'tl-note', t('report.helpline')));
+
+  const wrong = el(doc, 'div', 'tl-actions tl-report-wrong');
+  wrong.append(
+    el(doc, 'span', 'tl-qr-title', t('report.wrongTitle')),
+    button(t('report.wrongIssue'), 'tl-report-issue', async () => {
+      if (!(await open('issue', url))) status.textContent = t('report.openFailed');
+    }),
+    button(t('report.wrongCopy'), 'tl-report-wrongcopy', async () => {
+      const ok = await copy(wrongWarningText(url, verdict));
+      status.textContent = t(ok ? 'report.wrongCopied' : 'report.copyFailed');
+    }),
+  );
+  root.append(wrong, status);
+  if (close) {
+    const bar = el(doc, 'div', 'tl-actions tl-report-closebar');
+    bar.append(button(t('report.close'), 'tl-report-close', () => close()));
+    root.append(bar);
+  }
   return root;
 }
 
@@ -182,4 +271,18 @@ export const VERDICT_CSS = `
 .tl-mode-page .tl-label { font-size: 18px; }
 .tl-badge { display: inline-flex; align-items: center; gap: 4px; margin: 0 4px; padding: 1px 6px 1px 2px; border-radius: 10px; background: var(--tl-bg); border: 1px solid var(--tl-accent); color: var(--tl-accent); font-size: 11px; font-weight: 600; vertical-align: middle; cursor: help; white-space: nowrap; }
 .tl-badge .tl-icon { min-width: 16px; height: 16px; font-size: 10px; }
+.tl-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 0; }
+.tl-btn { font: inherit; font-size: 12px; line-height: 1.3; padding: 4px 10px; border: 1px solid var(--tl-border); border-radius: 6px; background: var(--tl-bg); color: var(--tl-fg); cursor: pointer; }
+.tl-btn:hover { border-color: var(--tl-accent); }
+.tl-btn:focus-visible, .tl-check input:focus-visible { outline: 2px solid var(--tl-accent); outline-offset: 1px; }
+.tl-report-open { margin-left: auto; padding: 2px 8px; color: var(--tl-accent); border-color: var(--tl-accent); font-weight: 600; }
+.tl-report { max-width: 400px; }
+.tl-mode-tooltip.tl-report, .tl-float .tl-report { box-shadow: 0 8px 24px rgba(0,0,0,.18); }
+.tl-report-url { display: block; margin: 2px 0 6px; user-select: all; }
+.tl-check { display: flex; gap: 6px; align-items: flex-start; font-size: 12px; color: var(--tl-muted); cursor: pointer; }
+.tl-check input { margin: 2px 0 0; }
+.tl-report-wrong { border-top: 1px solid var(--tl-border); padding-top: 8px; }
+.tl-report-wrong .tl-qr-title { flex-basis: 100%; }
+.tl-report-status:empty { display: none; }
+.tl-report-closebar { justify-content: flex-end; }
 `;

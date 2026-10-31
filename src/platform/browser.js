@@ -60,6 +60,12 @@ export function onTabRemoved(fn) {
   chrome.tabs.onRemoved.addListener((tabId) => fn(tabId));
 }
 
+// New foreground tab, opened only on an explicit user click ("Report this
+// link"). chrome.tabs.create needs no permission.
+export function openTab(url) {
+  return chrome.tabs.create({ url });
+}
+
 export function navigateTab(tabId, url) {
   return chrome.tabs.update(tabId, { url });
 }

@@ -62,6 +62,21 @@ reasons disappear without reloading.
   was stopped before anything loaded.
 - Click **paypa1.test** → also stopped (High risk tier; this can be switched off).
 
+### Report this link
+
+- Hover **Claim your UPI cashback** (Known malicious) → the tooltip has **Report
+  this link** at the top right. Move onto it and click: the report step shows
+  `https://upi-reward.aspida-demo.invalid/claim` (the `?id=4921` query is removed;
+  untick the box to include it). **Copy URL** copies it.
+- **Google Safe Browsing** opens its report form in a new tab with the URL already
+  filled in. **Netcraft** and **cybercrime.gov.in** copy the URL first ("URL copied,
+  paste it into the form") and open the plain page. The 1930 helpline line is for
+  people who already lost money. Don't submit the demo URL on the real sites.
+- **Report a wrong warning**: **Open a GitHub issue** (prefilled with URL, tier and
+  signal ids) or **Copy details**. **Close** / Escape closes the step.
+- "No known threats found" tooltips never show the button. The warning page has the
+  same button below the verdict. Nothing is sent unless you submit a form yourself.
+
 ## 3. QR codes (demo/qr.html)
 
 - Hover the first QR → *QR code contains (not opened): https://paypa1.test/…* →

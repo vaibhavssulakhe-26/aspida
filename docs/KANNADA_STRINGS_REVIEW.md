@@ -17,7 +17,7 @@ Rules for reviewers:
   Y") are **not** translated in this version and stay in English.
 
 Regenerate this file after changing either table: `node tools/kannada-review.mjs`.
-119 strings.
+141 strings.
 
 ## Verdict tiers
 
@@ -76,6 +76,31 @@ Regenerate this file after changing either table: `node tools/kannada-review.mjs
 | Key | English (source) | Kannada (draft) |
 |---|---|---|
 | `advice.software.piracy-list` | This site is listed as distributing cracked or pirated software, which commonly comes bundled with malware. Avoid downloading from it. Use the official site or a trusted store. | ಈ ಸೈಟ್ ಕ್ರ್ಯಾಕ್ ಮಾಡಿದ ಅಥವಾ ಪೈರೇಟೆಡ್ ಸಾಫ್ಟ್‌ವೇರ್ ಹಂಚುವ ಪಟ್ಟಿಯಲ್ಲಿದೆ; ಅಂತಹ ಸಾಫ್ಟ್‌ವೇರ್ ಜೊತೆ ಹೆಚ್ಚಾಗಿ ಮಾಲ್‌ವೇರ್ ಸೇರಿರುತ್ತದೆ. ಇಲ್ಲಿಂದ ಡೌನ್‌ಲೋಡ್ ಮಾಡಬೇಡಿ. ಅಧಿಕೃತ ಸೈಟ್ ಅಥವಾ ವಿಶ್ವಾಸಾರ್ಹ ಸ್ಟೋರ್ ಬಳಸಿ. |
+
+## report
+
+| Key | English (source) | Kannada (draft) |
+|---|---|---|
+| `report.button` | Report this link | ಈ ಲಿಂಕ್ ವರದಿ ಮಾಡಿ |
+| `report.title` | Report as suspicious | ಸಂಶಯಾಸ್ಪದ ಎಂದು ವರದಿ ಮಾಡಿ |
+| `report.intro` | Nothing is sent yet. The URL below leaves your browser only if you open a reporting site and submit it there. | ಇನ್ನೂ ಏನನ್ನೂ ಕಳುಹಿಸಿಲ್ಲ. ನೀವು ವರದಿ ಮಾಡುವ ಸೈಟ್ ತೆರೆದು ಅಲ್ಲಿ ಸಲ್ಲಿಸಿದರೆ ಮಾತ್ರ ಕೆಳಗಿನ URL ನಿಮ್ಮ ಬ್ರೌಸರ್‌ನಿಂದ ಹೊರಹೋಗುತ್ತದೆ. |
+| `report.urlLabel` | URL to report | ವರದಿ ಮಾಡುವ URL |
+| `report.strip` | Remove query string and #fragment (they can contain personal tokens) | ಕ್ವೆರಿ ಸ್ಟ್ರಿಂಗ್ ಮತ್ತು #ಫ್ರಾಗ್ಮೆಂಟ್ ತೆಗೆದುಹಾಕಿ (ಅವುಗಳಲ್ಲಿ ವೈಯಕ್ತಿಕ ಟೋಕನ್‌ಗಳಿರಬಹುದು) |
+| `report.copy` | Copy URL | URL ನಕಲಿಸಿ |
+| `report.copied` | URL copied. | URL ನಕಲಿಸಲಾಗಿದೆ. |
+| `report.copiedPaste` | URL copied, paste it into the form. | URL ನಕಲಿಸಲಾಗಿದೆ, ಅದನ್ನು ಫಾರ್ಮ್‌ನಲ್ಲಿ ಅಂಟಿಸಿ. |
+| `report.copyFailed` | Could not copy automatically. Select the URL above and copy it. | ಸ್ವಯಂಚಾಲಿತವಾಗಿ ನಕಲಿಸಲು ಆಗಲಿಲ್ಲ. ಮೇಲಿನ URL ಆಯ್ಕೆ ಮಾಡಿ ನಕಲಿಸಿ. |
+| `report.opensTab` | Opens in a new tab: | ಹೊಸ ಟ್ಯಾಬ್‌ನಲ್ಲಿ ತೆರೆಯುತ್ತದೆ: |
+| `report.safebrowsing` | Google Safe Browsing | Google Safe Browsing |
+| `report.netcraft` | Netcraft | Netcraft |
+| `report.cybercrime` | cybercrime.gov.in (India) | cybercrime.gov.in (ಭಾರತ) |
+| `report.helpline` | Already lost money? In India, call the cybercrime helpline 1930 straight away. | ಈಗಾಗಲೇ ಹಣ ಕಳೆದುಕೊಂಡಿದ್ದೀರಾ? ಭಾರತದಲ್ಲಿ ತಕ್ಷಣ ಸೈಬರ್ ಅಪರಾಧ ಸಹಾಯವಾಣಿ 1930 ಗೆ ಕರೆ ಮಾಡಿ. |
+| `report.wrongTitle` | Report a wrong warning | ತಪ್ಪು ಎಚ್ಚರಿಕೆಯನ್ನು ವರದಿ ಮಾಡಿ |
+| `report.wrongIssue` | Open a GitHub issue | GitHub issue ತೆರೆಯಿರಿ |
+| `report.wrongCopy` | Copy details | ವಿವರಗಳನ್ನು ನಕಲಿಸಿ |
+| `report.wrongCopied` | Details copied (URL, tier and signal ids). | ವಿವರಗಳನ್ನು ನಕಲಿಸಲಾಗಿದೆ (URL, ಮಟ್ಟ ಮತ್ತು ಸೂಚನೆಗಳ id ಗಳು). |
+| `report.close` | Close | ಮುಚ್ಚಿ |
+| `report.openFailed` | Could not open the page. | ಪುಟವನ್ನು ತೆರೆಯಲು ಆಗಲಿಲ್ಲ. |
 
 ## Toolbar icon tooltip
 
@@ -183,6 +208,8 @@ Regenerate this file after changing either table: `node tools/kannada-review.mjs
 | `feature.toolbarIcon.desc` | Colour the Aspida toolbar icon from a local check of the page you are on: green no known threats found, orange suspicious, red high risk or known malicious. | ನೀವು ಇರುವ ಪುಟದ ಸ್ಥಳೀಯ ಪರಿಶೀಲನೆಯಿಂದ Aspida ಟೂಲ್‌ಬಾರ್ ಐಕಾನ್‌ಗೆ ಬಣ್ಣ: ಹಸಿರು ತಿಳಿದಿರುವ ಅಪಾಯವಿಲ್ಲ, ಕಿತ್ತಳೆ ಸಂಶಯಾಸ್ಪದ, ಕೆಂಪು ಹೆಚ್ಚಿನ ಅಪಾಯ ಅಥವಾ ತಿಳಿದಿರುವ ದುರುದ್ದೇಶಪೂರಿತ. |
 | `feature.softwareChecks` | Cracked / pirated software | ಕ್ರ್ಯಾಕ್ / ಪೈರೇಟೆಡ್ ಸಾಫ್ಟ್‌ವೇರ್ |
 | `feature.softwareChecks.desc` | Mention in the hover verdict when a site is on a pirated-software list, or a link looks like a cracked download. Tooltip only, never a warning page. | ಸೈಟ್ ಪೈರೇಟೆಡ್ ಸಾಫ್ಟ್‌ವೇರ್ ಪಟ್ಟಿಯಲ್ಲಿದ್ದರೆ ಅಥವಾ ಲಿಂಕ್ ಕ್ರ್ಯಾಕ್ ಡೌನ್‌ಲೋಡ್‌ನಂತೆ ಕಂಡರೆ ತೀರ್ಪಿನಲ್ಲಿ ತಿಳಿಸಿ. ಟೂಲ್‌ಟಿಪ್ ಮಾತ್ರ, ಎಚ್ಚರಿಕೆ ಪುಟವಿಲ್ಲ. |
+| `feature.reportButton` | Report this link button | "ಈ ಲಿಂಕ್ ವರದಿ ಮಾಡಿ" ಬಟನ್ |
+| `feature.reportButton.desc` | Show "Report this link" in warning tooltips and the warning page. It only opens a reporting site in a new tab, or copies the URL, when you click; nothing is sent automatically. | ಎಚ್ಚರಿಕೆ ಟೂಲ್‌ಟಿಪ್‌ಗಳು ಮತ್ತು ಎಚ್ಚರಿಕೆ ಪುಟದಲ್ಲಿ "ಈ ಲಿಂಕ್ ವರದಿ ಮಾಡಿ" ತೋರಿಸಿ. ನೀವು ಕ್ಲಿಕ್ ಮಾಡಿದಾಗ ಮಾತ್ರ ವರದಿ ಸೈಟ್ ಅನ್ನು ಹೊಸ ಟ್ಯಾಬ್‌ನಲ್ಲಿ ತೆರೆಯುತ್ತದೆ ಅಥವಾ URL ನಕಲಿಸುತ್ತದೆ; ಏನನ್ನೂ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಕಳುಹಿಸುವುದಿಲ್ಲ. |
 | `feature.chatWhatsApp` | WhatsApp Web | WhatsApp Web |
 | `feature.chatWhatsApp.desc` | Pre-check links in WhatsApp Web chats so the hover verdict is instant. | ಮೌಸ್ ಇಟ್ಟಾಗ ತೀರ್ಪು ತಕ್ಷಣ ಬರುವಂತೆ WhatsApp Web ಚಾಟ್‌ಗಳಲ್ಲಿನ ಲಿಂಕ್‌ಗಳನ್ನು ಮೊದಲೇ ಪರಿಶೀಲಿಸಿ. |
 | `feature.chatTelegram` | Telegram Web | Telegram Web |

@@ -14,6 +14,7 @@ const FEATURES = [
   'blockHighRisk',
   'toolbarIcon',
   'softwareChecks',
+  'reportButton',
   'chatWhatsApp',
   'chatTelegram',
   'chatInstagram',

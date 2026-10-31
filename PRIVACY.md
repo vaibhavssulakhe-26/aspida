@@ -41,6 +41,27 @@ fails if any request goes to a hovered or scanned target.
    can be decoded locally. The page has already loaded that same image. The
    decoded link itself is never requested.
 
+## "Report this link"
+
+Warning tooltips (Suspicious, High risk, Known malicious) and the warning page
+have a **Report this link** button. It sends **nothing** by itself: there is no
+automatic reporting, no backend and no API key. Clicking it only shows the URL
+that would be reported (query string and `#fragment` removed by default, since
+they can contain personal tokens; user name and password always removed). The
+URL leaves your browser only if **you** then:
+
+- click a reporting site (Google Safe Browsing, Netcraft, cybercrime.gov.in), which
+  opens that site in a new tab; for Safe Browsing the URL is placed in the new
+  tab's address so its form is prefilled, and the other sites get nothing until
+  you paste the URL into their form and submit it there; or
+- click **Copy URL** / **Copy details**, which only puts text on your clipboard; or
+- click **Open a GitHub issue** (report a wrong warning), which opens a new-issue
+  page with the URL, verdict tier and signal ids prefilled, for you to submit or
+  discard.
+
+The extension makes no network request for any of this; opening a tab needs no
+extra permission. The button can be turned off in settings ("Report this link button").
+
 ## What is stored (on this device only)
 
 | Data | Where | Cleared by |
