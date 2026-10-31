@@ -163,8 +163,16 @@ Reporting and minimizing (open `mail.html#kyc`):
 - **Minimize** (banner top-right) shrinks the banner to a coloured pill
   ("High risk, show"). Reload: it stays minimized. Click the pill to expand.
   Other emails are unaffected. Clean emails have no Minimize or Report buttons.
+- Emails with no warning (`#meeting`, `#newsletter`, `#order`) keep the calm
+  "No known threats found" banner with no Minimize and no buttons next to links,
+  only a small **Think this is suspicious? Report**. It opens the same sender
+  step (address, Copy address, the three reporting sites) plus the email's links
+  (up to 5, query and #fragment removed), each with **Copy URL**. Use it to
+  report what Aspida missed.
 - Settings → Features → **Report buttons** off: the report buttons disappear
   without reload; Minimize stays.
+- Diagnosing buttons (e.g. on real Gmail): turn on **Debug logging**; the page
+  console shows `[Aspida] gmail: banner tier=…; buttons: …; skipped: … (reason)`.
 
 Notes: the KYC email shows its Reply-To as if "show details" were open, so the
 Reply-To check is demonstrated; the others say Reply-To wasn't visible. The

@@ -6,7 +6,9 @@
 // The banner can be minimized to a pill (remembered per email for the
 // browser session, via the worker). With the reportButton setting on, it has
 // "Report sender" (Suspicious / High sender) and "Report this link" buttons,
-// and each flagged link in the body gets a small "Report" button after it
+// a no-warning banner gets "Think this is suspicious? Report" (sender step
+// plus a picker of the email's links), and each flagged link in the body of
+// a flagged email gets a small "Report" button after it
 // (in its own closed shadow root, so neither side's CSS affects the other).
 // Reporting only copies text or asks the worker to open a reporting site in a
 // new tab; nothing is sent automatically.
@@ -15,7 +17,7 @@ import { send } from '../platform/messaging.js';
 import { blockShadowBefore, inlineShadow } from '../ui/overlay.js';
 import { renderEmailBanner, renderEmailPill, renderReportPanel, renderSenderReportPanel, renderInlineReport } from '../ui/render.js';
 import { copyText } from '../ui/clipboard.js';
-import { canReport } from '../core/report.js';
+import { canReport, bannerReportPlan, pickerLinks } from '../core/report.js';
 import { emailKey } from '../core/email-key.js';
 import { t } from '../config/strings/index.js';
 import { openReportPopover, closeReportPopover, destroyReportPopover } from './report-popover.js';
@@ -109,8 +111,9 @@ function openLinkReport(opener, verdict) {
   openReportPopover(opener, panel);
 }
 
-function openSenderReport(opener, verdict, sender) {
+function openSenderReport(opener, verdict, sender, links = []) {
   const panel = renderSenderReportPanel(verdict, sender, {
+    links,
     copy: (text) => copyText(text, opener.getRootNode()),
     open: (dest) => send('open-report', { kind: 'sender', dest }).then((ok) => !!ok, () => false),
     close: () => closeReportPopover(),
@@ -143,8 +146,10 @@ export function createGmail(site) {
       return;
     }
     const key = emailKey({ messageId: messageIdOf(site, msg), address: data.sender.address, subject: first(site.subject, document)?.textContent || '' });
-    const warn = result.summary.tier !== 'none';
-    const minimized = warn && key ? !!(await send('banner-state', { key })) : false;
+    const plan = bannerReportPlan({ summaryTier: result.summary.tier, senderVerdict: result.sender, sender: data.sender, reportOn, hasKey: !!key });
+    const shown = Object.keys(plan).filter((k) => plan[k] === true);
+    debug(`${site.id}: banner tier=${result.summary.tier}; buttons: ${shown.join(', ') || 'none'}; skipped: ${Object.entries(plan.skipped).map(([k, why]) => `${k} (${why})`).join(', ') || 'none'}`);
+    const minimized = plan.minimize ? !!(await send('banner-state', { key })) : false;
     if (!banners || !msg.isConnected) return;
 
     const notes = [];
@@ -162,9 +167,10 @@ export function createGmail(site) {
         : renderEmailBanner(result, {
             notes,
             senderInfo: data.sender,
-            onMinimize: warn && key ? safe(() => toggle(true), 'minimize') : null,
-            onReportSender: reportOn ? safe((b) => openSenderReport(b, result.sender, data.sender), 'report sender') : null,
-            onReportLink: reportOn ? safe((v, b) => openLinkReport(b, v), 'report link') : null,
+            onMinimize: plan.minimize ? safe(() => toggle(true), 'minimize') : null,
+            onReportSender: plan.reportSender ? safe((b) => openSenderReport(b, result.sender, data.sender), 'report sender') : null,
+            onReportLink: plan.inlineLinks ? safe((v, b) => openLinkReport(b, v), 'report link') : null,
+            onReportMissed: plan.reportMissed ? safe((b) => openSenderReport(b, result.sender || { tier: 'none' }, data.sender, pickerLinks(data.links)), 'report missed') : null,
           });
       if (focusToggle) view.classList.add('tl-enter');
       box.replaceChildren(view);
@@ -176,7 +182,7 @@ export function createGmail(site) {
       send('banner-state', { key, minimized: min }).catch(() => {});
     };
     draw(minimized, false);
-    const entry = { host, signature, extras: reportOn ? addInlineReports(msg, data, result) : [] };
+    const entry = { host, signature, extras: plan.inlineLinks ? addInlineReports(msg, data, result) : [] };
     banners.set(msg, entry);
   }
 

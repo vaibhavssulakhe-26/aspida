@@ -75,6 +75,10 @@ export default {
   'report.addressCopiedPaste': 'Address copied, paste it into the form.',
   'report.inline': 'Report',
   'report.inlineLabel': 'Report as suspicious: {url}',
+  'report.missedQuestion': 'Think this is suspicious?',
+  'report.missedButton': 'Report',
+  'report.missedLabel': 'Report this email as suspicious',
+  'report.linksTitle': 'Links in this email (query string and #fragment removed)',
 
   // Toolbar icon tooltip (per tab)
   'toolbar.normal': 'Aspida settings',

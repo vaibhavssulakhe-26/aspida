@@ -154,4 +154,12 @@ only when every box below is green.
       Known malicious red, "No known threats found" green. Settings → theme dark /
       light switches them too (banners live, tooltips on next hover); auto follows
       the OS. Check a dark website and a light one: panels are opaque and readable.
+- [ ] m14: mail.html#meeting / #newsletter / #order: banner says "No known threats
+      found" (never "safe"), no Minimize, no inline Report buttons, and a small
+      "Think this is suspicious? Report". It opens "Report as suspicious" with the
+      sender address + display name, Copy address, "Links in this email" (≤ 5,
+      stripped) each with Copy URL, the three destinations (new tab only on click)
+      and the 1930 line. #kyc / #parcel unchanged. "Report buttons" off: the control
+      is gone. With Debug logging on, the console shows one "banner tier=…;
+      buttons: …; skipped: …" line per banner, naming the reason for each skip.
 

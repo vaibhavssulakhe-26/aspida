@@ -66,6 +66,10 @@ In an opened email (Gmail and the demo mailbox) the same rules apply to:
   email is put in the new tab's address.
 - the small **Report** button after each flagged link in the email body: the same
   confirm step as the tooltip (URL shown, query/#fragment removed by default).
+- **Think this is suspicious? Report** on emails with no warning: the same sender
+  step, plus up to 5 of the email's links (query string and `#fragment`
+  removed) with their own **Copy URL** buttons. Nothing is reported unless you
+  copy something or open a reporting site.
 
 The extension makes no network request for any of this; opening a tab needs no
 extra permission. All report buttons can be turned off in settings ("Report buttons").

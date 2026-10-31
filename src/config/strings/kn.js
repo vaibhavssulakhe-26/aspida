@@ -69,6 +69,10 @@ export default {
   'report.addressCopiedPaste': 'ವಿಳಾಸ ನಕಲಿಸಲಾಗಿದೆ, ಅದನ್ನು ಫಾರ್ಮ್‌ಗೆ ಅಂಟಿಸಿ.',
   'report.inline': 'ವರದಿ',
   'report.inlineLabel': 'ಸಂಶಯಾಸ್ಪದ ಎಂದು ವರದಿ ಮಾಡಿ: {url}',
+  'report.missedQuestion': 'ಇದು ಸಂಶಯಾಸ್ಪದ ಎನಿಸುತ್ತದೆಯೇ?',
+  'report.missedButton': 'ವರದಿ ಮಾಡಿ',
+  'report.missedLabel': 'ಈ ಇಮೇಲ್ ಅನ್ನು ಸಂಶಯಾಸ್ಪದ ಎಂದು ವರದಿ ಮಾಡಿ',
+  'report.linksTitle': 'ಈ ಇಮೇಲ್‌ನಲ್ಲಿರುವ ಲಿಂಕ್‌ಗಳು (query string ಮತ್ತು #fragment ತೆಗೆದುಹಾಕಲಾಗಿದೆ)',
 
   'toolbar.normal': 'Aspida ಸೆಟ್ಟಿಂಗ್‌ಗಳು',
   'toolbar.none': 'Aspida: ಈ ಸೈಟ್‌ನಲ್ಲಿ ತಿಳಿದಿರುವ ಯಾವುದೇ ಅಪಾಯ ಕಂಡುಬಂದಿಲ್ಲ (ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಕ್ಲಿಕ್ ಮಾಡಿ)',

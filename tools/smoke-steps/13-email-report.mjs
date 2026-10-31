@@ -113,16 +113,35 @@ export default async function ({ browser, worker, base, extId, fail }) {
   await open('kyc');
   if (!/Minimize/.test(await banner())) fail('expanded state not remembered');
 
-  // Clean email: no minimize, no report buttons.
+  // No-warning email: calm wording, no Minimize, no inline buttons, only
+  // "Think this is suspicious? Report", which opens the sender step with a
+  // picker of the email's links.
   await open('meeting');
   text = await banner();
-  if (/Minimize|Report/.test(text) || (await inline()).length) fail(`clean email has buttons: ${text}`);
+  if (/Minimize|Report sender|Report this link/.test(text) || (await inline()).length) fail(`clean email has warning-only buttons: ${text}`);
+  if (!/No known threats found/.test(text) || !/Think this is suspicious\? Report/.test(text) || /\bsafe\b|phishing/i.test(text)) fail(`clean email banner: ${text}`);
+  await click('tl-report-missed', /Report/, '"Think this is suspicious? Report"');
+  await waitFor(async () => /Copy address/.test(await overlayText(page)), 'missed report step', 4000).catch(() => {});
+  step = await overlayText(page);
+  if (!/Report as suspicious/.test(step) || !/ananya\.rao@northwind\.example/.test(step) || !/Links in this email/.test(step)) fail(`missed report step: ${step}`);
+  if (!/wiki\.northwind\.example\/planning\/q4-notes/.test(step) || !/calendar\.northwind\.example\/event\/2291/.test(step)) fail(`missed report step lacks the email's links: ${step}`);
+  await click('tl-report-linkcopy', /Copy URL/, 'link picker Copy URL');
+  await sleep(300);
+  const copied = await page.evaluate(() => navigator.clipboard.readText()).catch(() => '');
+  if (copied !== 'https://wiki.northwind.example/planning/q4-notes') fail(`picker Copy URL copied "${copied}"`);
+  await click('tl-report-dest', /cybercrime/, 'cybercrime.gov.in button');
+  await sleep(500);
+  tabs = await opened();
+  if (tabs.join() !== 'https://cybercrime.gov.in/') fail(`missed report opened ${JSON.stringify(tabs)}`);
+  await page.keyboard.press('Escape');
 
   // Switch off: report buttons gone live, minimize stays.
   await open('kyc');
   await setSetting(browser, extId, { reportButton: false });
   await waitFor(async () => !/Report sender/.test(await banner()) && /Minimize/.test(await banner()), 'report buttons removed', 6000).catch(async () => fail(`report buttons still shown when off: ${await banner()}`));
   if ((await inline()).length) fail('inline Report still shown when the switch is off');
+  await open('order');
+  if (/Think this is suspicious/.test(await banner())) fail('"Think this is suspicious? Report" shown with the switch off');
   await setSetting(browser, extId, { reportButton: true });
 
   // The settings-page theme reaches in-page UI too (banner re-rendered live).

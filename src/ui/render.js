@@ -170,8 +170,10 @@ export function renderReportPanel(verdict, { copy, open, close, doc = document }
 // "Report sender" confirm step (opened email). Shows the sender address and
 // display name; Copy copies the address; destination buttons open the
 // reporting site's plain form in a new tab (after copying the address).
+// links: stripped URLs to offer with their own Copy buttons (used when the
+// user reports an email Aspida found nothing wrong with).
 //   copy(text) -> Promise<boolean>; open(dest) -> Promise<boolean>; close()
-export function renderSenderReportPanel(verdict, sender, { copy, open, close, doc = document } = {}) {
+export function renderSenderReportPanel(verdict, sender, { copy, open, close, links = [], doc = document } = {}) {
   const who = reportableSender(sender);
   const root = rootEl(doc, `tl-verdict tl-tier-${verdict.tier} tl-report tl-report-sender`);
   root.setAttribute('role', 'dialog');
@@ -209,7 +211,22 @@ export function renderSenderReportPanel(verdict, sender, { copy, open, close, do
     b.dataset.dest = id;
     dests.append(b);
   }
-  root.append(copyRow, el(doc, 'span', 'tl-qr-title', t('report.opensTab')), dests, el(doc, 'p', 'tl-note', t('report.helpline')), status);
+  root.append(copyRow);
+  if (links.length) {
+    const list = el(doc, 'ul', 'tl-report-links');
+    for (const url of links) {
+      const li = el(doc, 'li', 'tl-report-link');
+      li.append(
+        el(doc, 'code', 'tl-evidence', url),
+        button(t('report.copy'), 'tl-report-linkcopy', async () => {
+          status.textContent = t((await copy(url)) ? 'report.copied' : 'report.copyFailed');
+        }),
+      );
+      list.append(li);
+    }
+    root.append(el(doc, 'span', 'tl-qr-title', t('report.linksTitle')), list);
+  }
+  root.append(el(doc, 'span', 'tl-qr-title', t('report.opensTab')), dests, el(doc, 'p', 'tl-note', t('report.helpline')), status);
   if (close) {
     const bar = el(doc, 'div', 'tl-actions tl-report-closebar');
     bar.append(button(t('report.close'), 'tl-report-close', () => close()));
@@ -244,7 +261,9 @@ export function renderBadge(verdict, { doc = document } = {}) {
 //                              senderInfo: { address, displayName })
 //   onReportLink(verdict, button)  "Report this link" on flagged links
 //   onMinimize(button)         "Minimize" (any warning tier)
-export function renderEmailBanner(result, { doc = document, notes = [], senderInfo, onReportSender, onReportLink, onMinimize } = {}) {
+//   onReportMissed(button)     "Think this is suspicious? Report" (no-warning
+//                              emails; the caller decides when to offer it)
+export function renderEmailBanner(result, { doc = document, notes = [], senderInfo, onReportSender, onReportLink, onMinimize, onReportMissed } = {}) {
   const { summary, sender, links } = result;
   const root = rootEl(doc, `tl-verdict tl-tier-${summary.tier} tl-mode-banner`);
   const head = el(doc, 'div', 'tl-head');
@@ -274,6 +293,15 @@ export function renderEmailBanner(result, { doc = document, notes = [], senderIn
     root.append(s);
   }
   if (summary.tier === 'none') root.append(el(doc, 'p', 'tl-note', t('verdict.noneNote')));
+  if (onReportMissed && summary.tier === 'none') {
+    const row = el(doc, 'div', 'tl-actions tl-missed');
+    const b = el(doc, 'button', 'tl-btn tl-report-missed', t('report.missedButton'));
+    b.type = 'button';
+    b.setAttribute('aria-label', t('report.missedLabel'));
+    b.addEventListener('click', () => onReportMissed(b));
+    row.append(el(doc, 'span', 'tl-missed-q', t('report.missedQuestion')), b);
+    root.append(row);
+  }
   for (const n of notes) root.append(el(doc, 'p', 'tl-note tl-limit', n));
   return root;
 }
@@ -437,6 +465,13 @@ export const VERDICT_CSS = `${themeCss('.tl-verdict, .tl-badge, .tl-inline, .tl-
 .tl-report-wrong .tl-qr-title { flex-basis: 100%; }
 .tl-report-status:empty { display: none; }
 .tl-report-closebar { justify-content: flex-end; }
+.tl-report-links { list-style: none; margin: 2px 0 0; padding: 0; }
+.tl-report-link { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
+.tl-report-link .tl-evidence { flex: 1 1 auto; min-width: 0; margin: 0; }
+.tl-report-link .tl-btn { flex: none; padding: 2px 8px; }
+/* "Think this is suspicious? Report" on no-warning emails: small, secondary. */
+.tl-missed { font-size: 12px; color: var(--tl-muted); }
+.tl-report-missed { padding: 2px 8px; }
 /* Inline "Report" after a flagged link in an email body: small, no layout change. */
 .tl-inline { display: inline; white-space: nowrap; }
 .tl-inline-report { display: inline-block; vertical-align: baseline; margin: 0 0 0 4px; padding: 0 6px; font: 600 11px/16px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; border: 1px solid var(--tl-border); border-radius: 8px; background: var(--tl-tint); color: var(--tl-fg); cursor: pointer; text-transform: none; letter-spacing: normal; }

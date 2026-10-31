@@ -17,7 +17,7 @@ Rules for reviewers:
   Y") are **not** translated in this version and stay in English.
 
 Regenerate this file after changing either table: `node tools/kannada-review.mjs`.
-172 strings.
+176 strings.
 
 ## Verdict tiers
 
@@ -114,6 +114,10 @@ Regenerate this file after changing either table: `node tools/kannada-review.mjs
 | `report.addressCopiedPaste` | Address copied, paste it into the form. | ವಿಳಾಸ ನಕಲಿಸಲಾಗಿದೆ, ಅದನ್ನು ಫಾರ್ಮ್‌ಗೆ ಅಂಟಿಸಿ. |
 | `report.inline` | Report | ವರದಿ |
 | `report.inlineLabel` | Report as suspicious: {url} | ಸಂಶಯಾಸ್ಪದ ಎಂದು ವರದಿ ಮಾಡಿ: {url} |
+| `report.missedQuestion` | Think this is suspicious? | ಇದು ಸಂಶಯಾಸ್ಪದ ಎನಿಸುತ್ತದೆಯೇ? |
+| `report.missedButton` | Report | ವರದಿ ಮಾಡಿ |
+| `report.missedLabel` | Report this email as suspicious | ಈ ಇಮೇಲ್ ಅನ್ನು ಸಂಶಯಾಸ್ಪದ ಎಂದು ವರದಿ ಮಾಡಿ |
+| `report.linksTitle` | Links in this email (query string and #fragment removed) | ಈ ಇಮೇಲ್‌ನಲ್ಲಿರುವ ಲಿಂಕ್‌ಗಳು (query string ಮತ್ತು #fragment ತೆಗೆದುಹಾಕಲಾಗಿದೆ) |
 
 ## Toolbar icon tooltip
 

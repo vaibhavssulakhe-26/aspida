@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { emailKey, fnv1a, EMAIL_KEY_RE } from '../src/core/email-key.js';
-import { reportableSender, canReportSender, senderDestinationUrl, REPORT_DESTINATIONS } from '../src/core/report.js';
+import { reportableSender, canReportSender, senderDestinationUrl, REPORT_DESTINATIONS, bannerReportPlan, pickerLinks } from '../src/core/report.js';
 
 test('emailKey: message id first, else sender + subject; stable and opaque', () => {
   const a = emailKey({ messageId: '#msg-f:1781', address: 'x@y.test', subject: 'Hi' });
@@ -35,6 +35,46 @@ test('canReportSender: Suspicious and High only', () => {
   assert.equal(canReportSender({ tier: 'none' }, s), false);
   assert.equal(canReportSender({ tier: 'malicious' }, s), false);
   assert.equal(canReportSender({ tier: 'high' }, { address: 'bad' }), false);
+});
+
+test('canReportSender: a "none" sender only when the user asked to report it', () => {
+  const s = { address: 'a@b.test' };
+  assert.equal(canReportSender({ tier: 'none' }, s, { userInitiated: true }), true);
+  assert.equal(canReportSender(null, s, { userInitiated: true }), true, 'no sender verdict counts as none');
+  assert.equal(canReportSender({ tier: 'suspicious' }, s, { userInitiated: true }), true);
+  assert.equal(canReportSender({ tier: 'none' }, { address: 'bad' }, { userInitiated: true }), false);
+});
+
+test('bannerReportPlan: who can be reported in each tier', () => {
+  const sender = { address: 'a@b.test' };
+  // No warning: only "Think this is suspicious? Report"; no minimize, no inline buttons.
+  let p = bannerReportPlan({ summaryTier: 'none', senderVerdict: { tier: 'none' }, sender });
+  assert.deepEqual({ ...p, skipped: undefined }, { minimize: false, reportSender: false, reportMissed: true, inlineLinks: false, skipped: undefined });
+  assert.deepEqual(p.skipped, { minimize: 'tier none', reportSender: 'sender tier none', inlineLinks: 'tier none' });
+  // Flagged email, flagged sender: unchanged behaviour.
+  for (const tier of ['suspicious', 'high']) {
+    p = bannerReportPlan({ summaryTier: 'high', senderVerdict: { tier }, sender });
+    assert.equal(p.minimize && p.reportSender && p.inlineLinks && !p.reportMissed, true, tier);
+  }
+  // Flagged links only: no sender button, still no "missed" control.
+  p = bannerReportPlan({ summaryTier: 'suspicious', senderVerdict: { tier: 'none' }, sender });
+  assert.equal(p.reportSender || p.reportMissed, false);
+  assert.equal(p.inlineLinks, true);
+  assert.equal(p.skipped.reportSender, 'sender tier none');
+  // Setting off: no report controls at all; minimize stays.
+  p = bannerReportPlan({ summaryTier: 'high', senderVerdict: { tier: 'high' }, sender, reportOn: false });
+  assert.deepEqual([p.minimize, p.reportSender, p.inlineLinks], [true, false, false]);
+  assert.equal(p.skipped.reportSender, 'setting off');
+  assert.equal(bannerReportPlan({ summaryTier: 'none', sender, reportOn: false }).skipped.reportMissed, 'setting off');
+  // No usable address / no key.
+  assert.equal(bannerReportPlan({ summaryTier: 'none', sender: { address: '' } }).skipped.reportMissed, 'no sender address');
+  assert.equal(bannerReportPlan({ summaryTier: 'high', senderVerdict: { tier: 'high' }, sender, hasKey: false }).skipped.minimize, 'no key');
+});
+
+test('pickerLinks: at most 5 distinct stripped http(s) URLs', () => {
+  const links = ['https://a.example/x?token=1#f', { url: 'https://a.example/x' }, 'mailto:a@b.test', 'https://u:p@b.example/', 'http://c.example/', 'https://d.example/', 'https://e.example/', 'https://f.example/', 'https://g.example/'];
+  assert.deepEqual(pickerLinks(links), ['https://a.example/x', 'https://b.example/', 'http://c.example/', 'https://d.example/', 'https://e.example/']);
+  assert.deepEqual(pickerLinks(null), []);
 });
 
 test('senderDestinationUrl: fixed list only, no prefill', () => {
