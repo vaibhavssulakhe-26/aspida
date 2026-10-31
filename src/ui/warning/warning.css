@@ -3,7 +3,7 @@
    the verdict and the report step follow the same light/dark theme. */
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--tl-bg2, #e9ecef); color: var(--tl-fg, #1d3557); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-main { max-width: 720px; margin: 32px auto; padding: 32px 28px; background: var(--tl-bg, #fff); border: 1px solid var(--tl-border, #a8dadc); border-top: 6px solid var(--tl-high-accent, #d32f2f); border-radius: 14px; box-shadow: 0 8px 28px var(--tl-shadow, rgba(29, 53, 87, 0.2)); }
+main { max-width: 720px; margin: 32px auto; padding: 32px 28px; background: var(--tl-bg, #fff); border: 1px solid var(--tl-border, #a8dadc); border-radius: 14px; box-shadow: 0 8px 28px var(--tl-shadow, rgba(29, 53, 87, 0.2)); }
 @media (max-width: 760px) { main { margin: 0; border-radius: 0; border-left: 0; border-right: 0; padding: 28px 16px; } }
 .brand { font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--tl-fg); margin: 0 0 10px; font-size: 13px; }
 h1 { font-size: 26px; line-height: 1.25; margin: 0 0 8px; color: var(--tl-high-text, #b42318); }

@@ -49,14 +49,16 @@ export default async function ({ browser, extId, base, fail }) {
   styles = await rowStyles(page);
   if (!/207, 34, 46/.test(styles['row-kyc'])) fail(`mailbox KYC row not red: ${styles['row-kyc']}`);
   if (!/207, 34, 46/.test(styles['row-otp'])) fail(`mailbox OTP row not red: ${styles['row-otp']}`);
+  if (Object.values(styles).some((s) => /box-shadow/.test(s))) fail(`inbox rows still have a stripe: ${JSON.stringify(styles)}`);
   if (!/212, 167, 44/.test(styles['row-parcel'])) fail(`mailbox parcel row not yellow: ${styles['row-parcel']}`);
   for (const id of ['row-meeting', 'row-newsletter', 'row-order']) if (styles[id]) fail(`mailbox genuine row ${id} styled: ${styles[id]}`);
-  // And it really renders: sample the row's left edge in a screenshot.
+  // And it really renders: the row's left edge shows the soft tint (no
+  // coloured stripe), sampled from a screenshot.
   await page.mouse.move(1279, 899);
   await sleep(200);
   const png = PNG(await page.screenshot());
   const edges = await page.$$eval('tr.zA', (rs) => rs.map((r) => { const b = r.getBoundingClientRect(); return [r.id, Math.round(b.x + 1), Math.round(b.y + b.height / 2)]; }));
-  const want = { 'row-kyc': [207, 34, 46], 'row-otp': [207, 34, 46], 'row-parcel': [212, 167, 44] };
+  const want = { 'row-kyc': [249, 228, 230], 'row-otp': [249, 228, 230], 'row-parcel': [249, 243, 225] };
   for (const [id, x, y] of edges) {
     const got = png.at(x, y);
     const exp = want[id] || [255, 255, 255];

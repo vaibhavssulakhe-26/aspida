@@ -220,8 +220,8 @@ export function createGmail(site) {
 
   // ---- inbox highlighting -------------------------------------------------
   const ROW_STYLE = {
-    suspicious: { 'box-shadow': 'inset 4px 0 0 #d4a72c', 'background-color': 'rgba(212, 167, 44, 0.14)' },
-    high: { 'box-shadow': 'inset 4px 0 0 #cf222e', 'background-color': 'rgba(207, 34, 46, 0.12)' },
+    suspicious: { 'background-color': 'rgba(212, 167, 44, 0.14)' },
+    high: { 'background-color': 'rgba(207, 34, 46, 0.12)' },
   };
 
   function paint(row, tier) {

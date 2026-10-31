@@ -2,7 +2,8 @@
 // risk colours that stay red / yellow / green (never the palette's blue).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { PALETTE_COLORS, themeCss, setTheme, getTheme } from '../src/ui/render.js';
+import { readFileSync } from 'node:fs';
+import { PALETTE_COLORS, themeCss, setTheme, getTheme, VERDICT_CSS } from '../src/ui/render.js';
 
 const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 const lum = (h) => {
@@ -19,7 +20,7 @@ for (const name of ['light', 'dark']) {
   test(`${name} theme: text >= 4.5:1, borders/accents >= 3:1`, () => {
     const p = PALETTE_COLORS[name];
     const text = [['fg', 'bg'], ['fg', 'bg2'], ['muted', 'bg'], ['fg', 'hover'], ['primary-fg', 'primary']];
-    for (const t of TIERS) text.push([`${t}-text`, 'bg'], [`${t}-icon-fg`, `${t}-icon`]);
+    for (const t of TIERS) text.push([`${t}-text`, 'bg'], [`${t}-text`, `${t}-tint`], ['fg', `${t}-tint`], [`${t}-icon-fg`, `${t}-icon`]);
     for (const [f, b] of text) assert.ok(ratio(p[f], p[b]) >= 4.5, `${name}: ${f} on ${b} = ${ratio(p[f], p[b]).toFixed(2)}`);
     for (const t of TIERS) assert.ok(ratio(p[`${t}-accent`], p.bg) >= 3, `${name}: ${t}-accent border`);
     assert.ok(ratio(p.focus, p.bg) >= 3, `${name}: focus ring`);
@@ -57,4 +58,21 @@ test('theme: one variables block, light/dark/auto selectors', () => {
   } finally {
     setTheme('auto');
   }
+});
+
+// Coloured accent edge (a thicker or coloured border on one side, an inset
+// box-shadow stripe, a gradient stripe): only in the link / QR hover tooltip.
+const STRIPE = /border-(left|right|top|bottom|inline-start|inline-end|block-start|block-end)(-width)?\s*:(?!\s*1px solid var\(--(tl-)?(border|control)\))[^;]*|inset\s+\d+px\s+0\s+0|linear-gradient/;
+const rules = (css) => [...css.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(([, sel, body]) => ({ sel: sel.trim(), body }));
+
+test('accent stripe only on the link and QR hover tooltips', () => {
+  const striped = rules(VERDICT_CSS).filter((r) => STRIPE.test(r.body)).map((r) => r.sel);
+  assert.deepEqual(striped, ['.tl-mode-tooltip']);
+  for (const f of ['src/ui/warning/warning.css', 'src/ui/options/options.css']) {
+    const bad = rules(readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')).filter((r) => STRIPE.test(r.body) && !/border-(left|right|top|bottom):\s*0\b/.test(r.body));
+    assert.deepEqual(bad.map((r) => r.sel), [], f);
+  }
+  const gmail = readFileSync(new URL('../src/content/gmail.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(gmail, /inset\s+\d+px\s+0\s+0/, 'inbox rows: tint only, no stripe');
+  assert.match(gmail, /rgba\(207, 34, 46, 0\.12\)/, 'inbox rows keep the red tint');
 });

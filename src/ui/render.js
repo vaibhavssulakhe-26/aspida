@@ -338,8 +338,11 @@ export function renderQr({ qr, verdict }, { doc = document } = {}) {
 // place the values live; themeCss() turns them into CSS variables for light,
 // dark, and 'auto' (prefers-color-scheme). Risk colours stay semantic: green
 // (no known threats), yellow (Suspicious), red (High risk / Known malicious).
-// Every text colour here is >= 4.5:1 on the panel it is used on (WCAG AA);
-// accents used as borders are >= 3:1. Panels are opaque.
+// Every text colour here is >= 4.5:1 on the panel it is used on (WCAG AA),
+// tier labels also on their tint; accents are >= 3:1. Panels are opaque.
+// Only the hover tooltips (links, QR) carry a coloured accent edge; every
+// other panel has a plain 1px neutral border and shows severity with the
+// icon and a tinted label.
 const PALETTE = {
   light: {
     bg: '#ffffff', bg2: '#e9ecef', fg: '#1d3557', muted: '#4a5b73', border: '#a8dadc', control: '#4f7480',
@@ -348,6 +351,7 @@ const PALETTE = {
     'suspicious-accent': '#b58300', 'suspicious-text': '#7a5300', 'suspicious-icon': '#f2c94c', 'suspicious-icon-fg': '#1d3557',
     'high-accent': '#d32f2f', 'high-text': '#b42318', 'high-icon': '#d32f2f', 'high-icon-fg': '#ffffff',
     'malicious-accent': '#9b1c1c', 'malicious-text': '#9b1c1c', 'malicious-icon': '#9b1c1c', 'malicious-icon-fg': '#ffffff',
+    'none-tint': '#dfebe3', 'suspicious-tint': '#fbf0cd', 'high-tint': '#f9e2e2', 'malicious-tint': '#f1dfdf',
   },
   dark: {
     bg: '#1d3557', bg2: '#14253d', fg: '#e9ecef', muted: '#b9c6d2', border: '#4d7a87', control: '#7fa9b0',
@@ -356,6 +360,7 @@ const PALETTE = {
     'suspicious-accent': '#f2c94c', 'suspicious-text': '#f2c94c', 'suspicious-icon': '#f2c94c', 'suspicious-icon-fg': '#1d3557',
     'high-accent': '#ff8a80', 'high-text': '#ff9b91', 'high-icon': '#ff8a80', 'high-icon-fg': '#1d3557',
     'malicious-accent': '#ff7b72', 'malicious-text': '#ff8a80', 'malicious-icon': '#ff7b72', 'malicious-icon-fg': '#1d3557',
+    'none-tint': '#294a60', 'suspicious-tint': '#374756', 'high-tint': '#383f5c', 'malicious-tint': '#383d5a',
   },
 };
 export const PALETTE_COLORS = PALETTE; // for tests
@@ -383,11 +388,15 @@ export const VERDICT_CSS = `${themeCss('.tl-verdict, .tl-badge, .tl-inline, .tl-
 }
 /* Kannada interface: local fonts only (no web fonts are loaded). */
 .tl-verdict:lang(kn), .tl-badge:lang(kn), .tl-inline:lang(kn), .tl-pillwrap:lang(kn) { font-family: "Noto Sans Kannada", "Nirmala UI", "Tunga", "Kedage", system-ui, sans-serif; line-height: 1.55; }
-.tl-verdict { background: var(--tl-bg); border: 1px solid var(--tl-border); border-left: 4px solid var(--tl-accent); border-radius: 8px; padding: 10px 12px; }
-.tl-tier-none { --tl-accent: var(--tl-none-accent); --tl-label: var(--tl-none-text); --tl-icon-bg: var(--tl-none-icon); --tl-icon-fg: var(--tl-none-icon-fg); }
-.tl-tier-suspicious { --tl-accent: var(--tl-suspicious-accent); --tl-label: var(--tl-suspicious-text); --tl-icon-bg: var(--tl-suspicious-icon); --tl-icon-fg: var(--tl-suspicious-icon-fg); }
-.tl-tier-high { --tl-accent: var(--tl-high-accent); --tl-label: var(--tl-high-text); --tl-icon-bg: var(--tl-high-icon); --tl-icon-fg: var(--tl-high-icon-fg); }
-.tl-tier-malicious { --tl-accent: var(--tl-malicious-accent); --tl-label: var(--tl-malicious-text); --tl-icon-bg: var(--tl-malicious-icon); --tl-icon-fg: var(--tl-malicious-icon-fg); }
+.tl-verdict { background: var(--tl-bg); border: 1px solid var(--tl-border); border-radius: 8px; padding: 10px 12px; }
+/* Hover tooltips only: coloured accent edge. */
+.tl-mode-tooltip { border-left: 4px solid var(--tl-accent); }
+/* Elsewhere: the tier label is a tinted badge. */
+.tl-verdict:not(.tl-mode-tooltip) > .tl-head > .tl-label { padding: 0 8px; border-radius: 10px; background: var(--tl-tint); }
+.tl-tier-none { --tl-tint: var(--tl-none-tint); --tl-accent: var(--tl-none-accent); --tl-label: var(--tl-none-text); --tl-icon-bg: var(--tl-none-icon); --tl-icon-fg: var(--tl-none-icon-fg); }
+.tl-tier-suspicious { --tl-tint: var(--tl-suspicious-tint); --tl-accent: var(--tl-suspicious-accent); --tl-label: var(--tl-suspicious-text); --tl-icon-bg: var(--tl-suspicious-icon); --tl-icon-fg: var(--tl-suspicious-icon-fg); }
+.tl-tier-high { --tl-tint: var(--tl-high-tint); --tl-accent: var(--tl-high-accent); --tl-label: var(--tl-high-text); --tl-icon-bg: var(--tl-high-icon); --tl-icon-fg: var(--tl-high-icon-fg); }
+.tl-tier-malicious { --tl-tint: var(--tl-malicious-tint); --tl-accent: var(--tl-malicious-accent); --tl-label: var(--tl-malicious-text); --tl-icon-bg: var(--tl-malicious-icon); --tl-icon-fg: var(--tl-malicious-icon-fg); }
 .tl-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .tl-icon { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 4px; border-radius: 10px; background: var(--tl-icon-bg); color: var(--tl-icon-fg); font-weight: 700; font-size: 11px; box-sizing: border-box; }
 .tl-label { font-weight: 650; color: var(--tl-label); }
@@ -402,7 +411,8 @@ export const VERDICT_CSS = `${themeCss('.tl-verdict, .tl-badge, .tl-inline, .tl-
 .tl-qr-payload { margin: 0 0 8px; padding: 0 0 8px; border-bottom: 1px solid var(--tl-border); }
 .tl-qr-title { display: block; color: var(--tl-muted); font-size: 12px; }
 .tl-mode-banner { margin: 0 0 12px; }
-.tl-sub { margin: 8px 0 0; border-left-width: 3px; padding: 8px 10px; background: var(--tl-bg); }
+/* Findings inside the email banner: no box, just spacing and a thin divider. */
+.tl-sub { margin: 10px 0 0; padding: 10px 0 0; border: 0; border-top: 1px solid var(--tl-border); border-radius: 0; background: transparent; }
 .tl-mode-page { padding: 16px 18px; font-size: 15px; }
 .tl-mode-page .tl-icon { min-width: 26px; height: 26px; border-radius: 13px; font-size: 13px; }
 .tl-mode-page .tl-label { font-size: 18px; }
@@ -429,13 +439,13 @@ export const VERDICT_CSS = `${themeCss('.tl-verdict, .tl-badge, .tl-inline, .tl-
 .tl-report-closebar { justify-content: flex-end; }
 /* Inline "Report" after a flagged link in an email body: small, no layout change. */
 .tl-inline { display: inline; white-space: nowrap; }
-.tl-inline-report { display: inline-block; vertical-align: baseline; margin: 0 0 0 4px; padding: 0 6px; font: 600 11px/16px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; border: 1px solid var(--tl-accent); border-left-width: 3px; border-radius: 8px; background: var(--tl-bg); color: var(--tl-fg); cursor: pointer; text-transform: none; letter-spacing: normal; }
-.tl-inline-report:hover { background: var(--tl-hover); }
+.tl-inline-report { display: inline-block; vertical-align: baseline; margin: 0 0 0 4px; padding: 0 6px; font: 600 11px/16px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; border: 1px solid var(--tl-border); border-radius: 8px; background: var(--tl-tint); color: var(--tl-fg); cursor: pointer; text-transform: none; letter-spacing: normal; }
+.tl-inline-report:hover { border-color: var(--tl-control); }
 .tl-inline:lang(kn) .tl-inline-report { font-family: "Noto Sans Kannada", "Nirmala UI", "Tunga", "Kedage", system-ui, sans-serif; }
 /* Minimized email banner. */
 .tl-pillwrap { display: block; margin: 0 0 12px; }
-.tl-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px 3px 4px; border: 1px solid var(--tl-accent); border-left-width: 4px; border-radius: 14px; background: var(--tl-bg); color: var(--tl-label); font: inherit; font-weight: 650; cursor: pointer; }
-.tl-pill:hover { background: var(--tl-hover); }
+.tl-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px 3px 4px; border: 1px solid var(--tl-border); border-radius: 14px; background: var(--tl-tint); color: var(--tl-label); font: inherit; font-weight: 650; cursor: pointer; }
+.tl-pill:hover { border-color: var(--tl-control); }
 /* Expand / minimize: short fade-and-lift, opacity and transform only. */
 .tl-enter { animation: tl-enter 160ms ease-out; }
 @keyframes tl-enter { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
