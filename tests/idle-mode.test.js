@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createIdleMode, IDLE_AFTER_MS, ROTATE_MS, SLIDE_MS } from '../src/core/idle-mode.js';
+import { createIdleMode, IDLE_AFTER_MS, SLIDES } from '../src/core/idle-mode.js';
 
 // Minimal fake clock: tick(ms) runs due timeouts/intervals in time order.
 function fakeClock() {
@@ -43,37 +43,39 @@ function setup(opts = {}) {
     timers: clock.timers,
     onIdle: () => log.push('idle'),
     onActive: () => log.push('active'),
-    onRotate: () => log.push('rotate'),
     onSlide: () => log.push('slide'),
     ...opts,
   });
   return { clock, log, m, count: (k) => log.filter((x) => x === k).length };
 }
 
-test('starts idle: navbar rotates every 2 s, slides every 1 s', () => {
+test('starts idle: a new slide every 3 s, faded over 0.5 s (one config constant)', () => {
+  assert.deepEqual({ ...SLIDES }, { intervalMs: 3000, fadeMs: 500 });
+  assert.ok(Object.isFrozen(SLIDES));
   const { clock, m, count } = setup();
   m.start();
   assert.equal(m.mode, 'idle');
-  clock.tick(6000);
-  assert.equal(count('rotate'), 6000 / ROTATE_MS);
-  assert.equal(count('slide'), 6000 / SLIDE_MS);
+  clock.tick(2999);
+  assert.equal(count('slide'), 0);
+  clock.tick(1);
+  assert.equal(count('slide'), 1);
+  clock.tick(9000);
+  assert.equal(count('slide'), 4);
 });
 
-test('click on a navbar item -> active; rotation and slides stop at once', () => {
+test('click on a navbar item -> active; slides stop at once', () => {
   const { clock, m, count, log } = setup();
   m.start();
-  clock.tick(1500);
+  clock.tick(4500);
   m.activate();
   assert.equal(m.mode, 'active');
   assert.equal(log.at(-1), 'active');
-  const r = count('rotate');
   const s = count('slide');
   clock.tick(9000);
-  assert.equal(count('rotate'), r);
   assert.equal(count('slide'), s);
 });
 
-test('10 s without a click in active mode -> idle (rotation resumes)', () => {
+test('10 s without a click in active mode -> idle (slides resume)', () => {
   const { clock, m, count } = setup();
   m.start();
   m.activate();
@@ -82,8 +84,8 @@ test('10 s without a click in active mode -> idle (rotation resumes)', () => {
   clock.tick(1);
   assert.equal(m.mode, 'idle');
   assert.equal(count('idle'), 2);
-  clock.tick(ROTATE_MS);
-  assert.equal(count('rotate'), 1);
+  clock.tick(SLIDES.intervalMs);
+  assert.equal(count('slide'), 1);
 });
 
 test('every click restarts the countdown; idle clicks do nothing', () => {
@@ -136,10 +138,10 @@ test('hidden tab: all timers stop; on return the countdown starts over', () => {
   m.setHidden(true);
   assert.equal(clock.pending(), 0);
   clock.tick(10_000);
-  assert.equal(count('rotate') + count('slide'), 0);
+  assert.equal(count('slide'), 0);
   m.setHidden(false);
-  clock.tick(ROTATE_MS);
-  assert.equal(count('rotate'), 1);
+  clock.tick(SLIDES.intervalMs);
+  assert.equal(count('slide'), 1);
 
   m.activate();
   clock.tick(9000);
@@ -156,5 +158,5 @@ test('hidden tab: all timers stop; on return the countdown starts over', () => {
     m.setHidden(true);
     m.setHidden(false);
   }
-  assert.equal(clock.pending(), 2);
+  assert.equal(clock.pending(), 1);
 });

@@ -99,34 +99,43 @@ h1 { margin: 0; font-size: clamp(34px, 7vw, 52px); letter-spacing: 0.18em; font-
 .tagline { margin: 6px 0 0; color: var(--muted); font-size: 17px; letter-spacing: 0.02em; }
 .masthead .hint { margin: 8px 0 0; }
 
-/* Circular navbar. Every tab sits at the centre and is moved by --d slots
-   (set by options.js); only transform and opacity change, so the slide is
-   cheap and reduced-motion can simply turn the transition off. */
+/* Circular navbar, moved like a conveyor by options.js (src/core/belt.js):
+   every tab sits at the centre and gets an inline transform (translateX +
+   scale) and opacity per frame; --hl (0..1, nearness to the centre) drives
+   the opacity of the highlight fill (::before) and --hl-text that of the
+   light label on top (::after, with its own fill so that once switched it
+   fully covers the dark label; both labels share one font weight so the
+   glyphs line up during the short switch). Nothing else changes per frame (no colours, no layout).
+   Tabs are drawn at the centre size (scale 1) and shrink to 0.8 at rest. */
 .carousel { position: relative; height: 76px; margin: 0 auto 16px; overflow: hidden; --slot: 152px; --reach: 2; }
 .tabs { position: relative; height: 100%; }
 .tabs [role="tab"] {
-  position: absolute; left: 50%; top: 50%;
-  width: calc(var(--slot) - 12px); margin-left: calc((var(--slot) - 12px) / -2); margin-top: -19px; height: 38px;
+  --tab-w: calc((var(--slot) - 12px) * 1.12); /* options.js reads the slot back from this width */
+  position: absolute; left: 50%; top: 50%; z-index: 0; isolation: isolate;
+  width: var(--tab-w); margin-left: calc(var(--tab-w) / -2); margin-top: -21px; height: 42px;
   padding: 0 10px; border: 1px solid transparent; border-radius: 999px;
-  background: var(--tab-bg); color: var(--tab-fg); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  transform: translateX(calc(var(--d, 0) * var(--slot))) scale(0.86);
-  opacity: 0.8;
-  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease-out;
+  background: var(--tab-bg); color: var(--tab-fg); font-size: 15.5px; font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transform: scale(0.8); opacity: 0.82; --hl: 0; --hl-text: 0;
 }
-.tabs [role="tab"][data-dist="1"] { opacity: 0.9; transform: translateX(calc(var(--d, 0) * var(--slot))) scale(0.92); }
-.tabs [role="tab"][data-centre] {
-  background: var(--tab-sel-bg); color: var(--tab-sel-fg); font-weight: 700; opacity: 1;
-  transform: translateX(0) scale(1.12); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+.tabs [role="tab"]::before, .tabs [role="tab"]::after {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; opacity: var(--hl); pointer-events: none;
 }
-.tabs [role="tab"][data-out] { opacity: 0; pointer-events: none; }
+.tabs [role="tab"]::before { z-index: -1; background: var(--tab-sel-bg); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18); }
+.tabs [role="tab"]::after {
+  content: attr(data-label); z-index: 1; display: flex; align-items: center; justify-content: center; padding: 0 10px;
+  background: var(--tab-sel-bg); color: var(--tab-sel-fg); font-weight: inherit; white-space: inherit; line-height: inherit; text-align: center; overflow: hidden;
+  opacity: var(--hl-text);
+}
+.tabs.moving [role="tab"] { will-change: transform, opacity; }
+.tabs [role="tab"][data-out] { pointer-events: none; }
 .tabs [role="tab"]:hover:not([data-centre]) { border-color: var(--control); }
 .tabs [role="tab"]:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-.tabs.no-anim [role="tab"] { transition: none; }
 
 /* Narrow screens: one neighbour each side, smaller slots. */
 @media (max-width: 640px) {
   .carousel { --slot: min(128px, calc((100vw - 32px) / 3)); --reach: 1; }
-  .tabs [role="tab"] { font-size: 13px; padding: 0 6px; height: 42px; margin-top: -21px; white-space: normal; line-height: 1.2; text-overflow: clip; }
+  .tabs [role="tab"] { font-size: 14.5px; padding: 0 6px; height: 46px; margin-top: -23px; white-space: normal; line-height: 1.2; text-overflow: clip; }
+  .tabs [role="tab"]::after { padding: 0 6px; }
 }
 
 /* Content card. */
@@ -139,16 +148,23 @@ h1 { margin: 0; font-size: clamp(34px, 7vw, 52px); letter-spacing: 0.18em; font-
 /* Idle-mode slideshow: images stacked in one box (no layout jump), each
    sized to its own aspect ratio so the rounded corners and the shadow follow
    the picture; a 400 ms cross-fade (opacity only). */
-.slideshow { position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 60vh; margin: 8px auto 0; }
-.slideshow img { position: absolute; inset: 0; margin: auto; max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; border-radius: 14px; box-shadow: var(--slide-shadow); opacity: 0; transition: opacity 400ms ease-in-out; }
+.slideshow { margin: 8px auto 0; }
+.slides { position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 60vh; }
+.slideshow img { position: absolute; inset: 0; margin: auto; max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; border-radius: 14px; box-shadow: var(--slide-shadow); opacity: 0; transition: opacity var(--slide-fade, 500ms) ease-in-out; }
 .slideshow img.prev { opacity: 1; z-index: 1; transition: none; }
 .slideshow img.on { opacity: 1; z-index: 2; }
 .slideshow.entering, .card.entering { animation: panel-in 220ms ease-out; }
+/* Caption (cross-fades with its image) and progress dots (indicators only). */
+.slide-captions { position: relative; height: 3em; margin-top: 14px; }
+.slide-caption { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; margin: 0; padding: 0 8px; text-align: center; color: var(--fg); font-size: 14px; line-height: 1.4; opacity: 0; transition: opacity var(--slide-fade, 500ms) ease-in-out; }
+.slide-caption.on { opacity: 1; }
+.slide-dots { display: flex; justify-content: center; gap: 8px; margin-top: 4px; }
+.slide-dots span { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--control); box-sizing: border-box; }
+.slide-dots span.on { background: var(--tab-sel-bg); border-color: var(--tab-sel-bg); }
 
 @media (prefers-reduced-motion: reduce) {
-  .tabs [role="tab"] { transition: none; }
   .panel.entering, .slideshow.entering, .card.entering { animation: none; }
-  .slideshow img { transition: none; }
+  .slideshow img, .slide-caption { transition: none; }
 }
 
 h2 { font-size: 19px; margin: 0 0 6px; }

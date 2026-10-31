@@ -120,25 +120,33 @@ only when every box below is green.
       render (no boxes). Switch back to English: everything returns without reload.
 - [ ] m7: README, FEEDS, PRIVACY and DEMO match behaviour (permissions table equals
       manifest.json; feed URLs equal src/config/feeds.js).
-- [ ] m12: Settings page opens idle: "ASPIDA" / "Your digital shield", About centred
-      but no tab selected and no section card; the navbar advances one item every
-      2 s (smooth slide) and the screenshot slideshow below changes every second
-      (cross-fade, no layout jump, no dimming, rounded corners, navy shadow in
-      light / teal glow in dark). Moving the mouse or scrolling changes nothing; a
-      click outside the navbar changes nothing.
-- [ ] m12: Click a navbar item (also while it moves): rotation stops at once, the
-      item slides to the centre, the slideshow disappears and the section fades in.
+- [ ] m12: Settings page opens idle: "ASPIDA" / "Your digital shield", no tab
+      selected and no section card. The navbar moves continuously (no pauses, one
+      item-width per 2 s, seamless wrap, no gaps); the item at the centre is
+      enlarged and filled (navy/white in light, teal/navy in dark), and the fill
+      and size hand over smoothly to the next item with the label readable at
+      every moment. The slideshow changes every 3 s with a 0.5 s cross-fade (no
+      layout jump, rounded corners, navy shadow in light / teal glow in dark);
+      under it a one-line caption fades with its image and five dots show the
+      current slide (filled navy in light, teal in dark; not clickable). Moving
+      the mouse or scrolling changes nothing; a click outside the navbar changes
+      nothing.
+- [ ] m12: Click a navbar item (also while it moves): the motion stops at once,
+      the bar eases (~0.4 s, shortest way round) until that item is exactly
+      centred, then the slideshow disappears and the section fades in.
       Click each item: the loop wraps both ways (left of About is Your data) and
       there are always items on both sides. Tab to the navbar, then ←/→ / Home /
       End / Enter select (and leave idle); focus ring visible. Narrow window
       (~380 px): one neighbour each side, same behaviour.
 - [ ] m12: Wait 10 s without clicking: the section hides, the slideshow returns
-      from slide 1 and rotation resumes from the current item. Clicks restart the
+      from slide 1 and the motion resumes from where it stopped with a gentle
+      speed-up (no jerk). Clicks restart the
       10 s. Type in the Allowlist box and wait > 10 s: the section stays; 10 s
       after leaving the box it goes idle. Switch to another tab for a while and
-      back: no burst of rotations. Theme and language buttons still work in both
-      modes; ಕನ್ನಡ gives Kannada slide alt text. OS "reduce motion" on: slides and
-      navbar swap instantly, timers unchanged. Delete slides/slides.json: no
+      back: the bar continues where it was (no jump). Theme and language buttons still work in both
+      modes; ಕನ್ನಡ gives Kannada slide alt text and captions. OS "reduce motion"
+      on: the navbar stands still with the current item centred, slides swap
+      without fading, timers unchanged. Delete slides/slides.json: no
       slideshow, everything else works.
 - [ ] m12: Every switch on the Features tab still saves (toggle, reload the page,
       it stays) and takes effect on the demo page without reload. Feed switches,

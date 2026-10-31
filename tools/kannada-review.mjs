@@ -14,7 +14,7 @@ for (const key of Object.keys(en)) {
 const TITLES = {
   tier: 'Verdict tiers', verdict: 'Tooltip and banner text', badge: 'Chat badge', banner: 'Gmail banner', qr: 'QR tooltip',
   advice: 'Advice', toolbar: 'Toolbar icon tooltip', warning: 'Warning page', options: 'Settings page', ago: 'Relative times',
-  stat: 'Local counters', feature: 'Feature switches',
+  stat: 'Local counters', feature: 'Feature switches', slides: 'Settings page slideshow captions',
 };
 
 let out = `# Kannada interface strings: review sheet (DRAFT)

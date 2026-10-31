@@ -1,4 +1,5 @@
-// Circular navbar maths for the settings page. Pure: no DOM, no chrome.*.
+// Circular navbar maths for the settings page (whole-item positions; the
+// continuous idle motion is src/core/belt.js). Pure: no DOM, no chrome.*.
 // Items form a loop; the selected item sits at offset 0, the others at signed
 // offsets to its left (negative) and right (positive).
 
@@ -22,7 +23,3 @@ export function visibleOrder(selected, n, reach) {
   const r = Math.min(reach, Math.floor((n - 1) / 2));
   return Array.from({ length: 2 * r + 1 }, (_, k) => step(selected, k - r, n));
 }
-
-// True when an item jumps from one side of the loop to the other between two
-// selections; the UI moves it without sliding it across the bar.
-export const wrapped = (before, after, n) => Math.abs(after - before) > n / 2;

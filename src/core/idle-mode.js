@@ -1,7 +1,9 @@
 // Settings-page idle mode. Pure: timers are injected, no DOM, no chrome.*.
 //
-//   idle    slideshow visible, section content hidden, navbar auto-rotating
-//   active  a section is shown, rotation stopped, slideshow hidden
+//   idle    slideshow visible, section content hidden, navbar moving
+//           (the continuous navbar motion is src/core/belt.js, driven by the
+//           page's animation frame loop, not by a timer here)
+//   active  a section is shown, navbar still, slideshow hidden
 //
 // activate()   a navbar item was chosen (click or keyboard) -> active
 // click()      any mouse click on the page; in active mode it restarts the
@@ -15,8 +17,9 @@
 // the countdown restarts from the next focusLeft().
 
 export const IDLE_AFTER_MS = 10_000;
-export const ROTATE_MS = 2_000;
-export const SLIDE_MS = 1_000;
+// Slideshow: a new slide every intervalMs, cross-faded over fadeMs (the page
+// sets the CSS fade duration from this too).
+export const SLIDES = Object.freeze({ intervalMs: 3_000, fadeMs: 500 });
 
 const realTimers = () => ({
   setTimeout: (fn, ms) => setTimeout(fn, ms),
@@ -30,30 +33,25 @@ export function createIdleMode({
   isEditing = () => false,
   onIdle = () => {},
   onActive = () => {},
-  onRotate = () => {},
   onSlide = () => {},
   idleAfterMs = IDLE_AFTER_MS,
-  rotateMs = ROTATE_MS,
-  slideMs = SLIDE_MS,
+  slideMs = SLIDES.intervalMs,
 } = {}) {
   let mode = 'idle';
   let hidden = false;
   let countdown = null;
-  let rotate = null;
   let slide = null;
 
   function stopAll() {
     timers.clearTimeout(countdown);
-    timers.clearInterval(rotate);
     timers.clearInterval(slide);
-    countdown = rotate = slide = null;
+    countdown = slide = null;
   }
 
   function arm() {
     stopAll();
     if (hidden) return;
     if (mode === 'idle') {
-      rotate = timers.setInterval(() => onRotate(), rotateMs);
       slide = timers.setInterval(() => onSlide(), slideMs);
     } else {
       countdown = timers.setTimeout(expire, idleAfterMs);

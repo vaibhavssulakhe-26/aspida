@@ -40,8 +40,13 @@
       </div>
     </nav>
 
-    <!-- Idle mode: screenshots of Aspida (slides/slides.json), filled by options.js. -->
-    <div id="slideshow" class="slideshow" aria-live="off" hidden></div>
+    <!-- Idle mode: screenshots of Aspida (slides/slides.json) with a caption and
+         progress dots, filled by options.js. -->
+    <div id="slideshow" class="slideshow" aria-live="off" hidden>
+      <div id="slides" class="slides"></div>
+      <div id="slide-captions" class="slide-captions"></div>
+      <div id="slide-dots" class="slide-dots" aria-hidden="true"></div>
+    </div>
 
     <div class="card" id="content" hidden>
       <section id="panel-about" class="panel" role="tabpanel" aria-labelledby="tab-about" tabindex="0" hidden>

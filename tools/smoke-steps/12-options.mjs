@@ -1,10 +1,11 @@
-// Settings page: idle mode on load (navbar rotating, slideshow, no section),
-// choosing an item (centred, content shown, rotation stopped), wrap-around and
+// Settings page: idle mode on load (navbar moving continuously, slideshow with
+// caption and dots, no section), choosing an item (eased to the centre,
+// content shown, motion stopped), wrap-around and
 // keyboard, back to idle after 10 s without a click (not while typing),
 // narrow layout, theme button, and every feature switch saving to storage.
 import { sleep, waitFor, setSetting } from './helpers.mjs';
 
-const SETTLE_MS = 450; // slide is 260 ms
+const SETTLE_MS = 450; // ease to an item is 400 ms
 
 export default async function ({ browser, extId, fail }) {
   const opts = await browser.newPage();
@@ -20,6 +21,8 @@ export default async function ({ browser, extId, fail }) {
     const sel = chosen || tabs.find((t) => t.tabIndex === 0); // idle: the centred item
     const r = sel.getBoundingClientRect();
     const slides = [...document.querySelectorAll('#slideshow img')];
+    const caps = [...document.querySelectorAll('.slide-caption')];
+    const dots = [...document.querySelectorAll('#slide-dots span')];
     const shown = tabs.filter((t) => !t.hasAttribute('data-out')).map((t) => ({ id: t.dataset.tab, x: t.getBoundingClientRect().left + t.getBoundingClientRect().width / 2 }));
     shown.sort((a, b) => a.x - b.x);
     return {
@@ -28,6 +31,11 @@ export default async function ({ browser, extId, fail }) {
       slideshow: !document.getElementById('slideshow').hidden,
       slides: slides.length,
       slide: slides.findIndex((i) => i.classList.contains('on')),
+      caption: caps.find((c) => c.classList.contains('on'))?.textContent || '',
+      dot: dots.findIndex((d) => d.classList.contains('on')),
+      dots: dots.length,
+      transforms: tabs.map((t) => t.style.transform).join('|'),
+      moving: document.getElementById('tabs').classList.contains('moving'),
       content: !document.getElementById('content').hidden,
       centred: Math.abs(r.left + r.width / 2 - mid) < 2,
       bigger: r.height > Math.max(...tabs.filter((t) => t !== sel).map((t) => t.getBoundingClientRect().height)),
@@ -46,27 +54,52 @@ export default async function ({ browser, extId, fail }) {
     return s;
   };
 
-  // Load: idle. About centred, no tab selected, no section, slideshow on.
+  // Load: idle. About nearest the centre, no tab selected, no section,
+  // slideshow with caption and 5 dots (aria-hidden).
   await waitFor(async () => (await state()).slides > 0, 'slides loaded', 5000).catch(() => {});
-  const start = await expect({ mode: 'idle', selected: 'about', centred: true, bigger: true, panels: '', content: false, slideshow: true, slides: 5, order: 'stats data about features feeds', hScroll: false }, 'idle on load');
+  const start = await state();
+  for (const [k, v] of Object.entries({ mode: 'idle', selected: 'about', panels: '', content: false, slideshow: true, slides: 5, dots: 5, dot: 0, slide: 0, caption: 'Aspida banner on a Gmail email: no known threats', hScroll: false })) if (start[k] !== v) fail(`options idle on load: ${k} = ${JSON.stringify(start[k])}, want ${JSON.stringify(v)}`);
   if (await opts.$eval('#slideshow', (b) => b.getAttribute('aria-live')) !== 'off') fail('slideshow must not be announced (aria-live off)');
+  if (await opts.$eval('#slide-dots', (b) => b.getAttribute('aria-hidden')) !== 'true') fail('progress dots must be aria-hidden');
   const alts = await opts.$$eval('#slideshow img', (is) => is.map((i) => i.alt));
   if (alts[0] !== 'Aspida screenshot 1 of 5' || alts[4] !== 'Aspida screenshot 5 of 5') fail(`slide alt text: ${alts}`);
-  // Rotates every 2 s (one item), new slide every 1 s; mouse moves don't count.
+  // Continuous motion: positions change between any two moments (no pauses),
+  // ~1 item per 2 s; mouse moves don't count as activity.
   await opts.mouse.move(200, 400);
   await opts.mouse.move(900, 600);
-  await sleep(2100 - SETTLE_MS);
-  const rotated = await expect({ mode: 'idle', selected: 'features', centred: true, order: 'data about features feeds allowlist' }, 'auto-rotate after 2 s');
-  if (rotated.slide === start.slide) fail('slideshow did not advance');
+  const a = await state();
+  await sleep(300);
+  const b = await state();
+  await sleep(300);
+  const c = await state();
+  if (a.transforms === b.transforms || b.transforms === c.transforms) fail('navbar is not moving continuously');
+  if (!c.moving) fail('moving track lacks will-change while moving');
+  await sleep(2400 - 600);
+  const moved = await state();
+  if (moved.selected !== 'features' || moved.mode !== 'idle') fail(`after ~2.4 s the centre should be Features: ${moved.selected}`);
+  // Slides: still slide 1 before 3 s, slide 2 (with its caption and dot) after.
+  if (moved.slide !== 0) fail(`slide changed before 3 s (slide ${moved.slide})`);
+  const s2 = await waitFor(async () => { const st = await state(); return st.slide === 1 ? st : null; }, 'second slide', 2000).catch(() => null);
+  if (!s2 || s2.dot !== 1 || s2.caption !== 'Hover tooltip on a Google search result') fail(`second slide / caption / dot: ${JSON.stringify(s2 && { dot: s2.dot, caption: s2.caption })}`);
   // A click outside the navbar does nothing in idle mode.
   await opts.mouse.click(30, 600);
   await expect({ mode: 'idle', content: false }, 'click outside the navbar while idle');
 
-  // Click a visible item: it moves to the centre, rotation stops, section shows.
-  await opts.click('#tab-allowlist');
-  await expect({ mode: 'active', selected: 'allowlist', centred: true, focused: 'allowlist', panels: 'panel-allowlist', content: true, slideshow: false }, 'after click');
+  // Click a visible item (the right neighbour of the current centre): the
+  // belt stops, eases it to the centre, the section shows.
+  const target = await opts.evaluate(() => {
+    const tabs = [...document.querySelectorAll('[role="tab"]')];
+    const c = tabs.findIndex((t) => t.tabIndex === 0);
+    return tabs[(c + 1) % tabs.length].id;
+  });
+  const want = target.replace('tab-', '');
+  await opts.click(`#${target}`);
+  const settled = await expect({ mode: 'active', selected: want, centred: true, focused: want, panels: `panel-${want}`, content: true, slideshow: false, moving: false }, 'after click');
   await sleep(2300);
-  await expect({ selected: 'allowlist', mode: 'active' }, 'rotation stopped');
+  const still = await state();
+  if (still.transforms !== settled.transforms) fail('navbar still moving in active mode');
+  await opts.click('#tab-allowlist');
+  await expect({ selected: 'allowlist', centred: true, panels: 'panel-allowlist' }, 'click allowlist');
   await opts.click('#tab-feeds');
   await expect({ selected: 'feeds', centred: true, focused: 'feeds', panels: 'panel-feeds', order: 'about features feeds allowlist stats' }, 'second click');
 
@@ -105,6 +138,7 @@ export default async function ({ browser, extId, fail }) {
   // after the field loses focus, back to idle: slideshow from slide 1, no tab
   // selected, rotation resumes.
   await opts.click('#tab-allowlist');
+  await sleep(SETTLE_MS); // the section appears once the item is centred
   await opts.focus('#allow-input');
   await opts.keyboard.type('example.org');
   await sleep(10_800);
@@ -118,9 +152,9 @@ export default async function ({ browser, extId, fail }) {
     if (back.content || !back.slideshow || back.panels) fail(`idle again: ${JSON.stringify(back)}`);
     if (back.slide !== 0) fail(`slideshow did not restart from slide 1 (slide ${back.slide})`);
   }
-  await sleep(2100);
+  await sleep(2600);
   const after = await state();
-  if (back && after.selected === back.selected) fail('navbar rotation did not resume');
+  if (back && after.transforms === back.transforms) fail('navbar motion did not resume');
   if ((await opts.$eval('#allow-input', (i) => i.value)) !== 'example.org') fail('typed text lost');
   await opts.$eval('#allow-input', (i) => (i.value = ''));
 

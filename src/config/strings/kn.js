@@ -102,6 +102,14 @@ export default {
   'options.tab.stats': 'ಸ್ಥಳೀಯ ಎಣಿಕೆ',
   'options.tab.data': 'ನಿಮ್ಮ ಡೇಟಾ',
   'options.slideAlt': 'Aspida ಸ್ಕ್ರೀನ್‌ಶಾಟ್ {m} ರಲ್ಲಿ {n}',
+
+  // Captions for slides/slideN.png on the settings page (only what each screenshot shows).
+  'slides.caption1': 'Gmail ಇಮೇಲ್ ಮೇಲೆ Aspida ಬ್ಯಾನರ್: ತಿಳಿದಿರುವ ಅಪಾಯ ಇಲ್ಲ',
+  'slides.caption2': 'Google ಹುಡುಕಾಟ ಫಲಿತಾಂಶದ ಲಿಂಕ್ ಮೇಲೆ ಟೂಲ್‌ಟಿಪ್',
+  'slides.caption3': 'ನಕಲಿ PayPal ಲಿಂಕ್ ಮೇಲೆ ಹೆಚ್ಚಿನ ಅಪಾಯದ ಟೂಲ್‌ಟಿಪ್',
+  'slides.caption4': 'QR ಕೋಡ್ ಓದಲಾಗಿದೆ, ಸಂಶಯಾಸ್ಪದ ಎಂದು ಗುರುತಿಸಲಾಗಿದೆ, ತೆರೆಯಲಾಗಿಲ್ಲ',
+  'slides.caption5': 'ಡೆಮೊ ಇನ್‌ಬಾಕ್ಸ್: ಅಪಾಯಕಾರಿ ಸಾಲುಗಳು ಕೆಂಪು ಮತ್ತು ಹಳದಿ',
+
   'options.about': 'Aspida ಬಗ್ಗೆ',
   'options.about.intro': 'Aspida ನಿಮ್ಮ ಬ್ರೌಸರ್‌ಗೆ ಒಂದು ಸದ್ದಿಲ್ಲದ ಕಾವಲುಗಾರ. ನೀವು ನೋಡುವ ಲಿಂಕ್‌ಗಳು, ಸಂದೇಶಗಳು ಮತ್ತು ಇಮೇಲ್‌ಗಳನ್ನು ಅದು ಗಮನಿಸುತ್ತದೆ, ಮತ್ತು ಏನಾದರೂ ವಂಚನೆ ಅಥವಾ ನಕಲಿ ವೆಬ್‌ಸೈಟ್‌ನಂತೆ ಕಂಡರೆ ನಿಮ್ಮನ್ನು ಎಚ್ಚರಿಸುತ್ತದೆ.',
   'options.about.hover': 'ಲಿಂಕ್ ಮೇಲೆ ಮೌಸ್ ಇಟ್ಟರೆ, ಏನು ಸರಿಯಿಲ್ಲ ಮತ್ತು ಏಕೆ ಎಂದು ಅದು ತಿಳಿಸುತ್ತದೆ.',

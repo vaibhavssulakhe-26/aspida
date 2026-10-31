@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { wrapIndex, step, offset, offsets, visibleOrder, wrapped } from '../src/ui/options/carousel.js';
+import { wrapIndex, step, offset, offsets, visibleOrder } from '../src/ui/options/carousel.js';
+import { loopDistance } from '../src/core/belt.js';
 
 const TABS = ['about', 'features', 'feeds', 'allowlist', 'stats', 'data'];
 const n = TABS.length;
@@ -31,14 +32,6 @@ test('visible order: About selected by default, loop shown left to right', () =>
   assert.equal(visibleOrder(0, n, 9).length, 5, 'never shows an item twice');
 });
 
-test('wrapped: only items that change sides jump', () => {
-  // Selecting the next item: About goes from 0 to -1 (slides); Your data
-  // from -1 to -2 (slides); Local counter from -2 to +3 (wraps).
-  const before = offsets(0, n);
-  const after = offsets(1, n);
-  const jumped = TABS.filter((_, i) => wrapped(before[i], after[i], n));
-  assert.deepEqual(jumped, ['stats']);
-  // Previous: the opposite item (+3) comes in at -2 from the far side.
-  const back = offsets(5, n);
-  assert.deepEqual(TABS.filter((_, i) => wrapped(before[i], back[i], n)), ['allowlist']);
+test('whole-item offsets agree with the continuous belt at integer positions', () => {
+  for (let sel = 0; sel < n; sel++) offsets(sel, n).forEach((d, i) => assert.equal(loopDistance(i, sel, n), d));
 });

@@ -17,7 +17,7 @@ Rules for reviewers:
   Y") are **not** translated in this version and stay in English.
 
 Regenerate this file after changing either table: `node tools/kannada-review.mjs`.
-177 strings.
+182 strings.
 
 ## Verdict tiers
 
@@ -207,6 +207,16 @@ Regenerate this file after changing either table: `node tools/kannada-review.mjs
 | `options.refresh` | Refresh | ನವೀಕರಿಸಿ |
 | `options.refreshing` | Refreshing… | ನವೀಕರಿಸಲಾಗುತ್ತಿದೆ… |
 | `options.entries` | {urls} URLs, {hosts} hosts | {urls} URL ಗಳು, {hosts} ಹೋಸ್ಟ್‌ಗಳು |
+
+## Settings page slideshow captions
+
+| Key | English (source) | Kannada (draft) |
+|---|---|---|
+| `slides.caption1` | Aspida banner on a Gmail email: no known threats | Gmail ಇಮೇಲ್ ಮೇಲೆ Aspida ಬ್ಯಾನರ್: ತಿಳಿದಿರುವ ಅಪಾಯ ಇಲ್ಲ |
+| `slides.caption2` | Hover tooltip on a Google search result | Google ಹುಡುಕಾಟ ಫಲಿತಾಂಶದ ಲಿಂಕ್ ಮೇಲೆ ಟೂಲ್‌ಟಿಪ್ |
+| `slides.caption3` | High risk tooltip on a lookalike PayPal link | ನಕಲಿ PayPal ಲಿಂಕ್ ಮೇಲೆ ಹೆಚ್ಚಿನ ಅಪಾಯದ ಟೂಲ್‌ಟಿಪ್ |
+| `slides.caption4` | QR code decoded and rated Suspicious, not opened | QR ಕೋಡ್ ಓದಲಾಗಿದೆ, ಸಂಶಯಾಸ್ಪದ ಎಂದು ಗುರುತಿಸಲಾಗಿದೆ, ತೆರೆಯಲಾಗಿಲ್ಲ |
+| `slides.caption5` | Demo inbox: risky rows tinted red and yellow | ಡೆಮೊ ಇನ್‌ಬಾಕ್ಸ್: ಅಪಾಯಕಾರಿ ಸಾಲುಗಳು ಕೆಂಪು ಮತ್ತು ಹಳದಿ |
 
 ## Relative times
 

@@ -4,8 +4,12 @@ import { getSettings, updateSettings, getLocal, onLocalChanged } from '../../pla
 import { send } from '../../platform/messaging.js';
 import { manifestVersion } from '../../platform/browser.js';
 import { t, setLanguage } from '../../config/strings/index.js';
-import { step, offsets, wrapped } from './carousel.js';
-import { createIdleMode } from '../../core/idle-mode.js';
+import { step } from './carousel.js';
+import { createIdleMode, SLIDES } from '../../core/idle-mode.js';
+import {
+  loopDistance, wrapPosition, advance, clampDt, scaleFor, highlightFor, labelFor, opacityFor, slotX, targetFor, nearestItem,
+  easeOutCubic, easeInQuad, CENTRE_EASE_MS, RESUME_EASE_MS,
+} from '../../core/belt.js';
 
 // Feature switches in display order. Labels and descriptions are the
 // 'feature.<key>' and 'feature.<key>.desc' strings.
@@ -50,6 +54,7 @@ function applyLanguage(lang) {
   const code = setLanguage(lang);
   document.documentElement.lang = code;
   for (const e of document.querySelectorAll('[data-i18n]')) e.textContent = t(e.dataset.i18n);
+  for (const tab of document.querySelectorAll('[role="tab"]')) tab.dataset.label = tab.textContent; // highlight layer text
   for (const e of document.querySelectorAll('[data-i18n-label]')) e.setAttribute('aria-label', t(e.dataset.i18nLabel));
   for (const e of document.querySelectorAll('[data-i18n-placeholder]')) e.placeholder = t(e.dataset.i18nPlaceholder);
   $('lang-hint').hidden = code === 'en';
@@ -97,58 +102,119 @@ $('theme').addEventListener('click', () => {
 });
 darkQuery.addEventListener('change', showTheme);
 
-// Circular navbar. The selected tab is centred; the others sit at their loop
-// offset (see carousel.js) and slide when the selection changes.
+// Circular navbar, moved like a conveyor (see src/core/belt.js). One
+// position value places every tab; in idle mode a single animation-frame
+// loop advances it by elapsed time. Per frame only transform, opacity and
+// --hl (the highlight layer's opacity) are written; no layout is read.
 const tabs = [...document.querySelectorAll('[role="tab"]')];
 const TAB_IDS = tabs.map((b) => b.dataset.tab);
+const N = tabs.length;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-let selected = -1;
-let lastOffsets = null;
-// Centre-to-centre distance from the middle, in slots, for each loop offset:
-// the tabs are scaled (1.12 / 0.92 / 0.86), so equal steps would leave
-// uneven gaps.
-const SLOT_POSITION = [0, 1.02, 1.92, 2.79];
-const slotPosition = (d) => Math.sign(d) * SLOT_POSITION[Math.min(Math.abs(d), SLOT_POSITION.length - 1)];
+for (const tab of tabs) tab.dataset.label = tab.textContent; // text of the highlight layer (::after)
+const belt = { p: 0, raf: 0, last: 0, running: false, rampStart: 0, ease: null, slotPx: 152, reach: 2, centreIdx: -1 };
 
-function reach() {
-  return Number(getComputedStyle(document.querySelector('.carousel')).getPropertyValue('--reach')) || 2;
+// Layout reads happen here only (start-up and width changes), never per frame.
+// Tabs are drawn 1.12 x (slot - 12px) wide (see options.css).
+function measureBelt() {
+  belt.slotPx = tabs[0].offsetWidth / 1.12 + 12;
+  belt.reach = Number(getComputedStyle(document.querySelector('.carousel')).getPropertyValue('--reach')) || 2;
 }
 
-function layoutTabs(animate) {
-  const n = tabs.length;
-  const next = offsets(selected, n);
-  const r = reach();
-  const strip = $('tabs');
-  strip.classList.toggle('no-anim', !animate || reducedMotion.matches);
+function renderBelt() {
+  const { p, slotPx, reach } = belt;
   tabs.forEach((tab, i) => {
-    const d = next[i];
-    if (animate && lastOffsets && wrapped(lastOffsets[i], d, n)) {
-      // Changes sides: jump (hidden) to just outside its new place, then slide in.
-      tab.style.transition = 'none';
-      tab.style.setProperty('--d', String(slotPosition(d + Math.sign(d))));
-      tab.setAttribute('data-out', '');
-      void tab.offsetWidth;
-      tab.style.transition = '';
-    }
-    tab.style.setProperty('--d', String(slotPosition(d)));
-    tab.dataset.dist = String(Math.abs(d));
-    tab.toggleAttribute('data-out', Math.abs(d) > r);
+    const d = loopDistance(i, p, N);
+    const o = opacityFor(d, reach);
+    tab.style.transform = `translateX(${(slotX(d) * slotPx).toFixed(2)}px) scale(${scaleFor(d).toFixed(4)})`;
+    tab.style.opacity = o.toFixed(3);
+    tab.style.setProperty('--hl', highlightFor(d).toFixed(3));
+    tab.style.setProperty('--hl-text', labelFor(d).toFixed(3));
+    tab.toggleAttribute('data-out', o < 0.02);
   });
-  lastOffsets = next;
+  const c = nearestItem(p, N);
+  if (c !== belt.centreIdx) {
+    belt.centreIdx = c;
+    tabs.forEach((tab, k) => {
+      tab.tabIndex = k === c ? 0 : -1;
+      tab.toggleAttribute('data-centre', k === c); // aria-selected only in active mode
+    });
+  }
 }
 
-// Move item i to the centre of the navbar (no section change).
-function centre(i, { animate = true, focus = false } = {}) {
-  const n = tabs.length;
-  i = step(i, 0, n);
-  const changed = i !== selected;
-  selected = i;
-  tabs.forEach((tab, k) => {
-    tab.tabIndex = k === i ? 0 : -1;
-    tab.toggleAttribute('data-centre', k === i); // enlarged look; aria-selected only in active mode
-  });
-  layoutTabs(animate && changed);
-  if (focus) tabs[i].focus();
+function frame(ts) {
+  belt.raf = 0;
+  const dt = belt.last ? clampDt(ts - belt.last) : 0;
+  belt.last = ts;
+  const e = belt.ease;
+  if (e) {
+    const t = (ts - (e.start ??= ts)) / CENTRE_EASE_MS;
+    belt.p = e.from + (e.to - e.from) * easeOutCubic(t);
+    if (t >= 1) {
+      belt.p = wrapPosition(e.to, N);
+      belt.ease = null;
+      renderBelt();
+      stopLoop();
+      e.done();
+      return;
+    }
+  } else if (belt.running) {
+    belt.p = advance(belt.p, dt, N, easeInQuad((ts - (belt.rampStart ||= ts)) / RESUME_EASE_MS));
+  } else {
+    return stopLoop();
+  }
+  renderBelt();
+  belt.raf = requestAnimationFrame(frame);
+}
+
+function startLoop() {
+  if (belt.raf || document.visibilityState === 'hidden') return;
+  belt.last = 0; // first frame moves nothing: no jump after a pause
+  $('tabs').classList.add('moving');
+  belt.raf = requestAnimationFrame(frame);
+}
+
+function stopLoop() {
+  if (belt.raf) cancelAnimationFrame(belt.raf);
+  belt.raf = 0;
+  $('tabs').classList.remove('moving');
+}
+
+// Idle mode: continuous motion, ramping up from a standstill. Reduced
+// motion: stays still with the current item centred.
+function startMotion() {
+  belt.ease = null;
+  if (reducedMotion.matches) {
+    belt.running = false;
+    stopLoop();
+    belt.p = wrapPosition(Math.round(belt.p), N);
+    renderBelt();
+    return;
+  }
+  belt.running = true;
+  belt.rampStart = 0;
+  startLoop();
+}
+
+function stopMotion() {
+  belt.running = false;
+  if (!belt.ease) stopLoop();
+}
+
+// Stop and bring item i to the exact centre along the shortest path (eased),
+// then call done.
+function centreOn(i, done) {
+  belt.running = false;
+  const to = targetFor(i, belt.p, N);
+  if (reducedMotion.matches || Math.abs(to - belt.p) < 1e-3) {
+    belt.ease = null;
+    stopLoop();
+    belt.p = wrapPosition(to, N);
+    renderBelt();
+    done();
+    return;
+  }
+  belt.ease = { from: belt.p, to, start: null, done };
+  startLoop();
 }
 
 // Show section i (active mode), or none (idle mode: no tab is selected, every
@@ -178,13 +244,16 @@ function showSection(i, { animate = true } = {}) {
   history.replaceState(null, '', i === null ? location.pathname + location.search : `#${TAB_IDS[i]}`);
 }
 
-// ---- Idle mode: rotating navbar + slideshow until a section is chosen ----
+// ---- Idle mode: moving navbar + slideshow until a section is chosen ----
 // Slides come from slides/slides.json (written by `npm run slides`); if it is
-// missing or empty there is simply no slideshow.
-const slideshow = { box: $('slideshow'), imgs: [], index: 0 };
+// missing or empty there is simply no slideshow. Each slideN.png may have a
+// caption string 'slides.captionN'; without one, no caption is shown.
+const slideshow = { box: $('slideshow'), imgs: [], nums: [], captions: [], dots: [], index: 0 };
+slideshow.box.style.setProperty('--slide-fade', `${SLIDES.fadeMs}ms`);
 
 // Cross-fade: the new slide fades in on top while the previous one stays
 // fully visible underneath, so the picture never dims to the background.
+// Its caption fades in as the old caption fades out; the dots follow.
 function showSlide(k, { fade = true } = {}) {
   const { imgs } = slideshow;
   if (!imgs.length) return;
@@ -195,12 +264,21 @@ function showSlide(k, { fade = true } = {}) {
     img.classList.toggle('on', on);
     img.classList.toggle('prev', fade && j === prev && !on);
     img.setAttribute('aria-hidden', String(!on));
+    slideshow.captions[j].classList.toggle('on', on);
+    slideshow.captions[j].setAttribute('aria-hidden', String(!on));
+    slideshow.dots[j].classList.toggle('on', on);
   });
 }
 
+// Alt text and captions in the current language.
 function slideAlts() {
   const m = slideshow.imgs.length;
   slideshow.imgs.forEach((img, j) => (img.alt = t('options.slideAlt', { n: j + 1, m })));
+  slideshow.captions.forEach((cap, j) => {
+    const key = `slides.caption${slideshow.nums[j]}`;
+    const text = t(key);
+    cap.textContent = text === key ? '' : text;
+  });
 }
 
 async function loadSlides() {
@@ -225,9 +303,15 @@ async function loadSlides() {
       }
     }),
   );
-  slideshow.imgs = loaded.filter(Boolean);
+  const kept = names.map((f, j) => [f, loaded[j]]).filter(([, img]) => img);
+  slideshow.imgs = kept.map(([, img]) => img);
+  slideshow.nums = kept.map(([f]) => Number(/\d+/.exec(f)[0]));
+  slideshow.captions = kept.map(() => el('p', { className: 'slide-caption' }));
+  slideshow.dots = kept.map(() => el('span'));
   slideAlts();
-  slideshow.box.replaceChildren(...slideshow.imgs);
+  $('slides').replaceChildren(...slideshow.imgs);
+  $('slide-captions').replaceChildren(...slideshow.captions);
+  $('slide-dots').replaceChildren(...slideshow.dots);
   showSlide(0, { fade: false });
   if (idle.mode === 'idle') slideshow.box.hidden = !slideshow.imgs.length;
 }
@@ -245,6 +329,7 @@ const idle = createIdleMode({
   onIdle: () => {
     showSection(null, { animate: false });
     showSlide(0, { fade: false });
+    startMotion();
     const box = slideshow.box;
     box.hidden = !slideshow.imgs.length;
     if (!box.hidden && !reducedMotion.matches) {
@@ -254,17 +339,21 @@ const idle = createIdleMode({
     }
   },
   onActive: () => {
+    stopMotion();
     slideshow.box.hidden = true;
   },
-  onRotate: () => centre(selected + 1),
-  onSlide: () => showSlide(slideshow.index + 1),
+  onSlide: () => showSlide(slideshow.index + 1, { fade: !reducedMotion.matches }),
 });
 
-// Choosing an item (click or keyboard) shows it and leaves idle mode.
+// Choosing an item (click or keyboard): the belt stops at once and eases the
+// item to the centre, then its section shows (active mode).
 function activate(i, { focus = true } = {}) {
-  centre(i, { focus });
-  idle.activate();
-  showSection(selected);
+  i = step(i, 0, N);
+  if (focus) tabs[i].focus({ preventScroll: true });
+  centreOn(i, () => {
+    idle.activate();
+    showSection(i);
+  });
 }
 
 tabs.forEach((tab, i) => {
@@ -272,8 +361,10 @@ tabs.forEach((tab, i) => {
   tab.addEventListener('keydown', (e) => {
     const n = tabs.length;
     let to = null;
-    if (e.key === 'ArrowRight') to = step(selected, 1, n);
-    else if (e.key === 'ArrowLeft') to = step(selected, -1, n);
+    // Repeated keys during the ease step from where the belt is heading.
+    const here = belt.ease ? nearestItem(belt.ease.to, n) : nearestItem(belt.p, n);
+    if (e.key === 'ArrowRight') to = step(here, 1, n);
+    else if (e.key === 'ArrowLeft') to = step(here, -1, n);
     else if (e.key === 'Home') to = 0;
     else if (e.key === 'End') to = n - 1;
     else if (e.key === 'Enter' || e.key === ' ') to = i;
@@ -286,18 +377,37 @@ for (const node of [...document.querySelectorAll('[role="tabpanel"]'), $('conten
 // Only mouse clicks count as activity (not movement, hover or scrolling).
 document.addEventListener('click', () => idle.click(), { capture: true, passive: true });
 $('content').addEventListener('focusout', () => idle.focusLeft());
-document.addEventListener('visibilitychange', () => idle.setHidden(document.visibilityState === 'hidden'));
-// The number of neighbours shown changes with the width.
-matchMedia('(max-width: 640px)').addEventListener('change', () => layoutTabs(false));
+// Hidden tab: no timers, no frames; back: continue with no jump.
+document.addEventListener('visibilitychange', () => {
+  const hidden = document.visibilityState === 'hidden';
+  idle.setHidden(hidden);
+  if (hidden) stopLoop();
+  else if (belt.running || belt.ease) startLoop();
+});
+reducedMotion.addEventListener('change', () => idle.mode === 'idle' && startMotion());
+// The number of neighbours shown and the slot width change with the window
+// width: measure again after a resize (at most once per frame).
+let resizeQueued = false;
+addEventListener('resize', () => {
+  if (resizeQueued) return;
+  resizeQueued = true;
+  requestAnimationFrame(() => {
+    resizeQueued = false;
+    measureBelt();
+    renderBelt();
+  });
+});
 
 // Start: About centred, idle. options.html#feeds etc. opens that section
 // directly (active mode), as before.
 const fromHash = () => TAB_IDS.indexOf(location.hash.slice(1));
-centre(0, { animate: false });
+measureBelt();
+renderBelt();
 if (fromHash() >= 0) {
-  centre(fromHash(), { animate: false });
+  belt.p = fromHash();
+  renderBelt();
   idle.activate();
-  showSection(selected, { animate: false });
+  showSection(fromHash(), { animate: false });
 } else {
   idle.start();
 }

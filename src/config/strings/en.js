@@ -111,6 +111,14 @@ export default {
   'options.tab.stats': 'Local counter',
   'options.tab.data': 'Your data',
   'options.slideAlt': 'Aspida screenshot {n} of {m}',
+
+  // Captions for slides/slideN.png on the settings page (only what each screenshot shows).
+  'slides.caption1': 'Aspida banner on a Gmail email: no known threats',
+  'slides.caption2': 'Hover tooltip on a Google search result',
+  'slides.caption3': 'High risk tooltip on a lookalike PayPal link',
+  'slides.caption4': 'QR code decoded and rated Suspicious, not opened',
+  'slides.caption5': 'Demo inbox: risky rows tinted red and yellow',
+
   'options.about': 'About Aspida',
   'options.about.intro': 'Aspida is a quiet guard for your browser. It looks at the links, messages and emails you see and warns you when something looks like a scam or a fake website.',
   'options.about.hover': 'Hover over a link and it tells you what looks wrong and why.',
