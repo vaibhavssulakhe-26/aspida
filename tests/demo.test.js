@@ -111,7 +111,7 @@ test('demo mailbox keeps the DOM contract the Gmail selectors read', () => {
     assert.match(tpl[1], /<div class="a3s">/, `${id}: body in div.a3s`);
   }
   assert.match(html, /<table class="ajC">/, 'one email shows the details table (Reply-To)');
-  assert.match(html, /Turn on <strong>Gmail: inbox highlighting<\/strong> in Aspida settings to see risk colours\./);
+  assert.doesNotMatch(html, /Turn on <strong>Gmail: inbox highlighting|Synthetic emails only|Back to the demo/, "removed hint/footer text stays removed");
   assert.doesNotMatch(html, /\bGoogle\b|<input[^>]+type="password"/i, 'no Google branding, no sign-in form');
 });
 

@@ -136,7 +136,7 @@ it unchanged.
 1. Click an email (or open `mail.html#kyc` etc. directly): the list is replaced by
    the email with Aspida's banner above the body. **← Back to Inbox** returns.
 2. Inbox colours: open Aspida settings and turn on **Gmail: inbox highlighting**
-   (off by default; the page shows this hint too). Without reloading, the KYC and
+   (off by default). Without reloading, the KYC and
    OTP rows get a red left bar and pink tint, the parcel row a yellow bar and tint;
    the three genuine rows stay white. Right after installing, the first colouring can
    take a few seconds while feeds import.

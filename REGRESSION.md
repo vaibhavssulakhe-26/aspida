@@ -87,8 +87,8 @@ only when every box below is green.
       PayPal-lookalike row red, SBI-on-gmail.com row yellow, others unchanged. Turn it
       off: colours removed.
 - [ ] m6: http://localhost:8080/mail.html ("Aspmail"): header says "Aspida demo, not real
-      mail", tab title "Aspmail: Aspida demo mailbox, not real mail"; the highlighting hint
-      is shown; no Google branding or sign-in form. Opening an email replaces the list;
+      mail", tab title "Aspmail: Aspida demo mailbox, not real mail"; no hint or footer text
+      above the inbox; no Google branding or sign-in form. Opening an email replaces the list;
       "← Back to Inbox" returns. No banner until an email is opened. Open each email: KYC and OTP →
       High risk, parcel → Suspicious, meeting / newsletter / order → "No known threats
       found", with the reasons listed in DEMO.md §6b. With inbox highlighting on: KYC and

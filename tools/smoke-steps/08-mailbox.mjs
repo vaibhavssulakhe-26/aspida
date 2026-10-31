@@ -21,7 +21,7 @@ export default async function ({ browser, extId, base, fail }) {
   await page.goto(`${base}/mail.html`);
   if (!/^Aspmail: Aspida demo mailbox, not real mail$/.test(await page.title())) fail(`mailbox title: ${await page.title()}`);
   if (!(await page.$eval('header', (h) => h.textContent)).includes('Aspida demo, not real mail')) fail('mailbox header lacks the demo label');
-  if (!/Turn on Gmail: inbox highlighting in Aspida settings to see risk colours/.test(await page.$eval('.hint', (h) => h.textContent.replace(/\s+/g, ' ')))) fail('mailbox lacks the highlighting hint');
+  if (await page.$('.hint')) fail('mailbox still shows the removed hint / footer text');
   await sleep(800);
   if ((await banners(page)).length) fail('mailbox: banner shown before any email was opened');
 
