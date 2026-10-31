@@ -4,7 +4,6 @@
 //
 // format: 'url-list'    one URL per line (OpenPhish)
 //         'domain-list' one hostname per line (Phishing.Database)
-//         'urlhaus-csv' URLhaus CSV export (quoted, '#' comments)
 //         'mixed'       bundled sample: URLs or hostnames, '#' comments
 //
 // category: 'phishing' (default; any hit = "Known malicious") or 'piracy'
@@ -36,16 +35,6 @@ export const FEEDS = [
     format: 'domain-list',
     refreshHours: 24, // ~11 MB, so refresh daily rather than every 6 h
     license: 'MIT (Mitchell Krog, Phishing.Database).',
-  },
-  {
-    id: 'urlhaus',
-    name: 'URLhaus (abuse.ch) recent',
-    // abuse.ch requires a free personal Auth-Key in the path since 2025.
-    urlTemplate: 'https://urlhaus-api.abuse.ch/v2/files/exports/{key}/recent.csv',
-    needsKey: true,
-    format: 'urlhaus-csv',
-    refreshHours: 6,
-    license: 'abuse.ch fair-use terms; free Auth-Key required (abuse.ch/terms-of-use).',
   },
   {
     id: 'piracy-sample',

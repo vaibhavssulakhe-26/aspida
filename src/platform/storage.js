@@ -1,7 +1,7 @@
 // Thin wrapper over chrome.storage. Everything lives in storage.local
 // (device only) or storage.session (cleared when the browser closes).
 
-import { mergeSettings } from '../config/settings.js';
+import { mergeSettings, migrateSettings } from '../config/settings.js';
 
 const local = () => chrome.storage.local;
 const session = () => chrome.storage.session;
@@ -13,6 +13,10 @@ export async function getLocal(key, fallback) {
 
 export async function setLocal(key, value) {
   await local().set({ [key]: value });
+}
+
+export async function removeLocal(keys) {
+  await local().remove(keys);
 }
 
 export async function getSession(key, fallback) {
@@ -33,6 +37,15 @@ export async function updateSettings(patch) {
   const next = mergeSettings({ ...cur, ...patch, feeds: { ...cur.feeds, ...(patch.feeds || {}) } });
   await setLocal('settings', next);
   return next;
+}
+
+// Drops settings keys left over from earlier versions (see migrateSettings).
+export async function migrateStoredSettings() {
+  const raw = await getLocal('settings', undefined);
+  if (!raw) return false;
+  const { settings, changed } = migrateSettings(raw);
+  if (changed) await setLocal('settings', settings);
+  return changed;
 }
 
 // Calls fn(newSettings) whenever settings change in any context.

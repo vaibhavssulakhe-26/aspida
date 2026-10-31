@@ -11,13 +11,13 @@ Rules for reviewers:
   claims a site is safe. A unit test rejects ಸುರಕ್ಷಿತ.
 - Keep `{placeholders}` exactly as they are (a test checks this).
 - "Aspida" is the product name and stays in Latin letters. Brand and product
-  names (Gmail, WhatsApp Web, UPI, OTP, URLhaus, SPF/DKIM/DMARC, "show details")
+  names (Gmail, WhatsApp Web, UPI, OTP, SPF/DKIM/DMARC, "show details")
   are kept as written.
 - Reason sentences produced by the checks (e.g. "Link text shows X but it opens
   Y") are **not** translated in this version and stay in English.
 
 Regenerate this file after changing either table: `node tools/kannada-review.mjs`.
-141 strings.
+159 strings.
 
 ## Verdict tiers
 
@@ -133,6 +133,27 @@ Regenerate this file after changing either table: `node tools/kannada-review.mjs
 | Key | English (source) | Kannada (draft) |
 |---|---|---|
 | `options.pageTitle` | Aspida settings | Aspida ಸೆಟ್ಟಿಂಗ್‌ಗಳು |
+| `options.subtitle` | Your digital shield | ನಿಮ್ಮ ಡಿಜಿಟಲ್ ಗುರಾಣಿ |
+| `options.tablist` | Settings sections | ಸೆಟ್ಟಿಂಗ್ ವಿಭಾಗಗಳು |
+| `options.tab.about` | About | ಪರಿಚಯ |
+| `options.tab.features` | Features | ವೈಶಿಷ್ಟ್ಯಗಳು |
+| `options.tab.feeds` | Threat feeds | ಬೆದರಿಕೆ ಪಟ್ಟಿಗಳು |
+| `options.tab.allowlist` | Allowlist | ಅನುಮತಿ ಪಟ್ಟಿ |
+| `options.tab.stats` | Local counter | ಸ್ಥಳೀಯ ಎಣಿಕೆ |
+| `options.tab.data` | Your data | ನಿಮ್ಮ ಡೇಟಾ |
+| `options.about` | About Aspida | Aspida ಬಗ್ಗೆ |
+| `options.about.intro` | Aspida is a quiet guard for your browser. It looks at the links, messages and emails you see and warns you when something looks like a scam or a fake website. | Aspida ನಿಮ್ಮ ಬ್ರೌಸರ್‌ಗೆ ಒಂದು ಸದ್ದಿಲ್ಲದ ಕಾವಲುಗಾರ. ನೀವು ನೋಡುವ ಲಿಂಕ್‌ಗಳು, ಸಂದೇಶಗಳು ಮತ್ತು ಇಮೇಲ್‌ಗಳನ್ನು ಅದು ಗಮನಿಸುತ್ತದೆ, ಮತ್ತು ಏನಾದರೂ ವಂಚನೆ ಅಥವಾ ನಕಲಿ ವೆಬ್‌ಸೈಟ್‌ನಂತೆ ಕಂಡರೆ ನಿಮ್ಮನ್ನು ಎಚ್ಚರಿಸುತ್ತದೆ. |
+| `options.about.hover` | Hover over a link and it tells you what looks wrong and why. | ಲಿಂಕ್ ಮೇಲೆ ಮೌಸ್ ಇಟ್ಟರೆ, ಏನು ಸರಿಯಿಲ್ಲ ಮತ್ತು ಏಕೆ ಎಂದು ಅದು ತಿಳಿಸುತ್ತದೆ. |
+| `options.about.local` | Aspida works on your own device and does not send what you browse to anyone. | Aspida ನಿಮ್ಮ ಸ್ವಂತ ಸಾಧನದಲ್ಲೇ ಕೆಲಸ ಮಾಡುತ್ತದೆ ಮತ್ತು ನೀವು ಬ್ರೌಸ್ ಮಾಡುವುದನ್ನು ಯಾರಿಗೂ ಕಳುಹಿಸುವುದಿಲ್ಲ. |
+| `options.about.limits` | It can never promise that a link is harmless. It points out warning signs so you can decide. | ಒಂದು ಲಿಂಕ್ ಹಾನಿಯಿಲ್ಲದ್ದು ಎಂದು ಅದು ಎಂದಿಗೂ ಭರವಸೆ ನೀಡಲಾರದು. ನೀವು ನಿರ್ಧರಿಸಲು ಸಾಧ್ಯವಾಗುವಂತೆ ಎಚ್ಚರಿಕೆಯ ಚಿಹ್ನೆಗಳನ್ನು ತೋರಿಸುತ್ತದೆ. |
+| `options.themeToDark` | Switch to dark theme | ಗಾಢ ಥೀಮ್‌ಗೆ ಬದಲಿಸಿ |
+| `options.themeToLight` | Switch to light theme | ತಿಳಿ ಥೀಮ್‌ಗೆ ಬದಲಿಸಿ |
+| `options.storedTitle` | Kept on this device only | ಈ ಸಾಧನದಲ್ಲಿ ಮಾತ್ರ ಇಡಲಾಗುತ್ತದೆ |
+| `options.stored.settings` | Your settings, including language and theme | ಭಾಷೆ ಮತ್ತು ಥೀಮ್ ಸೇರಿದಂತೆ ನಿಮ್ಮ ಸೆಟ್ಟಿಂಗ್‌ಗಳು |
+| `options.stored.allowlist` | Your allowlist | ನಿಮ್ಮ ಅನುಮತಿ ಪಟ್ಟಿ |
+| `options.stored.counters` | The local counters (numbers only) | ಸ್ಥಳೀಯ ಎಣಿಕೆಗಳು (ಸಂಖ್ಯೆಗಳು ಮಾತ್ರ) |
+| `options.stored.feeds` | Downloaded threat-feed lists, with when they were last updated | ಡೌನ್‌ಲೋಡ್ ಮಾಡಿದ ಬೆದರಿಕೆ ಪಟ್ಟಿಗಳು ಮತ್ತು ಅವು ಕೊನೆಯದಾಗಿ ನವೀಕರಿಸಿದ ಸಮಯ |
+| `options.storedNever` | Not kept: the pages you visit, the links you point at, your emails or chats. | ಇಡಲಾಗುವುದಿಲ್ಲ: ನೀವು ಭೇಟಿ ನೀಡುವ ಪುಟಗಳು, ನೀವು ಮೌಸ್ ಇಡುವ ಲಿಂಕ್‌ಗಳು, ನಿಮ್ಮ ಇಮೇಲ್‌ಗಳು ಅಥವಾ ಚಾಟ್‌ಗಳು. |
 | `options.sub` | All checks run on this device. Nothing you browse, read or receive is sent anywhere. | ಎಲ್ಲಾ ಪರಿಶೀಲನೆಗಳು ಈ ಸಾಧನದಲ್ಲೇ ನಡೆಯುತ್ತವೆ. ನೀವು ಬ್ರೌಸ್ ಮಾಡುವ, ಓದುವ ಅಥವಾ ಸ್ವೀಕರಿಸುವ ಯಾವುದನ್ನೂ ಎಲ್ಲಿಗೂ ಕಳುಹಿಸುವುದಿಲ್ಲ. |
 | `options.version` | Version {v}. | ಆವೃತ್ತಿ {v}. |
 | `options.language` | Interface language | ಇಂಟರ್ಫೇಸ್ ಭಾಷೆ |
@@ -145,9 +166,6 @@ Regenerate this file after changing either table: `node tools/kannada-review.mjs
 | `options.colFeed` | Feed | ಪಟ್ಟಿ |
 | `options.colStatus` | Status | ಸ್ಥಿತಿ |
 | `options.colEntries` | Entries | ನಮೂದುಗಳು |
-| `options.urlhausLabel` | URLhaus Auth-Key | URLhaus Auth-Key |
-| `options.urlhausPlaceholder` | Free key from auth.abuse.ch | auth.abuse.ch ನಿಂದ ಉಚಿತ ಕೀ |
-| `options.saveKey` | Save key | ಕೀ ಉಳಿಸಿ |
 | `options.allowlist` | Allowlist | ಅನುಮತಿ ಪಟ್ಟಿ |
 | `options.allowHint` | Sites you trust. Aspida skips every check for them, including feeds. | ನೀವು ನಂಬುವ ಸೈಟ್‌ಗಳು. ಅವುಗಳಿಗೆ Aspida ಬೆದರಿಕೆ ಪಟ್ಟಿಗಳೂ ಸೇರಿದಂತೆ ಎಲ್ಲಾ ಪರಿಶೀಲನೆಗಳನ್ನು ಬಿಡುತ್ತದೆ. |
 | `options.domain` | Domain | ಡೊಮೇನ್ |

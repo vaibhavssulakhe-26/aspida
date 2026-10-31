@@ -30,7 +30,7 @@ Rules for reviewers:
   claims a site is safe. A unit test rejects ಸುರಕ್ಷಿತ.
 - Keep \`{placeholders}\` exactly as they are (a test checks this).
 - "Aspida" is the product name and stays in Latin letters. Brand and product
-  names (Gmail, WhatsApp Web, UPI, OTP, URLhaus, SPF/DKIM/DMARC, "show details")
+  names (Gmail, WhatsApp Web, UPI, OTP, SPF/DKIM/DMARC, "show details")
   are kept as written.
 - Reason sentences produced by the checks (e.g. "Link text shows X but it opens
   Y") are **not** translated in this version and stay in English.

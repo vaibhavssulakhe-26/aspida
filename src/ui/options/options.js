@@ -3,7 +3,8 @@
 import { getSettings, updateSettings, getLocal, onLocalChanged } from '../../platform/storage.js';
 import { send } from '../../platform/messaging.js';
 import { manifestVersion } from '../../platform/browser.js';
-import { t, setLanguage, LANGUAGES } from '../../config/strings/index.js';
+import { t, setLanguage } from '../../config/strings/index.js';
+import { step, offsets, wrapped } from './carousel.js';
 
 // Feature switches in display order. Labels and descriptions are the
 // 'feature.<key>' and 'feature.<key>.desc' strings.
@@ -42,31 +43,156 @@ function ago(ts) {
   return h < 48 ? t('ago.hours', { n: h }) : t('ago.days', { n: Math.round(h / 24) });
 }
 
-// Static text in options.html carries data-i18n / data-i18n-placeholder keys.
+// Static text in options.html carries data-i18n / data-i18n-label /
+// data-i18n-placeholder keys.
 function applyLanguage(lang) {
   const code = setLanguage(lang);
   document.documentElement.lang = code;
   for (const e of document.querySelectorAll('[data-i18n]')) e.textContent = t(e.dataset.i18n);
+  for (const e of document.querySelectorAll('[data-i18n-label]')) e.setAttribute('aria-label', t(e.dataset.i18nLabel));
   for (const e of document.querySelectorAll('[data-i18n-placeholder]')) e.placeholder = t(e.dataset.i18nPlaceholder);
   $('lang-hint').hidden = code === 'en';
   $('version').textContent = t('options.version', { v: manifestVersion() });
-  $('ui-language').value = code;
+  for (const b of document.querySelectorAll('[data-lang]')) b.setAttribute('aria-pressed', String(b.dataset.lang === code));
   if (!clearArmed) $('clear').textContent = t('options.clear');
+  showTheme();
 }
 
-$('ui-language').replaceChildren(...LANGUAGES.map(({ code, name }) => el('option', { value: code, textContent: name, lang: code })));
-$('ui-language').addEventListener('change', () => updateSettings({ uiLanguage: $('ui-language').value }));
+for (const b of document.querySelectorAll('[data-lang]')) b.addEventListener('click', () => updateSettings({ uiLanguage: b.dataset.lang }));
+
+// Theme: 'auto' follows the system; the button sets an explicit light/dark
+// opposite to what is showing. The choice is the 'theme' setting; a copy in
+// localStorage lets theme-boot.js apply it before first paint.
+const darkQuery = matchMedia('(prefers-color-scheme: dark)');
+let theme = 'auto';
+const isDark = () => theme === 'dark' || (theme === 'auto' && darkQuery.matches);
+
+function showTheme() {
+  const root = document.documentElement;
+  if (theme === 'auto') delete root.dataset.theme;
+  else root.dataset.theme = theme;
+  root.toggleAttribute('data-dark', isDark());
+  const label = t(isDark() ? 'options.themeToLight' : 'options.themeToDark');
+  $('theme').setAttribute('aria-label', label);
+  $('theme').title = label;
+  try {
+    if (theme === 'auto') localStorage.removeItem('aspida-theme');
+    else localStorage.setItem('aspida-theme', theme);
+  } catch {
+    // Cache only; the setting is what counts.
+  }
+}
+
+function applyTheme(next) {
+  theme = next;
+  showTheme();
+}
+
+$('theme').addEventListener('click', () => {
+  const next = isDark() ? 'light' : 'dark';
+  applyTheme(next);
+  updateSettings({ theme: next });
+});
+darkQuery.addEventListener('change', showTheme);
+
+// Circular navbar. The selected tab is centred; the others sit at their loop
+// offset (see carousel.js) and slide when the selection changes.
+const tabs = [...document.querySelectorAll('[role="tab"]')];
+const TAB_IDS = tabs.map((b) => b.dataset.tab);
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+let selected = -1;
+let lastOffsets = null;
+// Centre-to-centre distance from the middle, in slots, for each loop offset:
+// the tabs are scaled (1.12 / 0.92 / 0.86), so equal steps would leave
+// uneven gaps.
+const SLOT_POSITION = [0, 1.02, 1.92, 2.79];
+const slotPosition = (d) => Math.sign(d) * SLOT_POSITION[Math.min(Math.abs(d), SLOT_POSITION.length - 1)];
+
+function reach() {
+  return Number(getComputedStyle(document.querySelector('.carousel')).getPropertyValue('--reach')) || 2;
+}
+
+function layoutTabs(animate) {
+  const n = tabs.length;
+  const next = offsets(selected, n);
+  const r = reach();
+  const strip = $('tabs');
+  strip.classList.toggle('no-anim', !animate || reducedMotion.matches);
+  tabs.forEach((tab, i) => {
+    const d = next[i];
+    if (animate && lastOffsets && wrapped(lastOffsets[i], d, n)) {
+      // Changes sides: jump (hidden) to just outside its new place, then slide in.
+      tab.style.transition = 'none';
+      tab.style.setProperty('--d', String(slotPosition(d + Math.sign(d))));
+      tab.setAttribute('data-out', '');
+      void tab.offsetWidth;
+      tab.style.transition = '';
+    }
+    tab.style.setProperty('--d', String(slotPosition(d)));
+    tab.dataset.dist = String(Math.abs(d));
+    tab.toggleAttribute('data-out', Math.abs(d) > r);
+  });
+  lastOffsets = next;
+}
+
+function select(i, { focus = false, animate = true } = {}) {
+  const n = tabs.length;
+  i = step(i, 0, n);
+  const changed = i !== selected;
+  selected = i;
+  tabs.forEach((tab, k) => {
+    const on = k === i;
+    tab.setAttribute('aria-selected', String(on));
+    tab.tabIndex = on ? 0 : -1;
+    const panel = $(tab.getAttribute('aria-controls'));
+    if (on && panel.hidden) {
+      panel.hidden = false;
+      if (animate && !reducedMotion.matches) {
+        panel.classList.remove('entering');
+        void panel.offsetWidth;
+        panel.classList.add('entering');
+      }
+    } else if (!on) panel.hidden = true;
+  });
+  layoutTabs(animate && changed);
+  if (focus) tabs[i].focus();
+  if (changed) history.replaceState(null, '', `#${TAB_IDS[i]}`);
+}
+
+tabs.forEach((tab, i) => {
+  tab.addEventListener('click', () => select(i, { focus: true }));
+  tab.addEventListener('keydown', (e) => {
+    const n = tabs.length;
+    let to = null;
+    if (e.key === 'ArrowRight') to = step(selected, 1, n);
+    else if (e.key === 'ArrowLeft') to = step(selected, -1, n);
+    else if (e.key === 'Home') to = 0;
+    else if (e.key === 'End') to = n - 1;
+    else if (e.key === 'Enter' || e.key === ' ') to = i;
+    if (to === null) return;
+    e.preventDefault();
+    select(to, { focus: true });
+  });
+});
+for (const p of document.querySelectorAll('[role="tabpanel"]')) p.addEventListener('animationend', () => p.classList.remove('entering'));
+// The number of neighbours shown changes with the width.
+matchMedia('(max-width: 640px)').addEventListener('change', () => layoutTabs(false));
+
+// options.html#feeds etc. opens that section; About otherwise.
+const fromHash = () => TAB_IDS.indexOf(location.hash.slice(1));
+select(Math.max(fromHash(), 0), { animate: false });
+addEventListener('hashchange', () => fromHash() >= 0 && select(fromHash()));
 
 async function renderFeatures() {
   const s = await getSettings();
   $('features').replaceChildren(
     ...FEATURES.map((key) => {
       const input = el('input', { type: 'checkbox', checked: !!s[key], id: `f-${key}` });
+      input.setAttribute('role', 'switch');
       input.addEventListener('change', () => updateSettings({ [key]: input.checked }));
       return el('div', { className: 'toggle' }, input, el('label', { htmlFor: `f-${key}`, textContent: t(`feature.${key}`) }), el('span', { className: 'desc', textContent: t(`feature.${key}.desc`) }));
     }),
   );
-  $('urlhaus-key').value = s.urlhausAuthKey || '';
 }
 
 async function renderFeeds() {
@@ -75,6 +201,7 @@ async function renderFeeds() {
   const rows = info.feeds.map((f) => {
     const st = info.status[f.id] || {};
     const on = el('input', { type: 'checkbox', checked: !!s.feeds[f.id], ariaLabel: t('options.enableFeed', { name: f.name }) });
+    on.setAttribute('role', 'switch');
     on.addEventListener('change', () => updateSettings({ feeds: { [f.id]: on.checked } }));
     const status = el('td');
     if (!s.feeds[f.id]) status.append(el('span', { className: 'small', textContent: t('options.feedOff') }));
@@ -116,11 +243,6 @@ async function renderStats() {
   $('stats').replaceChildren(...STATS.map((k) => el('div', {}, el('dt', { textContent: t(`stat.${k}`) }), el('dd', { textContent: String(stats[k] || 0) }))));
 }
 
-$('urlhaus-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  await updateSettings({ urlhausAuthKey: $('urlhaus-key').value.trim() });
-});
-
 $('allow-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const v = $('allow-input').value.trim();
@@ -158,7 +280,8 @@ function renderAll() {
 let shownLanguage = null;
 onLocalChanged(async (keys) => {
   if (keys.includes('settings')) {
-    const { uiLanguage } = await getSettings();
+    const { uiLanguage, theme: stored } = await getSettings();
+    if (stored !== theme) applyTheme(stored);
     if (uiLanguage !== shownLanguage) {
       shownLanguage = uiLanguage;
       applyLanguage(uiLanguage);
@@ -170,7 +293,8 @@ onLocalChanged(async (keys) => {
   if (keys.includes('allowlist')) renderAllowlist();
   if (keys.includes('stats')) renderStats();
 });
-getSettings().then(({ uiLanguage }) => {
+getSettings().then(({ uiLanguage, theme: stored }) => {
+  theme = stored;
   shownLanguage = uiLanguage;
   applyLanguage(uiLanguage);
   renderAll();

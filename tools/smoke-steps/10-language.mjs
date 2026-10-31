@@ -10,17 +10,19 @@ export default async function ({ browser, worker, extId, base, fail }) {
   await opts.setViewport({ width: 1280, height: 900 });
   await opts.goto(`chrome-extension://${extId}/src/ui/options/options.html`);
   await opts.waitForSelector('#features input');
-  await opts.select('#ui-language', 'kn');
+  await opts.click('[data-lang="kn"]');
   await waitFor(() => opts.$eval('#h-features', (h) => h.textContent).then((x) => x === KN.features), 'options page in Kannada', 5000).catch(() => {});
   const o = await opts.evaluate(() => ({
     lang: document.documentElement.lang,
     h: document.getElementById('h-features').textContent,
+    tab: document.getElementById('tab-about').textContent,
+    pressed: document.querySelector('[data-lang="kn"]').getAttribute('aria-pressed'),
     label: document.querySelector('label[for="f-hoverVerdict"]').textContent,
     hint: !document.getElementById('lang-hint').hidden,
     hscroll: document.documentElement.scrollWidth > innerWidth,
     font: getComputedStyle(document.body).fontFamily,
   }));
-  if (o.lang !== 'kn' || o.h !== KN.features || !o.hint || !/Kannada/.test(o.font)) fail(`options page not switched to Kannada: ${JSON.stringify(o)}`);
+  if (o.lang !== 'kn' || o.h !== KN.features || o.tab !== 'ಪರಿಚಯ' || o.pressed !== 'true' || !o.hint || !/Kannada/.test(o.font)) fail(`options page not switched to Kannada: ${JSON.stringify(o)}`);
   if (/[A-Za-z]{4,}/.test(o.label)) fail(`feature label still English: ${o.label}`);
   if (o.hscroll) fail('options page scrolls sideways in Kannada at 1280 px');
   await opts.setViewport({ width: 600, height: 900 });

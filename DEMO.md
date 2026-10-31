@@ -176,14 +176,26 @@ the normal icon straight away; turn it on and the icons come back.
 
 ## 8. Settings page
 
-- Language: pick **ಕನ್ನಡ** in the top-right dropdown. The settings page switches
-  at once; hover a link on the demo page or open the demo mailbox: tier names,
-  banner text and advice are in Kannada, the reasons stay in English (by design).
-  The toolbar tooltip and warning page follow too. Switch back to English the
-  same way. (Kannada strings are a DRAFT pending native-speaker review.)
-- Feed table: OpenPhish (~300 URLs) and Phishing.Database (~392k domains) with
-  last-updated times. URLhaus needs an abuse.ch key.
-- Allowlist, local counters (numbers only), **Clear all data**.
+Click the Aspida toolbar icon (or open the extension's options).
+
+- Top: **ASPIDA**, "Your digital shield", and a navbar with About, Features,
+  Threat feeds, Allowlist, Local counter, Your data. **About** opens first, in
+  the centre. Click **Features**: it slides to the centre (bigger, filled) and the
+  card below fades to the feature switches. Keep clicking to the right: the bar
+  loops (Your data → About → …), always with sections on both sides. ←/→ keys
+  do the same once a tab has focus. On a phone-width window only one neighbour
+  shows each side.
+- Theme: the sun/moon button top-right switches light ↔ dark and is remembered.
+  Default follows the system setting.
+- Language: click **ಕನ್ನಡ** top-right. The settings page switches at once;
+  hover a link on the demo page or open the demo mailbox: tier names, banner text
+  and advice are in Kannada, the reasons stay in English (by design). The
+  toolbar tooltip and warning page follow too. Click **EN** to switch back.
+  (Kannada strings are a DRAFT pending native-speaker review.)
+- Threat feeds: OpenPhish (~300 URLs) and Phishing.Database (~392k domains) with
+  last-updated times, plus the bundled demo lists and HaGeZi Anti-Piracy.
+- Allowlist; Local counter (numbers only); Your data: what is stored on this
+  device and **Clear all data**.
 - Privacy: no backend, no per-URL lookups, `chrome.storage.local` only.
 
 ## If the network is down on stage

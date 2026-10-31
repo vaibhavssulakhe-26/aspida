@@ -18,20 +18,51 @@ export const DEFAULT_SETTINGS = {
   softwareChecks: true, // cracked/pirated software signals (tooltip only)
   reportButton: true, // "Report this link" in risky tooltips and the warning page
   uiLanguage: 'en', // interface language: 'en' or 'kn' (draft); reasons stay English
+  theme: 'auto', // settings page colours: 'auto' (follows the system), 'light' or 'dark'
   feeds: {
     sample: true, // bundled demo feed (offline)
     openphish: true,
     'phishing-database': true,
-    urlhaus: false, // needs a free abuse.ch Auth-Key
     'piracy-sample': true, // bundled pirated-software demo list (offline)
     'hagezi-piracy': true,
   },
-  urlhausAuthKey: '',
   debug: false, // verbose console.debug from content scripts
 };
 
+export const THEMES = ['auto', 'light', 'dark'];
+
+// Keys from earlier versions that no longer mean anything (the URLhaus feed
+// and its Auth-Key were removed).
+const REMOVED_KEYS = ['urlhausAuthKey'];
+export const REMOVED_FEEDS = ['urlhaus'];
+
+// Stored settings without the removed keys. changed: whether anything was
+// dropped, so the caller knows to write the result back.
+export function migrateSettings(stored) {
+  const s = { ...(stored || {}) };
+  let changed = false;
+  for (const k of REMOVED_KEYS) {
+    if (Object.hasOwn(s, k)) {
+      delete s[k];
+      changed = true;
+    }
+  }
+  if (s.feeds && typeof s.feeds === 'object') {
+    s.feeds = { ...s.feeds };
+    for (const id of REMOVED_FEEDS) {
+      if (Object.hasOwn(s.feeds, id)) {
+        delete s.feeds[id];
+        changed = true;
+      }
+    }
+  }
+  return { settings: s, changed };
+}
+
 export function mergeSettings(stored) {
-  const s = { ...DEFAULT_SETTINGS, ...(stored || {}) };
-  s.feeds = { ...DEFAULT_SETTINGS.feeds, ...(stored?.feeds || {}) };
+  const clean = migrateSettings(stored).settings;
+  const s = { ...DEFAULT_SETTINGS, ...clean };
+  s.feeds = { ...DEFAULT_SETTINGS.feeds, ...(clean.feeds || {}) };
+  if (!THEMES.includes(s.theme)) s.theme = 'auto';
   return s;
 }

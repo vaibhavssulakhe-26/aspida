@@ -31,8 +31,7 @@
   ],
   "host_permissions": [
     "https://raw.githubusercontent.com/*",
-    "https://openphish.com/*",
-    "https://urlhaus-api.abuse.ch/*"
+    "https://openphish.com/*"
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none'"

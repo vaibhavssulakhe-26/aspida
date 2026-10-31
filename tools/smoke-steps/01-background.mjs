@@ -31,31 +31,10 @@ export default async function ({ browser, extId, fail }) {
   const v3 = await msg('analyze-url', { url: 'https://www.wikipedia.org/' });
   if (v3.tier !== 'none') fail(`wikipedia expected none, got ${v3.tier}`);
 
-  // Options page rendered its sections.
+  // Options page rendered its sections (five feeds now that URLhaus is gone).
   const counts = await opts.evaluate(() => ({ toggles: document.querySelectorAll('#features input').length, feeds: document.querySelectorAll('#feeds tbody tr').length }));
-  if (counts.toggles < 8 || counts.feeds !== 6) fail(`options page incomplete: ${JSON.stringify(counts)}`);
-
-  // Layout: Features left / Threat feeds right on wide screens, stacked on
-  // narrow ones; Features first in tab order; no horizontal scrolling.
-  const layout = () => opts.evaluate(() => {
-    const f = document.getElementById('features-section').getBoundingClientRect();
-    const t = document.getElementById('feeds-section').getBoundingClientRect();
-    const a = document.querySelector('section[aria-labelledby="h-allow"]').getBoundingClientRect();
-    const focusables = [...document.querySelectorAll('input, button')];
-    return {
-      sideBySide: Math.abs(f.top - t.top) < 2 && f.right <= t.left,
-      stacked: t.top >= f.bottom,
-      allowBelow: a.top >= Math.max(f.bottom, t.bottom),
-      hScroll: document.documentElement.scrollWidth > document.documentElement.clientWidth,
-      featuresFirst: focusables[0]?.closest('section')?.id === 'features-section',
-    };
-  });
-  await opts.setViewport({ width: 1280, height: 900 });
-  const wide = await layout();
-  if (!wide.sideBySide || !wide.allowBelow || wide.hScroll || !wide.featuresFirst) fail(`options wide layout: ${JSON.stringify(wide)}`);
-  await opts.setViewport({ width: 600, height: 900 });
-  const narrow = await layout();
-  if (!narrow.stacked || !narrow.allowBelow || narrow.hScroll) fail(`options narrow layout: ${JSON.stringify(narrow)}`);
+  if (counts.toggles < 8 || counts.feeds !== 5) fail(`options page incomplete: ${JSON.stringify(counts)}`);
+  // Detailed navbar / theme / switch checks are in step 12.
 
   // Interstitial on a known-malicious navigation.
   const tab = await browser.newPage();

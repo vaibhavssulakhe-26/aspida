@@ -32,18 +32,6 @@ text). Re-check before any non-hackathon use.
 | Notes | Stored as host entries; a host matches itself and its subdomains up to the registrable domain. The `phishing-links-ACTIVE.txt` list (~66 MB) is deliberately **not** used: too large for a browser extension. Hits on well-known (top-10k) domains are ignored, so a listing of a shared host can't flag all of it |
 | Import cost | ~9 s to store 391,548 hosts in IndexedDB; ~2–3 ms per lookup |
 
-## URLhaus (abuse.ch) (disabled by default)
-
-| | |
-|---|---|
-| Legacy URLs | `https://urlhaus.abuse.ch/downloads/text_online/`, `/csv_online/`, `/text/`, `/hostfile/` all return **`410 Gone`** on the check date |
-| Current access | Exports require a free personal **Auth-Key in the URL path**: `https://urlhaus-api.abuse.ch/v2/files/exports/<AUTH-KEY>/recent.csv` (per https://urlhaus.abuse.ch/api/). Without a valid key the endpoint refuses the request (`401`/`403`); Aspida records the error (seen as "HTTP 401" or "Failed to fetch" in testing) and stores no data |
-| Getting a key | abuse.ch Authentication Portal (free) |
-| Format | CSV with `#` comment lines; column 3 is the URL (`id,dateadded,url,url_status,...`) |
-| Aspida refresh | Every 6 hours (abuse.ch asks for no more than every 5 minutes) |
-| Terms | Free under abuse.ch fair-use terms; commercial use may need a subscription (abuse.ch/terms-of-use) |
-| Status in Aspida | Off until you paste a key on the options page. **Not verified with a real key in this build**: the parser follows the documented CSV layout and is unit-tested on a sample in that format |
-
 ## Bundled demo feed (always available, offline)
 
 `data/sample-feed.txt`: a few synthetic hosts and URLs under the reserved

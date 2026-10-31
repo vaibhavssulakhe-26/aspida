@@ -9,7 +9,8 @@
 import { FEEDS, feedEnabled, feedCategory } from '../config/feeds.js';
 import { parseFeed } from '../core/feed-parse.js';
 import { feedUrlKey, hostLookupChain } from '../core/url.js';
-import { getLocal, setLocal, getSettings, getSession, setSession } from '../platform/storage.js';
+import { getLocal, setLocal, removeLocal, getSettings, getSession, setSession } from '../platform/storage.js';
+import { REMOVED_FEEDS } from '../config/settings.js';
 import { putEntries, deleteGenerations, findExisting, deleteDatabase } from '../platform/idb.js';
 import { extensionUrl } from '../platform/browser.js';
 
@@ -33,15 +34,7 @@ export async function bumpDataEpoch() {
   await setLocal('dataEpoch', Date.now());
 }
 
-function feedUrl(feed, settings) {
-  if (feed.bundled) return extensionUrl(feed.bundled);
-  if (feed.needsKey) {
-    const key = (settings.urlhausAuthKey || '').trim();
-    if (!/^[A-Za-z0-9]{8,128}$/.test(key)) return null;
-    return feed.urlTemplate.replace('{key}', encodeURIComponent(key));
-  }
-  return feed.url;
-}
+const feedUrl = (feed) => (feed.bundled ? extensionUrl(feed.bundled) : feed.url);
 
 async function download(url) {
   const ctrl = new AbortController();
@@ -62,8 +55,7 @@ export async function refreshFeed(id, { force = false } = {}) {
   if (!feed) throw new Error(`unknown feed ${id}`);
   const settings = await getSettings();
   if (!feedEnabled(feed, settings)) return patchStatus(id, { error: null, disabled: true });
-  const url = feedUrl(feed, settings);
-  if (!url) return patchStatus(id, { error: 'Auth-Key not set', lastAttempt: Date.now(), disabled: false });
+  const url = feedUrl(feed);
 
   // Single-flight per feed across worker restarts.
   const lockKey = `feedLock:${id}`;
@@ -154,6 +146,14 @@ export async function lookup(rawUrl) {
     const feed = FEEDS.find((f) => f.id === source);
     return { source: feed?.name || source, kind, value, category: feedCategory(feed) };
   });
+}
+
+// Feeds removed in an update: drop their stored entries and status.
+export async function dropRemovedFeeds() {
+  for (const id of REMOVED_FEEDS) {
+    await deleteGenerations(id, null);
+    await removeLocal(statusKey(id));
+  }
 }
 
 export async function wipeFeeds() {

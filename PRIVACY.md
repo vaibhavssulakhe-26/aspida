@@ -31,8 +31,7 @@ fails if any request goes to a hovered or scanned target.
 ## Network requests Aspida makes
 
 1. **Feed downloads**, to exactly these hosts (also the only `host_permissions`):
-   `raw.githubusercontent.com`, `openphish.com`, `urlhaus-api.abuse.ch` (only if
-   you add a key). The pirated-software list (HaGeZi Anti-Piracy) also comes
+   `raw.githubusercontent.com` and `openphish.com`. The pirated-software list (HaGeZi Anti-Piracy) also comes
    from `raw.githubusercontent.com`. These requests are sent without cookies or a referrer. Like any
    download, they reveal your IP address and the time to that host. They contain
    nothing about your browsing.
@@ -66,7 +65,8 @@ extra permission. The button can be turned off in settings ("Report this link bu
 
 | Data | Where | Cleared by |
 |---|---|---|
-| Settings, allowlist, URLhaus Auth-Key | `chrome.storage.local` (not `sync`, so nothing goes to your Google account) | Clear all data |
+| Settings (including interface language and settings-page theme), allowlist | `chrome.storage.local` (not `sync`, so nothing goes to your Google account) | Clear all data |
+| Copy of the settings-page theme (`light` / `dark`), so the page opens in the right colours before settings load | `localStorage` of the extension's own settings page | Clear all data (theme back to `auto`) |
 | Feed entries | IndexedDB (extension origin) | Clear all data |
 | Feed status (time, counts, last error) | `chrome.storage.local` | Clear all data |
 | Detection counters (numbers only, no URLs) | `chrome.storage.local` | Clear all data |
@@ -76,6 +76,10 @@ extra permission. The button can be turned off in settings ("Report this link bu
 
 **Clear all data** (options page, click twice) deletes all of the above and
 then reloads the bundled demo feed.
+
+Earlier versions had an optional URLhaus feed with a personal abuse.ch
+Auth-Key. That feed is gone; updating deletes the stored key, the URLhaus
+switch and any URLhaus entries.
 
 ## Visible to websites
 

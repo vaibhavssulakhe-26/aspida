@@ -2,10 +2,10 @@
 // top level (required for MV3 wake-ups) and keeps no state in globals.
 
 import { serve } from '../platform/messaging.js';
-import { getLocal, setLocal, getSettings, onSettingsChanged, onLocalChanged, clearAllStorage } from '../platform/storage.js';
+import { getLocal, setLocal, getSettings, onSettingsChanged, onLocalChanged, clearAllStorage, migrateStoredSettings } from '../platform/storage.js';
 import { ensureAlarm, onAlarm, onInstalled, onStartup, onBeforeTopNavigate, onTopPageChanged, onTabRemoved, onActionClicked, openOptionsPage, openTab } from '../platform/browser.js';
 import { FEEDS, FEED_ALARM, FEED_ALARM_PERIOD_MINUTES } from '../config/feeds.js';
-import { refreshDueFeeds, refreshFeed, getFeedStatus, applyFeedToggles, wipeFeeds, bumpDataEpoch } from './feed-manager.js';
+import { refreshDueFeeds, refreshFeed, getFeedStatus, applyFeedToggles, wipeFeeds, bumpDataEpoch, dropRemovedFeeds } from './feed-manager.js';
 import { analyzeMany, analyzeOne, analyzeEmail, analyzeSenders, invalidateContext, allowlistKeyFor, bumpStat } from './analyzer.js';
 import { handleNavigation, addBypass, dropTab } from './navigation-guard.js';
 import { decodeQrFromUrl } from './qr-fetch.js';
@@ -13,6 +13,8 @@ import { updateTabIcon, refreshAllTabIcons } from './toolbar-icon.js';
 import { destinationUrl, reportableUrl, wrongWarningIssueUrl, REPORTABLE_TIERS } from '../core/report.js';
 
 async function init() {
+  await migrateStoredSettings();
+  await dropRemovedFeeds();
   refreshAllTabIcons().catch((e) => console.warn('Aspida toolbar icon refresh failed', e));
   await ensureAlarm(FEED_ALARM, FEED_ALARM_PERIOD_MINUTES);
   await refreshDueFeeds();
@@ -87,7 +89,7 @@ serve({
     return list;
   },
 
-  'feed-status': async () => ({ feeds: FEEDS.map(({ id, name, refreshHours, license, needsKey }) => ({ id, name, refreshHours, license, needsKey: !!needsKey })), status: await getFeedStatus() }),
+  'feed-status': async () => ({ feeds: FEEDS.map(({ id, name, refreshHours, license }) => ({ id, name, refreshHours, license })), status: await getFeedStatus() }),
   'feed-refresh': ({ id }) => refreshFeed(id, { force: true }),
   stats: () => getLocal('stats', {}),
 

@@ -15,13 +15,9 @@ only when every box below is green.
 ## Manual (Chrome, chrome://extensions → Load unpacked → repo root)
 
 - [ ] m1: Extension card shows no "Errors" button. Service worker "Inspect" console is clean.
-- [ ] m2: Options page layout: on a wide window Features is the left column and
-      Threat feeds the right; Allowlist, counters and "Clear all data" follow below
-      at full width. On a narrow window everything is one column. Tab starts in
-      Features. Check light and dark mode.
-- [ ] m2: Toolbar icon opens the options page. Feed table shows "Bundled demo feed"
-      updated, OpenPhish / Phishing.Database updated within a minute (online), URLhaus
-      "Auth-Key not set" unless a key is saved.
+- [ ] m2: Toolbar icon opens the options page. Feed table (Threat feeds tab) shows
+      "Bundled demo feed" updated, OpenPhish / Phishing.Database updated within a
+      minute (online). Five feed rows; no Auth-Key field.
 - [ ] m2: Visit `http://malicious.aspida-demo.invalid/` → warning page, label
       "Known malicious", evidence cites the host. "Go back" returns; "Proceed anyway"
       leaves the page (DNS error is expected for .invalid) and does not loop.
@@ -116,11 +112,27 @@ only when every box below is green.
 - [ ] m9: Feed table shows "HaGeZi's Anti-Piracy" updated (online) and the bundled
       pirated-software demo list. Turn off "Cracked / pirated software" → software
       reasons gone without reload; the two piracy lists are not downloaded while off.
-- [ ] m10: Settings → language ಕನ್ನಡ: the settings page switches without reload, both
-      columns fit (no sideways scroll at wide or narrow width; feed table buttons not
-      clipped). Demo tooltips, the demo mailbox banner, the toolbar tooltip and the
+- [ ] m10: Settings → ಕನ್ನಡ (top-right): the settings page switches without reload,
+      navbar labels fit (no sideways scroll at wide or narrow width; feed rows and
+      buttons not clipped). Demo tooltips, the demo mailbox banner, the toolbar tooltip and the
       warning page show Kannada tier names and text; reasons stay English; "No known
       threats found" is ತಿಳಿದಿರುವ ಯಾವುದೇ ಅಪಾಯ ಕಂಡುಬಂದಿಲ್ಲ (never ಸುರಕ್ಷಿತ). Kannada glyphs
       render (no boxes). Switch back to English: everything returns without reload.
 - [ ] m7: README, FEEDS, PRIVACY and DEMO match behaviour (permissions table equals
       manifest.json; feed URLs equal src/config/feeds.js).
+- [ ] m12: Settings page: "ASPIDA" / "Your digital shield" centred; About selected
+      and centred on open. Click each navbar item: it slides to the centre (bigger,
+      bold) and the card swaps with a short fade; the loop wraps both ways (left of
+      About is Your data) and there are always items on both sides. Tab to the
+      navbar, then ←/→ / Home / End move the selection; focus ring visible.
+      Narrow window (~380 px): one neighbour each side, same behaviour. With the OS
+      "reduce motion" setting on, the swap is instant.
+- [ ] m12: Every switch on the Features tab still saves (toggle, reload the page,
+      it stays) and takes effect on the demo page without reload. Feed switches,
+      Refresh, allowlist add/remove, counters and Clear all data still work.
+- [ ] m12: Sun/moon button: switches light ↔ dark, survives a reload with no flash
+      of the other theme. Fresh profile / after Clear all data: follows the OS
+      light/dark setting. Warnings stay red/green in both themes; text readable.
+- [ ] m12: Updating from a build that had URLhaus: settings keep every other
+      choice; `chrome.storage.local` no longer has `urlhausAuthKey`, `feeds.urlhaus`
+      or `feedStatus:urlhaus`.

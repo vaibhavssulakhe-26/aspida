@@ -1,52 +1,211 @@
-:root { --bg: #fbfbfc; --card: #ffffff; --fg: #1f2328; --muted: #59636e; --border: #d0d7de; --accent: #1f6feb; --danger: #b91c1c; --ok: #1a7f37; color-scheme: light dark; }
-@media (prefers-color-scheme: dark) { :root { --bg: #0d1117; --card: #161b22; --fg: #e6edf3; --muted: #9198a1; --border: #3d444d; --accent: #4493f8; --danger: #f87171; --ok: #3fb950; } }
-* { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-main { max-width: 820px; margin: 0 auto; padding: 32px 16px 64px; }
-/* Features (left) and Threat feeds (right) side by side on wide screens; one
-   column otherwise. DOM order keeps Features first for tab order. */
-.columns { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; margin: 16px 0; }
-.columns > section { margin: 0; }
-@media (min-width: 960px) {
-  main { max-width: 1180px; }
-  .columns { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); }
+/* Settings page. Palette "Clean Blue": navy #1D3557, teal #A8DADC, light grey
+   #E9ECEF, white. Risk colours (danger / ok) stay red and green in both
+   themes. Contrast (WCAG AA) was checked for every text/background pair:
+   body and muted text >= 4.5:1, tabs >= 4.5:1 at their reduced opacity,
+   control borders and focus rings >= 3:1. */
+:root {
+  --navy: #1d3557;
+  --teal: #a8dadc;
+  --grey: #e9ecef;
+  --white: #ffffff;
+
+  --bg: var(--grey);
+  --card: var(--white);
+  --fg: var(--navy);
+  --muted: #4a5b73;
+  --border: #a8dadc;
+  --control: #4f7480; /* checkbox/input outlines */
+  --hover: #d8eeef;
+  --focus: var(--navy);
+  --tab-bg: #d8eeef;
+  --tab-fg: var(--navy);
+  --tab-sel-bg: var(--navy);
+  --tab-sel-fg: var(--white);
+  --switch-on: var(--teal);
+  --switch-knob-on: var(--navy);
+  --switch-off: var(--grey);
+  --danger: #b42318;
+  --ok: #1a7f37;
+  --shadow: 0 1px 2px rgba(29, 53, 87, 0.08), 0 6px 24px rgba(29, 53, 87, 0.08);
+  color-scheme: light;
 }
-h1 { margin: 0; font-size: 24px; }
-h2 { font-size: 16px; margin: 0 0 4px; }
-.sub, .hint { color: var(--muted); margin: 4px 0 12px; }
-section { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin: 16px 0; }
-.toggles { display: grid; gap: 10px; }
-.toggle { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: start; }
-.toggle input { margin-top: 3px; }
-.toggle .desc { grid-column: 2; color: var(--muted); font-size: 13px; }
+/* Dark tokens: applied for 'dark', and for 'auto' when the system is dark. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14253d;
+    --card: var(--navy);
+    --fg: var(--grey);
+    --muted: #b9c6d2;
+    --border: rgba(168, 218, 220, 0.3);
+    --control: #7fa9b0;
+    --hover: rgba(168, 218, 220, 0.12);
+    --focus: var(--teal);
+    --tab-bg: #2c4256;
+    --tab-fg: var(--teal);
+    --tab-sel-bg: var(--teal);
+    --tab-sel-fg: var(--navy);
+    --switch-on: var(--teal);
+    --switch-knob-on: var(--navy);
+    --switch-off: #14253d;
+    --danger: #ff9b91;
+    --ok: #7ee2a0;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 8px 28px rgba(0, 0, 0, 0.25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14253d;
+  --card: var(--navy);
+  --fg: var(--grey);
+  --muted: #b9c6d2;
+  --border: rgba(168, 218, 220, 0.3);
+  --control: #7fa9b0;
+  --hover: rgba(168, 218, 220, 0.12);
+  --focus: var(--teal);
+  --tab-bg: #2c4256;
+  --tab-fg: var(--teal);
+  --tab-sel-bg: var(--teal);
+  --tab-sel-fg: var(--navy);
+  --switch-on: var(--teal);
+  --switch-knob-on: var(--navy);
+  --switch-off: #14253d;
+  --danger: #ff9b91;
+  --ok: #7ee2a0;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 8px 28px rgba(0, 0, 0, 0.25);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+main { max-width: 920px; margin: 0 auto; padding: 56px 16px 64px; }
+
+/* Language + theme, top-right corner. */
+.corner { position: absolute; top: 12px; right: 16px; display: flex; gap: 8px; align-items: center; }
+.lang { display: inline-flex; border: 1px solid var(--control); border-radius: 8px; overflow: hidden; }
+.lang button { border: 0; border-radius: 0; padding: 4px 10px; background: transparent; color: var(--fg); font-size: 13px; }
+.lang button + button { border-left: 1px solid var(--control); }
+.lang button[aria-pressed="true"] { background: var(--tab-sel-bg); color: var(--tab-sel-fg); font-weight: 600; }
+.icon-btn { display: inline-grid; place-items: center; width: 34px; height: 30px; padding: 0; border-color: var(--control); }
+#theme .sun { display: none; }
+:root[data-dark] #theme .sun { display: block; }
+:root[data-dark] #theme .moon { display: none; }
+
+/* Title block. */
+.masthead { text-align: center; margin-bottom: 20px; }
+h1 { margin: 0; font-size: clamp(34px, 7vw, 52px); letter-spacing: 0.18em; font-weight: 800; line-height: 1.1; padding-left: 0.18em; }
+.tagline { margin: 6px 0 0; color: var(--muted); font-size: 17px; letter-spacing: 0.02em; }
+.masthead .hint { margin: 8px 0 0; }
+
+/* Circular navbar. Every tab sits at the centre and is moved by --d slots
+   (set by options.js); only transform and opacity change, so the slide is
+   cheap and reduced-motion can simply turn the transition off. */
+.carousel { position: relative; height: 76px; margin: 0 auto 16px; overflow: hidden; --slot: 152px; --reach: 2; }
+.tabs { position: relative; height: 100%; }
+.tabs [role="tab"] {
+  position: absolute; left: 50%; top: 50%;
+  width: calc(var(--slot) - 12px); margin-left: calc((var(--slot) - 12px) / -2); margin-top: -19px; height: 38px;
+  padding: 0 10px; border: 1px solid transparent; border-radius: 999px;
+  background: var(--tab-bg); color: var(--tab-fg); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transform: translateX(calc(var(--d, 0) * var(--slot))) scale(0.86);
+  opacity: 0.8;
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease-out;
+}
+.tabs [role="tab"][data-dist="1"] { opacity: 0.9; transform: translateX(calc(var(--d, 0) * var(--slot))) scale(0.92); }
+.tabs [role="tab"][aria-selected="true"] {
+  background: var(--tab-sel-bg); color: var(--tab-sel-fg); font-weight: 700; opacity: 1;
+  transform: translateX(0) scale(1.12); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+.tabs [role="tab"][data-out] { opacity: 0; pointer-events: none; }
+.tabs [role="tab"]:hover:not([aria-selected="true"]) { border-color: var(--control); }
+.tabs [role="tab"]:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.tabs.no-anim [role="tab"] { transition: none; }
+
+/* Narrow screens: one neighbour each side, smaller slots. */
+@media (max-width: 640px) {
+  .carousel { --slot: min(128px, calc((100vw - 32px) / 3)); --reach: 1; }
+  .tabs [role="tab"] { font-size: 13px; padding: 0 6px; height: 42px; margin-top: -21px; white-space: normal; line-height: 1.2; text-overflow: clip; }
+}
+
+/* Content card. */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 24px; box-shadow: var(--shadow); }
+.panel:focus-visible { outline: 2px solid var(--focus); outline-offset: 6px; border-radius: 6px; }
+.panel.entering { animation: panel-in 220ms ease-out; }
+@keyframes panel-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (max-width: 640px) { .card { padding: 16px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .tabs [role="tab"] { transition: none; }
+  .panel.entering { animation: none; }
+}
+
+h2 { font-size: 19px; margin: 0 0 6px; }
+h3 { font-size: 15px; margin: 18px 0 6px; }
+p { margin: 0 0 10px; }
+.lead { font-size: 17px; }
+.hint, .note { color: var(--muted); margin: 4px 0 14px; }
+.note { color: var(--fg); }
+.small { font-size: 13px; color: var(--muted); }
+.stored { margin: 0 0 10px; padding-left: 20px; }
+.stored li { margin: 2px 0; }
+
+/* Feature switches: native checkboxes styled as switches (role="switch"). */
+.toggles { display: grid; gap: 4px; }
+.toggle { display: grid; grid-template-columns: auto 1fr; gap: 0 12px; align-items: start; padding: 8px 6px; border-radius: 8px; }
+.toggle:hover { background: var(--hover); }
+.toggle label { font-weight: 600; cursor: pointer; }
+.toggle .desc { grid-column: 2; color: var(--muted); font-size: 14px; }
+input[type="checkbox"] {
+  appearance: none; margin: 2px 0 0; flex: none; position: relative; cursor: pointer;
+  width: 38px; height: 22px; border-radius: 11px; border: 1.5px solid var(--control); background: var(--switch-off);
+}
+input[type="checkbox"]::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 15px; height: 15px; border-radius: 50%;
+  background: var(--control); transition: transform 160ms ease-out;
+}
+input[type="checkbox"]:checked { background: var(--switch-on); border-color: var(--switch-knob-on); }
+input[type="checkbox"]:checked::after { transform: translateX(16px); background: var(--switch-knob-on); }
+input[type="checkbox"]:disabled { opacity: 0.5; cursor: default; }
+@media (prefers-reduced-motion: reduce) { input[type="checkbox"]::after { transition: none; } }
+
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
-th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
-th { font-size: 12px; color: var(--muted); font-weight: 600; }
+th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
 td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* Narrow: each feed becomes a block (switch | name, status, entries, refresh). */
+@media (max-width: 640px) {
+  #feeds thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  #feeds tr { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  #feeds td { display: block; padding: 0; border: 0; grid-column: 2; }
+  #feeds td:first-child { grid-column: 1; grid-row: 1 / span 4; }
+  #feeds td.num { white-space: normal; }
+  #feeds td:last-child button { margin-top: 4px; }
+}
 .err { color: var(--danger); }
 .okc { color: var(--ok); }
-.small { font-size: 12px; color: var(--muted); }
+
 .inline-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
-input[type=text], input[type=password] { font: inherit; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--fg); min-width: 0; flex: 1 1 220px; }
-button { font: inherit; padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); color: var(--fg); cursor: pointer; }
-button:hover { border-color: var(--accent); }
+input[type="text"] { font: inherit; padding: 7px 10px; border: 1px solid var(--control); border-radius: 8px; background: var(--card); color: var(--fg); min-width: 0; flex: 1 1 220px; }
+button { font: inherit; padding: 6px 14px; border: 1px solid var(--control); border-radius: 8px; background: var(--card); color: var(--fg); cursor: pointer; }
+button:hover { background: var(--hover); }
+button:disabled { opacity: 0.55; cursor: default; }
 button.danger { color: var(--danger); border-color: var(--danger); }
-button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.chips { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
-.chips li { display: inline-flex; align-items: center; gap: 6px; padding: 2px 4px 2px 10px; border: 1px solid var(--border); border-radius: 14px; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.chips { list-style: none; padding: 0; margin: 14px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.chips li { display: inline-flex; align-items: center; gap: 6px; padding: 2px 4px 2px 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--hover); }
+.chips li.small { background: none; border-style: dashed; padding-right: 12px; }
 .chips button { padding: 0 8px; border: 0; background: transparent; color: var(--muted); }
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin: 0; }
-.stats div { border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
-.stats dt { color: var(--muted); font-size: 12px; }
-.stats dd { margin: 0; font-size: 20px; font-weight: 650; font-variant-numeric: tabular-nums; }
-.pill { display: inline-block; padding: 1px 8px; border-radius: 10px; border: 1px solid var(--border); font-size: 12px; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 0; }
+.stats div { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+.stats dt { color: var(--muted); font-size: 13px; }
+.stats dd { margin: 0; font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-.title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.lang { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
-.lang select { font: inherit; padding: 4px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); color: var(--fg); }
+
 /* Kannada interface: local fonts only (no web fonts are loaded). */
 html:lang(kn) body, html:lang(kn) button, html:lang(kn) input, html:lang(kn) select { font-family: "Noto Sans Kannada", "Nirmala UI", "Tunga", "Kedage", system-ui, sans-serif; }
-html:lang(kn) body { line-height: 1.6; }
-html:lang(kn) th { white-space: normal; }
+html:lang(kn) body { line-height: 1.65; }
+html:lang(kn) th { white-space: normal; text-transform: none; }
 html:lang(kn) td.num { white-space: normal; }

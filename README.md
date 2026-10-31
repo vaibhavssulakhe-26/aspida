@@ -32,7 +32,7 @@ demo server), use `npm run demo -- 8081`. Stage walkthrough: [DEMO.md](DEMO.md).
 |---|---|---|
 | Link hover verdict with cited evidence; visible links pre-checked | all http(s) pages | Link hover verdict (on) |
 | Typosquat / homoglyph / IDN lookalikes, brand claims (SBI, HDFC, ICICI, Paytm, PhonePe, Google Pay, IRCTC, Amazon, Flipkart, …) | everywhere | part of every check |
-| Threat-feed matching (OpenPhish, Phishing.Database, URLhaus*), local | everywhere | per feed (on; URLhaus off) |
+| Threat-feed matching (OpenPhish, Phishing.Database), local | everywhere | per feed (on) |
 | QR code hover: decode locally, show contents, check the link, never open it; UPI payee shown | all http(s) pages | QR code hover (on) |
 | Chat links: background pre-check so the hover verdict is instant | WhatsApp Web, Telegram Web, Instagram DMs | one per app (on) |
 | Inline risk badges next to chat links (verdicts are otherwise shown only on hover/focus) | same chat apps | Show inline badges in chat (**off**) |
@@ -41,11 +41,10 @@ demo server), use `npm run demo -- 8081`. Stage walkthrough: [DEMO.md](DEMO.md).
 | Warning page before loading known-malicious sites | navigation | Warning page (on), Warning page for High risk (on) |
 | Cracked / pirated software: host on a pirated-software list (HaGeZi Anti-Piracy, bundled demo list), 2+ cracked-software words (crack, keygen, activator, …), or a direct .exe/.msi/.zip/.iso/.scr/.apk download from an unknown site. Suspicious at most on its own, tooltip only, never a warning page | all http(s) pages | Cracked / pirated software (on) |
 | Toolbar icon colour for the current page: green no known threats found, orange suspicious, red high risk / known malicious, black not checked (non-web pages) | toolbar | Toolbar icon reflects the current site (on) |
-| Settings, feed status, allowlist, local counters, clear all data | options page | n/a |
+| Settings page: title "ASPIDA – Your digital shield" and a circular navbar (About, Features, Threat feeds, Allowlist, Local counter, Your data; About first). Click a section or use ←/→ and it slides to the centre | options page | n/a |
+| Settings page theme: light / dark "Clean Blue" palette, sun/moon button top-right | options page | follows the system (`auto`) |
 | "Report this link" on warning tooltips and the warning page: shows the exact URL (query/#fragment removed by default), Copy URL, and opens Google Safe Browsing (prefilled), Netcraft or cybercrime.gov.in in a new tab only when clicked; "Report a wrong warning" opens a prefilled GitHub issue or copies the details. Nothing is sent automatically | tooltips (risky tiers only), warning page | Report this link button (on) |
-| Interface language: English or Kannada (ಕನ್ನಡ, **DRAFT** translation) for tier names, buttons, settings, warning page, tooltip/banner text and advice. Reason sentences from the checks stay in English | options page dropdown | English |
-
-\* URLhaus requires a free abuse.ch Auth-Key since 2025; see [FEEDS.md](FEEDS.md).
+| Interface language: English or Kannada (ಕನ್ನಡ, **DRAFT** translation) for tier names, buttons, settings, warning page, tooltip/banner text and advice. Reason sentences from the checks stay in English | options page, EN / ಕನ್ನಡ switch top-right | English |
 
 Every feature has its own switch so it can be turned off instantly (e.g. on stage)
 without reloading the extension.
@@ -133,7 +132,6 @@ the extension package. Those files are listed in `web_accessible_resources`.
 | `webNavigation` | `onBeforeNavigate` to show the warning page (blocking webRequest isn't available in MV3); `onCommitted` / `onHistoryStateUpdated` and `getFrame` to colour the toolbar icon from the current page's URL (which is how the icon works without the `tabs` permission) | "Read your browsing history" |
 | host `https://raw.githubusercontent.com/*` | OpenPhish (redirect target), Phishing.Database and HaGeZi Anti-Piracy list files. Chrome ignores paths in host permissions, so it can't be narrowed to the two repos | covered below |
 | host `https://openphish.com/*` | OpenPhish feed URL | |
-| host `https://urlhaus-api.abuse.ch/*` | URLhaus export (only with your Auth-Key) | |
 | content scripts on `http://*/*`, `https://*/*` | Link hover and QR hover everywhere, plus the chat and Gmail modules (which only activate on their sites). Chrome also treats these match patterns as host access for the extension's own requests; Aspida uses that only to fetch the bytes of a QR **image** you hover on another site | "Read and change all your data on all websites" |
 
 Setting a tab's toolbar icon and tooltip (`chrome.action.setIcon` / `setTitle`)
@@ -199,8 +197,7 @@ and no remote code: the extension-page CSP is `script-src 'self'`.
   Suffix List.
 - **Shorteners** are reported but never expanded; expanding would send the link
   to the shortener.
-- **Feeds**: OpenPhish Community is for non-commercial use. URLhaus needs a
-  personal key.
+- **Feeds**: OpenPhish Community is for non-commercial use.
 
 ## Tests
 

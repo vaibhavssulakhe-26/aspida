@@ -4,68 +4,100 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title data-i18n="options.pageTitle">Aspida settings</title>
+  <!-- Classic (blocking) script: applies the remembered theme before first paint. -->
+  <script src="theme-boot.js"></script>
   <link rel="stylesheet" href="options.css">
   <script type="module" src="options.js"></script>
 </head>
 <body>
+  <div class="corner">
+    <div class="lang" role="group" aria-label="Interface language" data-i18n-label="options.language">
+      <button type="button" data-lang="en" lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="kn" lang="kn" aria-pressed="false">ಕನ್ನಡ</button>
+    </div>
+    <button id="theme" class="icon-btn" type="button" aria-label="Switch to dark theme" title="Switch to dark theme">
+      <svg class="moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="currentColor"/></svg>
+      <svg class="sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></g></svg>
+    </button>
+  </div>
+
   <main>
-    <header>
-      <div class="title-row">
-        <h1>Aspida</h1>
-        <div class="lang">
-          <label for="ui-language" data-i18n="options.language">Interface language</label>
-          <select id="ui-language"></select>
-        </div>
-      </div>
-      <p class="sub"><span data-i18n="options.sub">All checks run on this device. Nothing you browse, read or receive is sent anywhere.</span> <span id="version"></span></p>
+    <header class="masthead">
+      <h1>ASPIDA</h1>
+      <p class="tagline" data-i18n="options.subtitle">Your digital shield</p>
       <p id="lang-hint" class="hint" data-i18n="options.languageHint" hidden>Kannada translation is a draft. Reasons from the checks stay in English.</p>
     </header>
 
-    <div class="columns">
-      <section id="features-section" aria-labelledby="h-features">
+    <!-- Circular navbar: options.js positions the tabs around the selected one. -->
+    <nav class="carousel">
+      <div id="tabs" class="tabs" role="tablist" aria-label="Settings sections" data-i18n-label="options.tablist">
+        <button type="button" role="tab" id="tab-about" aria-controls="panel-about" data-tab="about" data-i18n="options.tab.about">About</button>
+        <button type="button" role="tab" id="tab-features" aria-controls="panel-features" data-tab="features" data-i18n="options.tab.features">Features</button>
+        <button type="button" role="tab" id="tab-feeds" aria-controls="panel-feeds" data-tab="feeds" data-i18n="options.tab.feeds">Threat feeds</button>
+        <button type="button" role="tab" id="tab-allowlist" aria-controls="panel-allowlist" data-tab="allowlist" data-i18n="options.tab.allowlist">Allowlist</button>
+        <button type="button" role="tab" id="tab-stats" aria-controls="panel-stats" data-tab="stats" data-i18n="options.tab.stats">Local counter</button>
+        <button type="button" role="tab" id="tab-data" aria-controls="panel-data" data-tab="data" data-i18n="options.tab.data">Your data</button>
+      </div>
+    </nav>
+
+    <div class="card">
+      <section id="panel-about" class="panel" role="tabpanel" aria-labelledby="tab-about" tabindex="0">
+        <h2 id="h-about" data-i18n="options.about">About Aspida</h2>
+        <p class="lead" data-i18n="options.about.intro"></p>
+        <p data-i18n="options.about.hover"></p>
+        <p data-i18n="options.about.local"></p>
+        <p data-i18n="options.about.limits"></p>
+        <p class="small" id="version"></p>
+      </section>
+
+      <section id="panel-features" class="panel" role="tabpanel" aria-labelledby="tab-features" tabindex="0" hidden>
         <h2 id="h-features" data-i18n="options.features">Features</h2>
         <p class="hint" data-i18n="options.featuresHint">Each feature can be switched off on its own. Changes apply right away, without reloading pages.</p>
         <div id="features" class="toggles"></div>
       </section>
 
-      <section id="feeds-section" aria-labelledby="h-feeds">
+      <section id="panel-feeds" class="panel" role="tabpanel" aria-labelledby="tab-feeds" tabindex="0" hidden>
         <h2 id="h-feeds" data-i18n="options.feeds">Threat feeds</h2>
         <p class="hint" data-i18n="options.feedsHint">Feed files are downloaded from the listed hosts and matched locally. Your URLs are never sent to them.</p>
         <div class="table-wrap"><table id="feeds">
           <thead><tr><th data-i18n="options.colOn">On</th><th data-i18n="options.colFeed">Feed</th><th data-i18n="options.colStatus">Status</th><th data-i18n="options.colEntries">Entries</th><th></th></tr></thead>
           <tbody></tbody>
         </table></div>
-        <form id="urlhaus-form" class="inline-form">
-          <label for="urlhaus-key" data-i18n="options.urlhausLabel">URLhaus Auth-Key</label>
-          <input id="urlhaus-key" type="password" autocomplete="off" spellcheck="false" placeholder="Free key from auth.abuse.ch" data-i18n-placeholder="options.urlhausPlaceholder">
-          <button type="submit" data-i18n="options.saveKey">Save key</button>
+      </section>
+
+      <section id="panel-allowlist" class="panel" role="tabpanel" aria-labelledby="tab-allowlist" tabindex="0" hidden>
+        <h2 id="h-allow" data-i18n="options.allowlist">Allowlist</h2>
+        <p class="hint" data-i18n="options.allowHint">Sites you trust. Aspida skips every check for them, including feeds.</p>
+        <form id="allow-form" class="inline-form">
+          <label for="allow-input" class="sr-only" data-i18n="options.domain">Domain</label>
+          <input id="allow-input" type="text" placeholder="example.com" autocomplete="off" spellcheck="false">
+          <button type="submit" data-i18n="options.add">Add</button>
         </form>
+        <ul id="allowlist" class="chips"></ul>
+      </section>
+
+      <section id="panel-stats" class="panel" role="tabpanel" aria-labelledby="tab-stats" tabindex="0" hidden>
+        <h2 id="h-stats" data-i18n="options.stats">Local counters</h2>
+        <p class="hint" data-i18n="options.statsHint">Counts only; no URLs or messages are kept.</p>
+        <dl id="stats" class="stats"></dl>
+      </section>
+
+      <section id="panel-data" class="panel" role="tabpanel" aria-labelledby="tab-data" tabindex="0" hidden>
+        <h2 id="h-data" data-i18n="options.data">Your data</h2>
+        <p class="note" data-i18n="options.sub">All checks run on this device. Nothing you browse, read or receive is sent anywhere.</p>
+        <h3 data-i18n="options.storedTitle">Kept on this device only</h3>
+        <ul class="stored">
+          <li data-i18n="options.stored.settings"></li>
+          <li data-i18n="options.stored.allowlist"></li>
+          <li data-i18n="options.stored.counters"></li>
+          <li data-i18n="options.stored.feeds"></li>
+        </ul>
+        <p class="hint" data-i18n="options.storedNever"></p>
+        <p class="hint" data-i18n="options.dataHint">Removes settings, allowlist, counters and downloaded feeds. The bundled demo feed is reloaded.</p>
+        <button id="clear" class="danger" type="button" data-i18n="options.clear">Clear all data</button>
+        <span id="clear-msg" class="hint" role="status"></span>
       </section>
     </div>
-
-    <section aria-labelledby="h-allow">
-      <h2 id="h-allow" data-i18n="options.allowlist">Allowlist</h2>
-      <p class="hint" data-i18n="options.allowHint">Sites you trust. Aspida skips every check for them, including feeds.</p>
-      <form id="allow-form" class="inline-form">
-        <label for="allow-input" class="sr-only" data-i18n="options.domain">Domain</label>
-        <input id="allow-input" type="text" placeholder="example.com" autocomplete="off" spellcheck="false">
-        <button type="submit" data-i18n="options.add">Add</button>
-      </form>
-      <ul id="allowlist" class="chips"></ul>
-    </section>
-
-    <section aria-labelledby="h-stats">
-      <h2 id="h-stats" data-i18n="options.stats">Local counters</h2>
-      <p class="hint" data-i18n="options.statsHint">Counts only; no URLs or messages are kept.</p>
-      <dl id="stats" class="stats"></dl>
-    </section>
-
-    <section aria-labelledby="h-data">
-      <h2 id="h-data" data-i18n="options.data">Your data</h2>
-      <p class="hint" data-i18n="options.dataHint">Removes settings, allowlist, counters and downloaded feeds. The bundled demo feed is reloaded.</p>
-      <button id="clear" class="danger" type="button" data-i18n="options.clear">Clear all data</button>
-      <span id="clear-msg" class="hint" role="status"></span>
-    </section>
   </main>
 </body>
 </html>
