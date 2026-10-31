@@ -7,19 +7,30 @@
 //
 // Interface text comes from t() in the language set with setLanguage()
 // (src/config/strings/). Reason sentences from the checks stay in English.
+// Colours follow the 'theme' setting (setTheme), see PALETTE below.
 
 import { t, getLanguage } from '../config/strings/index.js';
-import { canReport, reportableUrl, destinationUrl, wrongWarningText, REPORT_DESTINATIONS } from '../core/report.js';
+import { canReport, reportableUrl, destinationUrl, wrongWarningText, REPORT_DESTINATIONS, reportableSender, canReportSender } from '../core/report.js';
 
 export const TIER_ICON = { none: 'i', suspicious: '!', high: '!!', malicious: '✕' };
 
 const tierLabel = (tier) => t(`tier.${tier}`);
 
-// Root of every rendered block carries lang, so the Kannada font stack applies.
-function rootEl(doc, cls) {
-  const e = doc.createElement('div');
+// 'auto' (follow prefers-color-scheme), 'light' or 'dark'.
+let theme = 'auto';
+export function setTheme(value) {
+  theme = value === 'light' || value === 'dark' ? value : 'auto';
+  return theme;
+}
+export const getTheme = () => theme;
+
+// Root of every rendered block carries lang (Kannada font stack) and the
+// theme (colour variables, see themeCss).
+function rootEl(doc, cls, tag = 'div') {
+  const e = doc.createElement(tag);
   e.className = cls;
   e.lang = getLanguage();
+  e.dataset.theme = theme;
   return e;
 }
 
@@ -32,7 +43,8 @@ function el(doc, tag, cls, text) {
 
 // verdict: { tier, label, subject, hostUnicode, reasons[], allowlisted }
 // mode: 'tooltip' | 'banner' | 'page'
-// report: { onOpen() } adds a "Report this link" button (risky tiers only).
+// report: { onOpen(button), label?, allowed? } adds a "Report this link"
+// button (risky tiers only, unless allowed says otherwise).
 export function renderVerdict(verdict, { mode = 'tooltip', doc = document, maxReasons = mode === 'tooltip' ? 3 : 20, title, report } = {}) {
   const root = rootEl(doc, `tl-verdict tl-tier-${verdict.tier} tl-mode-${mode}`);
   root.setAttribute('role', 'status');
@@ -65,12 +77,12 @@ export function renderVerdict(verdict, { mode = 'tooltip', doc = document, maxRe
   }
   for (const id of verdict.advice || []) root.append(el(doc, 'p', 'tl-note tl-advice', t(`advice.${id}`)));
   if (verdict.tier === 'none') root.append(el(doc, 'p', 'tl-note', t('verdict.noneNote')));
-  if (report && canReport(verdict)) {
+  if (report && (report.allowed ?? canReport(verdict))) {
     // In the header row, right under the link, so the pointer reaches it
     // without crossing the rest of the tooltip.
-    const b = el(doc, 'button', 'tl-btn tl-report-open', t('report.button'));
+    const b = el(doc, 'button', 'tl-btn tl-report-open', report.label || t('report.button'));
     b.type = 'button';
-    b.addEventListener('click', () => report.onOpen());
+    b.addEventListener('click', () => report.onOpen(b));
     head.append(b);
   }
   return root;
@@ -155,37 +167,127 @@ export function renderReportPanel(verdict, { copy, open, close, doc = document }
   return root;
 }
 
+// "Report sender" confirm step (opened email). Shows the sender address and
+// display name; Copy copies the address; destination buttons open the
+// reporting site's plain form in a new tab (after copying the address).
+//   copy(text) -> Promise<boolean>; open(dest) -> Promise<boolean>; close()
+export function renderSenderReportPanel(verdict, sender, { copy, open, close, doc = document } = {}) {
+  const who = reportableSender(sender);
+  const root = rootEl(doc, `tl-verdict tl-tier-${verdict.tier} tl-report tl-report-sender`);
+  root.setAttribute('role', 'dialog');
+  root.setAttribute('aria-label', t('report.title'));
+  const head = el(doc, 'div', 'tl-head');
+  head.append(el(doc, 'span', 'tl-icon', TIER_ICON[verdict.tier]), el(doc, 'span', 'tl-label', t('report.title')));
+  root.append(head, el(doc, 'p', 'tl-note', t('report.senderIntro')));
+  if (!who) return root;
+  const shown = el(doc, 'code', 'tl-evidence tl-report-url tl-report-address', who.address);
+  shown.setAttribute('aria-label', t('report.senderLabel'));
+  root.append(el(doc, 'span', 'tl-qr-title', t('report.senderLabel')), shown);
+  if (who.displayName) root.append(el(doc, 'p', 'tl-note tl-report-name', t('report.senderName', { name: who.displayName })));
+
+  const status = el(doc, 'p', 'tl-note tl-report-status');
+  status.setAttribute('role', 'status');
+  const button = (text, cls, onClick) => {
+    const b = el(doc, 'button', `tl-btn ${cls}`, text);
+    b.type = 'button';
+    b.addEventListener('click', onClick);
+    return b;
+  };
+  const copyNow = async (okKey) => {
+    const ok = await copy(who.address);
+    status.textContent = t(ok ? okKey : 'report.copyFailed');
+    return ok;
+  };
+  const copyRow = el(doc, 'div', 'tl-actions');
+  copyRow.append(button(t('report.copyAddress'), 'tl-report-copy', () => copyNow('report.addressCopied')));
+  const dests = el(doc, 'div', 'tl-actions');
+  for (const { id } of REPORT_DESTINATIONS) {
+    const b = button(t(`report.${id}`), 'tl-report-dest', async () => {
+      await copyNow('report.addressCopiedPaste');
+      if (!(await open(id))) status.textContent = t('report.openFailed');
+    });
+    b.dataset.dest = id;
+    dests.append(b);
+  }
+  root.append(copyRow, el(doc, 'span', 'tl-qr-title', t('report.opensTab')), dests, el(doc, 'p', 'tl-note', t('report.helpline')), status);
+  if (close) {
+    const bar = el(doc, 'div', 'tl-actions tl-report-closebar');
+    bar.append(button(t('report.close'), 'tl-report-close', () => close()));
+    root.append(bar);
+  }
+  return root;
+}
+
+// Small "Report" button placed right after a flagged link in an email body.
+export function renderInlineReport(verdict, { onOpen, doc = document } = {}) {
+  const root = rootEl(doc, `tl-inline tl-tier-${verdict.tier}`, 'span');
+  const b = el(doc, 'button', 'tl-inline-report', t('report.inline'));
+  b.type = 'button';
+  b.setAttribute('aria-label', t('report.inlineLabel', { url: verdict.subject }));
+  b.title = t('report.title');
+  b.addEventListener('click', () => onOpen(b));
+  root.append(b);
+  return root;
+}
+
 // Small inline pill next to a chat link. Text is the tier label.
 export function renderBadge(verdict, { doc = document } = {}) {
-  const b = el(doc, 'span', `tl-badge tl-tier-${verdict.tier}`);
-  b.lang = getLanguage();
+  const b = rootEl(doc, `tl-badge tl-tier-${verdict.tier}`, 'span');
   b.append(el(doc, 'span', 'tl-icon', TIER_ICON[verdict.tier]), el(doc, 'span', 'tl-badge-text', tierLabel(verdict.tier)));
   return b;
 }
 
 // Gmail banner: combined summary + sender verdict + flagged links.
 // result: { summary: {tier,label,count}, sender, links: verdict[] }
-export function renderEmailBanner(result, { doc = document, notes = [] } = {}) {
+// Optional callbacks (each adds a button):
+//   onReportSender(button)     "Report sender" (Suspicious / High sender only;
+//                              senderInfo: { address, displayName })
+//   onReportLink(verdict, button)  "Report this link" on flagged links
+//   onMinimize(button)         "Minimize" (any warning tier)
+export function renderEmailBanner(result, { doc = document, notes = [], senderInfo, onReportSender, onReportLink, onMinimize } = {}) {
   const { summary, sender, links } = result;
   const root = rootEl(doc, `tl-verdict tl-tier-${summary.tier} tl-mode-banner`);
   const head = el(doc, 'div', 'tl-head');
   head.append(el(doc, 'span', 'tl-icon', TIER_ICON[summary.tier]), el(doc, 'span', 'tl-label', t('banner.title', { label: tierLabel(summary.tier) })));
   const linkList = (links || []).filter(Boolean);
   head.append(el(doc, 'span', 'tl-host', linkList.length === 1 ? t('banner.checkedOne') : t('banner.checkedMany', { n: linkList.length })));
+  if (onMinimize && summary.tier !== 'none') {
+    const m = el(doc, 'button', 'tl-btn tl-minimize', t('banner.minimize'));
+    m.type = 'button';
+    m.setAttribute('aria-expanded', 'true');
+    m.setAttribute('aria-label', t('banner.minimizeLabel'));
+    m.addEventListener('click', () => onMinimize(m));
+    head.append(m);
+  }
   root.append(head);
 
   if (sender && sender.tier !== 'none') {
-    const s = renderVerdict(sender, { mode: 'banner', doc, title: t('banner.sender', { address: sender.subject }) });
-    s.classList.add('tl-sub');
+    const report = onReportSender ? { label: t('report.senderButton'), allowed: canReportSender(sender, senderInfo), onOpen: (b) => onReportSender(b) } : null;
+    const s = renderVerdict(sender, { mode: 'banner', doc, title: t('banner.sender', { address: sender.subject }), report });
+    s.classList.add('tl-sub', 'tl-sub-sender');
     root.append(s);
   }
   for (const v of linkList.filter((x) => x.tier !== 'none').slice(0, 5)) {
-    const s = renderVerdict(v, { mode: 'banner', doc, maxReasons: 3, title: v.subject.length > 80 ? `${v.subject.slice(0, 80)}…` : v.subject });
+    const report = onReportLink ? { onOpen: (b) => onReportLink(v, b) } : null;
+    const s = renderVerdict(v, { mode: 'banner', doc, maxReasons: 3, title: v.subject.length > 80 ? `${v.subject.slice(0, 80)}…` : v.subject, report });
     s.classList.add('tl-sub');
     root.append(s);
   }
   if (summary.tier === 'none') root.append(el(doc, 'p', 'tl-note', t('verdict.noneNote')));
   for (const n of notes) root.append(el(doc, 'p', 'tl-note tl-limit', n));
+  return root;
+}
+
+// Minimized banner: a small coloured pill that expands it again.
+export function renderEmailPill(summary, { onExpand, doc = document } = {}) {
+  const root = rootEl(doc, `tl-pillwrap tl-tier-${summary.tier}`);
+  const b = el(doc, 'button', 'tl-pill');
+  b.type = 'button';
+  b.setAttribute('aria-expanded', 'false');
+  b.setAttribute('aria-label', t('banner.pillLabel', { label: tierLabel(summary.tier) }));
+  b.append(el(doc, 'span', 'tl-icon', TIER_ICON[summary.tier]), el(doc, 'span', 'tl-pill-text', t('banner.pill', { label: tierLabel(summary.tier) })));
+  b.addEventListener('click', () => onExpand(b));
+  root.append(b);
   return root;
 }
 
@@ -230,59 +332,112 @@ export function renderQr({ qr, verdict }, { doc = document } = {}) {
   return root;
 }
 
-// Styles for all of the above. Injected into each Shadow root / page.
-export const VERDICT_CSS = `
-.tl-verdict, .tl-badge {
-  --tl-bg: #ffffff; --tl-fg: #1f2328; --tl-muted: #59636e; --tl-border: #d0d7de; --tl-code: #f6f8fa;
-  --tl-none: #3b6fb6; --tl-suspicious: #b26b00; --tl-high: #c2410c; --tl-malicious: #b91c1c;
-  font: 13px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  color: var(--tl-fg); box-sizing: border-box; text-align: left; letter-spacing: normal;
+// ---- Colours ----------------------------------------------------------------
+// Palette "Clean Blue" (navy #1D3557, teal #A8DADC, light grey #E9ECEF,
+// white) for every in-page panel, the warning page included. This is the one
+// place the values live; themeCss() turns them into CSS variables for light,
+// dark, and 'auto' (prefers-color-scheme). Risk colours stay semantic: green
+// (no known threats), yellow (Suspicious), red (High risk / Known malicious).
+// Every text colour here is >= 4.5:1 on the panel it is used on (WCAG AA);
+// accents used as borders are >= 3:1. Panels are opaque.
+const PALETTE = {
+  light: {
+    bg: '#ffffff', bg2: '#e9ecef', fg: '#1d3557', muted: '#4a5b73', border: '#a8dadc', control: '#4f7480',
+    hover: '#d8eeef', primary: '#1d3557', 'primary-fg': '#ffffff', focus: '#1d3557', shadow: 'rgba(29, 53, 87, 0.22)',
+    'none-accent': '#17733a', 'none-text': '#17733a', 'none-icon': '#17733a', 'none-icon-fg': '#ffffff',
+    'suspicious-accent': '#b58300', 'suspicious-text': '#7a5300', 'suspicious-icon': '#f2c94c', 'suspicious-icon-fg': '#1d3557',
+    'high-accent': '#d32f2f', 'high-text': '#b42318', 'high-icon': '#d32f2f', 'high-icon-fg': '#ffffff',
+    'malicious-accent': '#9b1c1c', 'malicious-text': '#9b1c1c', 'malicious-icon': '#9b1c1c', 'malicious-icon-fg': '#ffffff',
+  },
+  dark: {
+    bg: '#1d3557', bg2: '#14253d', fg: '#e9ecef', muted: '#b9c6d2', border: '#4d7a87', control: '#7fa9b0',
+    hover: '#2c4256', primary: '#a8dadc', 'primary-fg': '#1d3557', focus: '#a8dadc', shadow: 'rgba(0, 0, 0, 0.45)',
+    'none-accent': '#7ee2a0', 'none-text': '#7ee2a0', 'none-icon': '#7ee2a0', 'none-icon-fg': '#1d3557',
+    'suspicious-accent': '#f2c94c', 'suspicious-text': '#f2c94c', 'suspicious-icon': '#f2c94c', 'suspicious-icon-fg': '#1d3557',
+    'high-accent': '#ff8a80', 'high-text': '#ff9b91', 'high-icon': '#ff8a80', 'high-icon-fg': '#1d3557',
+    'malicious-accent': '#ff7b72', 'malicious-text': '#ff8a80', 'malicious-icon': '#ff7b72', 'malicious-icon-fg': '#1d3557',
+  },
+};
+export const PALETTE_COLORS = PALETTE; // for tests
+
+const cssVars = (map) => Object.entries(map).map(([k, v]) => `--tl-${k}: ${v};`).join(' ');
+
+// Variables for the elements matched by `selector` (a comma list). The theme
+// comes from a data-theme attribute on those elements ('light' / 'dark';
+// anything else follows the system).
+export function themeCss(selector) {
+  const list = selector.split(',').map((x) => x.trim());
+  const each = (suffix) => list.map((x) => x + suffix).join(', ');
+  const dark = `${cssVars(PALETTE.dark)} color-scheme: dark;`;
+  return `${list.join(', ')} { ${cssVars(PALETTE.light)} color-scheme: light; }
+@media (prefers-color-scheme: dark) { ${each(':not([data-theme="light"])')} { ${dark} } }
+${each('[data-theme="dark"]')} { ${dark} }
+`;
 }
-@media (prefers-color-scheme: dark) {
-  .tl-verdict, .tl-badge {
-    --tl-bg: #161b22; --tl-fg: #e6edf3; --tl-muted: #9198a1; --tl-border: #3d444d; --tl-code: #0d1117;
-    --tl-none: #6ea8fe; --tl-suspicious: #e3a008; --tl-high: #fb923c; --tl-malicious: #f87171;
-  }
+
+// Styles for all of the above. Injected into each Shadow root / page.
+export const VERDICT_CSS = `${themeCss('.tl-verdict, .tl-badge, .tl-inline, .tl-pillwrap')}
+.tl-verdict, .tl-badge, .tl-inline, .tl-pillwrap {
+  font: 13px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--tl-fg); box-sizing: border-box; text-align: left; letter-spacing: normal; text-transform: none; font-style: normal;
 }
 /* Kannada interface: local fonts only (no web fonts are loaded). */
-.tl-verdict:lang(kn), .tl-badge:lang(kn) { font-family: "Noto Sans Kannada", "Nirmala UI", "Tunga", "Kedage", system-ui, sans-serif; line-height: 1.55; }
+.tl-verdict:lang(kn), .tl-badge:lang(kn), .tl-inline:lang(kn), .tl-pillwrap:lang(kn) { font-family: "Noto Sans Kannada", "Nirmala UI", "Tunga", "Kedage", system-ui, sans-serif; line-height: 1.55; }
 .tl-verdict { background: var(--tl-bg); border: 1px solid var(--tl-border); border-left: 4px solid var(--tl-accent); border-radius: 8px; padding: 10px 12px; }
-.tl-tier-none { --tl-accent: var(--tl-none); }
-.tl-tier-suspicious { --tl-accent: var(--tl-suspicious); }
-.tl-tier-high { --tl-accent: var(--tl-high); }
-.tl-tier-malicious { --tl-accent: var(--tl-malicious); }
+.tl-tier-none { --tl-accent: var(--tl-none-accent); --tl-label: var(--tl-none-text); --tl-icon-bg: var(--tl-none-icon); --tl-icon-fg: var(--tl-none-icon-fg); }
+.tl-tier-suspicious { --tl-accent: var(--tl-suspicious-accent); --tl-label: var(--tl-suspicious-text); --tl-icon-bg: var(--tl-suspicious-icon); --tl-icon-fg: var(--tl-suspicious-icon-fg); }
+.tl-tier-high { --tl-accent: var(--tl-high-accent); --tl-label: var(--tl-high-text); --tl-icon-bg: var(--tl-high-icon); --tl-icon-fg: var(--tl-high-icon-fg); }
+.tl-tier-malicious { --tl-accent: var(--tl-malicious-accent); --tl-label: var(--tl-malicious-text); --tl-icon-bg: var(--tl-malicious-icon); --tl-icon-fg: var(--tl-malicious-icon-fg); }
 .tl-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.tl-icon { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 4px; border-radius: 10px; background: var(--tl-accent); color: #fff; font-weight: 700; font-size: 11px; box-sizing: border-box; }
-.tl-label { font-weight: 650; color: var(--tl-accent); }
+.tl-icon { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 4px; border-radius: 10px; background: var(--tl-icon-bg); color: var(--tl-icon-fg); font-weight: 700; font-size: 11px; box-sizing: border-box; }
+.tl-label { font-weight: 650; color: var(--tl-label); }
 .tl-host { color: var(--tl-muted); overflow-wrap: anywhere; font-size: 12px; }
 .tl-reasons { margin: 8px 0 0; padding: 0 0 0 18px; }
 .tl-reason { margin: 4px 0; }
 .tl-detail { display: block; }
-.tl-evidence { display: inline-block; margin-top: 2px; padding: 1px 6px; border-radius: 4px; background: var(--tl-code); border: 1px solid var(--tl-border); font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; max-width: 100%; box-sizing: border-box; }
+.tl-evidence { display: inline-block; margin-top: 2px; padding: 1px 6px; border-radius: 4px; background: var(--tl-bg2); color: var(--tl-fg); border: 1px solid var(--tl-border); font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; max-width: 100%; box-sizing: border-box; }
 .tl-more, .tl-note { color: var(--tl-muted); font-size: 12px; }
 .tl-note { margin: 8px 0 0; }
-.tl-mode-tooltip { max-width: 360px; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
+.tl-mode-tooltip { max-width: 360px; box-shadow: 0 8px 24px var(--tl-shadow); }
 .tl-qr-payload { margin: 0 0 8px; padding: 0 0 8px; border-bottom: 1px solid var(--tl-border); }
 .tl-qr-title { display: block; color: var(--tl-muted); font-size: 12px; }
 .tl-mode-banner { margin: 0 0 12px; }
-.tl-sub { margin: 8px 0 0; border-left-width: 3px; padding: 8px 10px; }
+.tl-sub { margin: 8px 0 0; border-left-width: 3px; padding: 8px 10px; background: var(--tl-bg); }
 .tl-mode-page { padding: 16px 18px; font-size: 15px; }
 .tl-mode-page .tl-icon { min-width: 26px; height: 26px; border-radius: 13px; font-size: 13px; }
 .tl-mode-page .tl-label { font-size: 18px; }
-.tl-badge { display: inline-flex; align-items: center; gap: 4px; margin: 0 4px; padding: 1px 6px 1px 2px; border-radius: 10px; background: var(--tl-bg); border: 1px solid var(--tl-accent); color: var(--tl-accent); font-size: 11px; font-weight: 600; vertical-align: middle; cursor: help; white-space: nowrap; }
+.tl-badge { display: inline-flex; align-items: center; gap: 4px; margin: 0 4px; padding: 1px 6px 1px 2px; border-radius: 10px; background: var(--tl-bg); border: 1px solid var(--tl-accent); color: var(--tl-label); font-size: 11px; font-weight: 600; vertical-align: middle; cursor: help; white-space: nowrap; }
 .tl-badge .tl-icon { min-width: 16px; height: 16px; font-size: 10px; }
 .tl-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 0; }
-.tl-btn { font: inherit; font-size: 12px; line-height: 1.3; padding: 4px 10px; border: 1px solid var(--tl-border); border-radius: 6px; background: var(--tl-bg); color: var(--tl-fg); cursor: pointer; }
-.tl-btn:hover { border-color: var(--tl-accent); }
-.tl-btn:focus-visible, .tl-check input:focus-visible { outline: 2px solid var(--tl-accent); outline-offset: 1px; }
-.tl-report-open { margin-left: auto; padding: 2px 8px; color: var(--tl-accent); border-color: var(--tl-accent); font-weight: 600; }
+/* Buttons: secondary = teal tint, navy text; destinations = primary (navy). */
+.tl-btn { font: inherit; font-size: 12px; line-height: 1.3; padding: 4px 10px; border: 1px solid var(--tl-border); border-radius: 6px; background: var(--tl-hover); color: var(--tl-fg); cursor: pointer; margin: 0; text-transform: none; }
+.tl-btn:hover { border-color: var(--tl-control); }
+.tl-report-dest { background: var(--tl-primary); border-color: var(--tl-primary); color: var(--tl-primary-fg); font-weight: 600; }
+.tl-report-dest:hover { border-color: var(--tl-fg); }
+.tl-btn:focus-visible, .tl-check input:focus-visible, .tl-pill:focus-visible, .tl-inline-report:focus-visible { outline: 2px solid var(--tl-focus); outline-offset: 1px; }
+.tl-report-open { margin-left: auto; padding: 2px 8px; font-weight: 600; }
+.tl-minimize { margin-left: auto; padding: 2px 8px; }
+.tl-report-open + .tl-minimize { margin-left: 0; }
 .tl-report { max-width: 400px; }
-.tl-mode-tooltip.tl-report, .tl-float .tl-report { box-shadow: 0 8px 24px rgba(0,0,0,.18); }
+.tl-mode-tooltip.tl-report, .tl-float .tl-report { box-shadow: 0 8px 24px var(--tl-shadow); }
 .tl-report-url { display: block; margin: 2px 0 6px; user-select: all; }
 .tl-check { display: flex; gap: 6px; align-items: flex-start; font-size: 12px; color: var(--tl-muted); cursor: pointer; }
-.tl-check input { margin: 2px 0 0; }
+.tl-check input { margin: 2px 0 0; accent-color: var(--tl-primary); }
 .tl-report-wrong { border-top: 1px solid var(--tl-border); padding-top: 8px; }
 .tl-report-wrong .tl-qr-title { flex-basis: 100%; }
 .tl-report-status:empty { display: none; }
 .tl-report-closebar { justify-content: flex-end; }
+/* Inline "Report" after a flagged link in an email body: small, no layout change. */
+.tl-inline { display: inline; white-space: nowrap; }
+.tl-inline-report { display: inline-block; vertical-align: baseline; margin: 0 0 0 4px; padding: 0 6px; font: 600 11px/16px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; border: 1px solid var(--tl-accent); border-left-width: 3px; border-radius: 8px; background: var(--tl-bg); color: var(--tl-fg); cursor: pointer; text-transform: none; letter-spacing: normal; }
+.tl-inline-report:hover { background: var(--tl-hover); }
+.tl-inline:lang(kn) .tl-inline-report { font-family: "Noto Sans Kannada", "Nirmala UI", "Tunga", "Kedage", system-ui, sans-serif; }
+/* Minimized email banner. */
+.tl-pillwrap { display: block; margin: 0 0 12px; }
+.tl-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px 3px 4px; border: 1px solid var(--tl-accent); border-left-width: 4px; border-radius: 14px; background: var(--tl-bg); color: var(--tl-label); font: inherit; font-weight: 650; cursor: pointer; }
+.tl-pill:hover { background: var(--tl-hover); }
+/* Expand / minimize: short fade-and-lift, opacity and transform only. */
+.tl-enter { animation: tl-enter 160ms ease-out; }
+@keyframes tl-enter { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .tl-enter { animation: none; } }
 `;

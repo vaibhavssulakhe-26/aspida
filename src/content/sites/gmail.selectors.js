@@ -20,6 +20,11 @@ export default {
   sender: ['h3.iw span[email]', 'span.gD[email]'],
   // Rows of the "show details" table (present only when the user opens it).
   detailRows: ['table.ajC tr', '.ajA tr'],
+  // Attributes on the message element that carry Gmail's message id (used
+  // only to remember a minimized banner for this session).
+  messageIdAttrs: ['data-legacy-message-id', 'data-message-id'],
+  // Conversation subject (outside the message element).
+  subject: ['h2.hP'],
   // Message body.
   body: ['div.a3s', 'div.ii.gt'],
   // Where the banner goes: inserted before this element.

@@ -17,7 +17,7 @@ Rules for reviewers:
   Y") are **not** translated in this version and stay in English.
 
 Regenerate this file after changing either table: `node tools/kannada-review.mjs`.
-159 strings.
+172 strings.
 
 ## Verdict tiers
 
@@ -54,6 +54,10 @@ Regenerate this file after changing either table: `node tools/kannada-review.mjs
 | `banner.sender` | Sender {address} | ಕಳುಹಿಸಿದವರು {address} |
 | `banner.replyToHidden` | Reply-To isn't shown in Gmail's normal view, so it wasn't checked. Open "show details" on the email to include it. | Gmail ನ ಸಾಮಾನ್ಯ ನೋಟದಲ್ಲಿ Reply-To ತೋರಿಸುವುದಿಲ್ಲ, ಆದ್ದರಿಂದ ಅದನ್ನು ಪರಿಶೀಲಿಸಲಾಗಿಲ್ಲ. ಅದನ್ನು ಸೇರಿಸಲು ಇಮೇಲ್‌ನಲ್ಲಿ "show details" ತೆರೆಯಿರಿ. |
 | `banner.noAuthResults` | Gmail does not expose SPF/DKIM/DMARC results to extensions; this check uses the visible sender, links and Reply-To only. | Gmail SPF/DKIM/DMARC ಫಲಿತಾಂಶಗಳನ್ನು ವಿಸ್ತರಣೆಗಳಿಗೆ ನೀಡುವುದಿಲ್ಲ; ಈ ಪರಿಶೀಲನೆ ಕಾಣುವ ಕಳುಹಿಸಿದವರು, ಲಿಂಕ್‌ಗಳು ಮತ್ತು Reply-To ಅನ್ನು ಮಾತ್ರ ಬಳಸುತ್ತದೆ. |
+| `banner.minimize` | Minimize | ಚಿಕ್ಕದಾಗಿಸಿ |
+| `banner.minimizeLabel` | Minimize the Aspida alert for this email | ಈ ಇಮೇಲ್‌ನ Aspida ಎಚ್ಚರಿಕೆಯನ್ನು ಚಿಕ್ಕದಾಗಿಸಿ |
+| `banner.pill` | {label}, show | {label}, ತೋರಿಸಿ |
+| `banner.pillLabel` | Show the Aspida alert: {label} | Aspida ಎಚ್ಚರಿಕೆ ತೋರಿಸಿ: {label} |
 
 ## QR tooltip
 
@@ -101,6 +105,15 @@ Regenerate this file after changing either table: `node tools/kannada-review.mjs
 | `report.wrongCopied` | Details copied (URL, tier and signal ids). | ವಿವರಗಳನ್ನು ನಕಲಿಸಲಾಗಿದೆ (URL, ಮಟ್ಟ ಮತ್ತು ಸೂಚನೆಗಳ id ಗಳು). |
 | `report.close` | Close | ಮುಚ್ಚಿ |
 | `report.openFailed` | Could not open the page. | ಪುಟವನ್ನು ತೆರೆಯಲು ಆಗಲಿಲ್ಲ. |
+| `report.senderButton` | Report sender | ಕಳುಹಿಸಿದವರನ್ನು ವರದಿ ಮಾಡಿ |
+| `report.senderIntro` | Nothing is sent yet. The address below leaves your browser only if you open a reporting site and submit it there. | ಇನ್ನೂ ಏನನ್ನೂ ಕಳುಹಿಸಲಾಗಿಲ್ಲ. ನೀವು ವರದಿ ಮಾಡುವ ಸೈಟ್ ತೆರೆದು ಅಲ್ಲಿ ಸಲ್ಲಿಸಿದರೆ ಮಾತ್ರ ಕೆಳಗಿನ ವಿಳಾಸ ನಿಮ್ಮ ಬ್ರೌಸರ್‌ನಿಂದ ಹೊರಹೋಗುತ್ತದೆ. |
+| `report.senderLabel` | Sender to report | ವರದಿ ಮಾಡಬೇಕಾದ ಕಳುಹಿಸಿದವರು |
+| `report.senderName` | Shown as: {name} | ತೋರಿಸಿದ ಹೆಸರು: {name} |
+| `report.copyAddress` | Copy address | ವಿಳಾಸ ನಕಲಿಸಿ |
+| `report.addressCopied` | Address copied. | ವಿಳಾಸ ನಕಲಿಸಲಾಗಿದೆ. |
+| `report.addressCopiedPaste` | Address copied, paste it into the form. | ವಿಳಾಸ ನಕಲಿಸಲಾಗಿದೆ, ಅದನ್ನು ಫಾರ್ಮ್‌ಗೆ ಅಂಟಿಸಿ. |
+| `report.inline` | Report | ವರದಿ |
+| `report.inlineLabel` | Report as suspicious: {url} | ಸಂಶಯಾಸ್ಪದ ಎಂದು ವರದಿ ಮಾಡಿ: {url} |
 
 ## Toolbar icon tooltip
 
@@ -226,8 +239,8 @@ Regenerate this file after changing either table: `node tools/kannada-review.mjs
 | `feature.toolbarIcon.desc` | Colour the Aspida toolbar icon from a local check of the page you are on: green no known threats found, orange suspicious, red high risk or known malicious. | ನೀವು ಇರುವ ಪುಟದ ಸ್ಥಳೀಯ ಪರಿಶೀಲನೆಯಿಂದ Aspida ಟೂಲ್‌ಬಾರ್ ಐಕಾನ್‌ಗೆ ಬಣ್ಣ: ಹಸಿರು ತಿಳಿದಿರುವ ಅಪಾಯವಿಲ್ಲ, ಕಿತ್ತಳೆ ಸಂಶಯಾಸ್ಪದ, ಕೆಂಪು ಹೆಚ್ಚಿನ ಅಪಾಯ ಅಥವಾ ತಿಳಿದಿರುವ ದುರುದ್ದೇಶಪೂರಿತ. |
 | `feature.softwareChecks` | Cracked / pirated software | ಕ್ರ್ಯಾಕ್ / ಪೈರೇಟೆಡ್ ಸಾಫ್ಟ್‌ವೇರ್ |
 | `feature.softwareChecks.desc` | Mention in the hover verdict when a site is on a pirated-software list, or a link looks like a cracked download. Tooltip only, never a warning page. | ಸೈಟ್ ಪೈರೇಟೆಡ್ ಸಾಫ್ಟ್‌ವೇರ್ ಪಟ್ಟಿಯಲ್ಲಿದ್ದರೆ ಅಥವಾ ಲಿಂಕ್ ಕ್ರ್ಯಾಕ್ ಡೌನ್‌ಲೋಡ್‌ನಂತೆ ಕಂಡರೆ ತೀರ್ಪಿನಲ್ಲಿ ತಿಳಿಸಿ. ಟೂಲ್‌ಟಿಪ್ ಮಾತ್ರ, ಎಚ್ಚರಿಕೆ ಪುಟವಿಲ್ಲ. |
-| `feature.reportButton` | Report this link button | "ಈ ಲಿಂಕ್ ವರದಿ ಮಾಡಿ" ಬಟನ್ |
-| `feature.reportButton.desc` | Show "Report this link" in warning tooltips and the warning page. It only opens a reporting site in a new tab, or copies the URL, when you click; nothing is sent automatically. | ಎಚ್ಚರಿಕೆ ಟೂಲ್‌ಟಿಪ್‌ಗಳು ಮತ್ತು ಎಚ್ಚರಿಕೆ ಪುಟದಲ್ಲಿ "ಈ ಲಿಂಕ್ ವರದಿ ಮಾಡಿ" ತೋರಿಸಿ. ನೀವು ಕ್ಲಿಕ್ ಮಾಡಿದಾಗ ಮಾತ್ರ ವರದಿ ಸೈಟ್ ಅನ್ನು ಹೊಸ ಟ್ಯಾಬ್‌ನಲ್ಲಿ ತೆರೆಯುತ್ತದೆ ಅಥವಾ URL ನಕಲಿಸುತ್ತದೆ; ಏನನ್ನೂ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಕಳುಹಿಸುವುದಿಲ್ಲ. |
+| `feature.reportButton` | Report buttons | ವರದಿ ಬಟನ್‌ಗಳು |
+| `feature.reportButton.desc` | "Report this link" in warning tooltips and the warning page; in opened emails, "Report sender" and a small "Report" next to flagged links. They only copy text or open a reporting site in a new tab when you click; nothing is sent automatically. | ಎಚ್ಚರಿಕೆ ಟೂಲ್‌ಟಿಪ್‌ಗಳು ಮತ್ತು ಎಚ್ಚರಿಕೆ ಪುಟದಲ್ಲಿ "ಈ ಲಿಂಕ್ ವರದಿ ಮಾಡಿ"; ತೆರೆದ ಇಮೇಲ್‌ಗಳಲ್ಲಿ "ಕಳುಹಿಸಿದವರನ್ನು ವರದಿ ಮಾಡಿ" ಮತ್ತು ಗುರುತಿಸಿದ ಲಿಂಕ್‌ಗಳ ಪಕ್ಕ ಚಿಕ್ಕ "ವರದಿ" ಬಟನ್. ನೀವು ಕ್ಲಿಕ್ ಮಾಡಿದಾಗ ಮಾತ್ರ ಪಠ್ಯ ನಕಲಿಸುತ್ತವೆ ಅಥವಾ ವರದಿ ಸೈಟ್ ಅನ್ನು ಹೊಸ ಟ್ಯಾಬ್‌ನಲ್ಲಿ ತೆರೆಯುತ್ತವೆ; ಏನನ್ನೂ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಕಳುಹಿಸುವುದಿಲ್ಲ. |
 | `feature.chatWhatsApp` | WhatsApp Web | WhatsApp Web |
 | `feature.chatWhatsApp.desc` | Pre-check links in WhatsApp Web chats so the hover verdict is instant. | ಮೌಸ್ ಇಟ್ಟಾಗ ತೀರ್ಪು ತಕ್ಷಣ ಬರುವಂತೆ WhatsApp Web ಚಾಟ್‌ಗಳಲ್ಲಿನ ಲಿಂಕ್‌ಗಳನ್ನು ಮೊದಲೇ ಪರಿಶೀಲಿಸಿ. |
 | `feature.chatTelegram` | Telegram Web | Telegram Web |

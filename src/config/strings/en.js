@@ -24,6 +24,10 @@ export default {
   'banner.sender': 'Sender {address}',
   'banner.replyToHidden': 'Reply-To isn\'t shown in Gmail\'s normal view, so it wasn\'t checked. Open "show details" on the email to include it.',
   'banner.noAuthResults': 'Gmail does not expose SPF/DKIM/DMARC results to extensions; this check uses the visible sender, links and Reply-To only.',
+  'banner.minimize': 'Minimize',
+  'banner.minimizeLabel': 'Minimize the Aspida alert for this email',
+  'banner.pill': '{label}, show',
+  'banner.pillLabel': 'Show the Aspida alert: {label}',
 
   // QR tooltip
   'qr.unreadable': 'Could not read this image.',
@@ -62,6 +66,15 @@ export default {
   'report.wrongCopied': 'Details copied (URL, tier and signal ids).',
   'report.close': 'Close',
   'report.openFailed': 'Could not open the page.',
+  'report.senderButton': 'Report sender',
+  'report.senderIntro': 'Nothing is sent yet. The address below leaves your browser only if you open a reporting site and submit it there.',
+  'report.senderLabel': 'Sender to report',
+  'report.senderName': 'Shown as: {name}',
+  'report.copyAddress': 'Copy address',
+  'report.addressCopied': 'Address copied.',
+  'report.addressCopiedPaste': 'Address copied, paste it into the form.',
+  'report.inline': 'Report',
+  'report.inlineLabel': 'Report as suspicious: {url}',
 
   // Toolbar icon tooltip (per tab)
   'toolbar.normal': 'Aspida settings',
@@ -166,8 +179,8 @@ export default {
   'feature.toolbarIcon.desc': 'Colour the Aspida toolbar icon from a local check of the page you are on: green no known threats found, orange suspicious, red high risk or known malicious.',
   'feature.softwareChecks': 'Cracked / pirated software',
   'feature.softwareChecks.desc': 'Mention in the hover verdict when a site is on a pirated-software list, or a link looks like a cracked download. Tooltip only, never a warning page.',
-  'feature.reportButton': 'Report this link button',
-  'feature.reportButton.desc': 'Show "Report this link" in warning tooltips and the warning page. It only opens a reporting site in a new tab, or copies the URL, when you click; nothing is sent automatically.',
+  'feature.reportButton': 'Report buttons',
+  'feature.reportButton.desc': '"Report this link" in warning tooltips and the warning page; in opened emails, "Report sender" and a small "Report" next to flagged links. They only copy text or open a reporting site in a new tab when you click; nothing is sent automatically.',
   'feature.chatWhatsApp': 'WhatsApp Web',
   'feature.chatWhatsApp.desc': 'Pre-check links in WhatsApp Web chats so the hover verdict is instant.',
   'feature.chatTelegram': 'Telegram Web',

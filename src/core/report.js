@@ -52,6 +52,33 @@ export function destinationUrl(id, target) {
   return { url: u.href, prefilled: true };
 }
 
+// ---- Report sender (opened email) ------------------------------------------
+// Senders are reported only for these tiers (the sender checks never produce
+// "Known malicious" on their own).
+export const SENDER_REPORT_TIERS = new Set(['suspicious', 'high']);
+
+const ADDRESS_RE = /^[^\s@<>()",;:]+@[^\s@<>()",;:]+\.[^\s@<>()",;:]+$/;
+
+// { address, displayName } as shown in the confirm step, or null if the
+// address doesn't look like one. The display name is trimmed and capped (it
+// is attacker-controlled text, shown with textContent only).
+export function reportableSender(sender) {
+  const address = String(sender?.address || '').trim();
+  if (!ADDRESS_RE.test(address) || address.length > 254) return null;
+  const name = String(sender?.displayName || '').replace(/\s+/g, ' ').trim().slice(0, 120);
+  return { address, displayName: name && name !== address ? name : '' };
+}
+
+export function canReportSender(verdict, sender) {
+  return !!verdict && SENDER_REPORT_TIERS.has(verdict.tier) && !!reportableSender(sender);
+}
+
+// Destination page for a sender report: the plain form (no prefill; the UI
+// copies the address first). null for an unknown destination.
+export function senderDestinationUrl(id) {
+  return REPORT_DESTINATIONS.find((x) => x.id === id)?.base || null;
+}
+
 // "Report a wrong warning": short text with the URL and the signal ids (no
 // page content, no personal data beyond the URL the user chose to share).
 export function wrongWarningText(target, verdict) {

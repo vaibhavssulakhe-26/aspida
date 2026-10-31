@@ -4,7 +4,7 @@
 import { send } from '../../platform/messaging.js';
 import { closeCurrentTab } from '../../platform/browser.js';
 import { getSettings, onSettingsChanged } from '../../platform/storage.js';
-import { renderVerdict, renderReportPanel, VERDICT_CSS } from '../render.js';
+import { renderVerdict, renderReportPanel, VERDICT_CSS, themeCss, setTheme } from '../render.js';
 import { copyText } from '../clipboard.js';
 import { t, setLanguage } from '../../config/strings/index.js';
 
@@ -12,11 +12,26 @@ const target = new URLSearchParams(location.search).get('url') || '';
 const isHttp = /^https?:\/\//i.test(target);
 
 const style = document.createElement('style');
-style.textContent = VERDICT_CSS;
+style.textContent = themeCss(':root') + VERDICT_CSS;
 document.head.append(style);
 let verdict = null;
 let reportOpen = false;
 let reportEnabled = true;
+
+// Same theme as the settings page ('auto' follows the system). The copy in
+// localStorage is what theme-boot.js applies before first paint.
+function applyTheme(value) {
+  const theme = setTheme(value);
+  const root = document.documentElement;
+  if (theme === 'auto') delete root.dataset.theme;
+  else root.dataset.theme = theme;
+  try {
+    if (theme === 'auto') localStorage.removeItem('aspida-theme');
+    else localStorage.setItem('aspida-theme', theme);
+  } catch {
+    // cache only
+  }
+}
 
 // Static text carries data-i18n keys; re-run when the language setting changes.
 function render(lang) {
@@ -52,9 +67,11 @@ function renderReport(focus) {
 async function show() {
   const settings = await getSettings();
   reportEnabled = settings.reportButton !== false;
+  applyTheme(settings.theme);
   render(settings.uiLanguage);
   onSettingsChanged((s) => {
     reportEnabled = s.reportButton !== false;
+    applyTheme(s.theme);
     render(s.uiLanguage);
   });
   if (!isHttp) return;

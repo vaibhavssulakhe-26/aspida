@@ -2,11 +2,23 @@
 // (2) optional inbox-row highlighting from the sender shown in the list.
 // Read-only: never clicks (not even "show details"), replies, sends or edits.
 // Selectors live in sites/gmail.selectors.js; misses fail soft.
+//
+// The banner can be minimized to a pill (remembered per email for the
+// browser session, via the worker). With the reportButton setting on, it has
+// "Report sender" (Suspicious / High sender) and "Report this link" buttons,
+// and each flagged link in the body gets a small "Report" button after it
+// (in its own closed shadow root, so neither side's CSS affects the other).
+// Reporting only copies text or asks the worker to open a reporting site in a
+// new tab; nothing is sent automatically.
 
 import { send } from '../platform/messaging.js';
-import { blockShadowBefore } from '../ui/overlay.js';
-import { renderEmailBanner } from '../ui/render.js';
+import { blockShadowBefore, inlineShadow } from '../ui/overlay.js';
+import { renderEmailBanner, renderEmailPill, renderReportPanel, renderSenderReportPanel, renderInlineReport } from '../ui/render.js';
+import { copyText } from '../ui/clipboard.js';
+import { canReport } from '../core/report.js';
+import { emailKey } from '../core/email-key.js';
 import { t } from '../config/strings/index.js';
+import { openReportPopover, closeReportPopover, destroyReportPopover } from './report-popover.js';
 import { safe, debounce, debug, anchorText, httpHref } from './util.js';
 
 const MAX_LINKS = 200;
@@ -77,9 +89,39 @@ export function extractEmail(site, msg) {
   };
 }
 
+function messageIdOf(site, msg) {
+  for (const attr of site.messageIdAttrs || []) {
+    const v = msg.getAttribute(attr) || msg.querySelector(`[${attr}]`)?.getAttribute(attr);
+    if (v) return v;
+  }
+  return '';
+}
+
+const signalsOf = (verdict) => (verdict.reasons || []).map((r) => r.id);
+
+// Confirm steps, shown in the shared report popover next to the button.
+function openLinkReport(opener, verdict) {
+  const panel = renderReportPanel(verdict, {
+    copy: (text) => copyText(text, opener.getRootNode()),
+    open: (dest, url) => send('open-report', { dest, target: url, tier: verdict.tier, signals: signalsOf(verdict) }).then((ok) => !!ok, () => false),
+    close: () => closeReportPopover(),
+  });
+  openReportPopover(opener, panel);
+}
+
+function openSenderReport(opener, verdict, sender) {
+  const panel = renderSenderReportPanel(verdict, sender, {
+    copy: (text) => copyText(text, opener.getRootNode()),
+    open: (dest) => send('open-report', { kind: 'sender', dest }).then((ok) => !!ok, () => false),
+    close: () => closeReportPopover(),
+  });
+  openReportPopover(opener, panel);
+}
+
 export function createGmail(site) {
-  let banners = null; // message element -> { host, signature }
+  let banners = null; // message element -> { host, signature, extras: inline hosts }
   let bannerMo = null;
+  let reportOn = true; // settings.reportButton
   let rows = null; // painted row -> original inline style values
   let checked = null; // row -> sender signature already analysed (Gmail reuses rows)
   let rowMo = null;
@@ -91,8 +133,8 @@ export function createGmail(site) {
     const existing = banners.get(msg);
     // Same content and banner still shown (or its request still in flight): nothing to do.
     if (existing && existing.signature === signature && (!existing.host || existing.host.isConnected)) return;
-    existing?.host.remove();
-    banners.set(msg, { host: null, signature }); // claim before the async gap
+    removeEntry(existing);
+    banners.set(msg, { host: null, signature, extras: [] }); // claim before the async gap
     const result = await send('analyze-email', data);
     if (!banners || !result || !msg.isConnected) return;
     const anchor = first(site.bannerBefore, msg);
@@ -100,12 +142,74 @@ export function createGmail(site) {
       debug(`${site.id}: no banner anchor matched`);
       return;
     }
+    const key = emailKey({ messageId: messageIdOf(site, msg), address: data.sender.address, subject: first(site.subject, document)?.textContent || '' });
+    const warn = result.summary.tier !== 'none';
+    const minimized = warn && key ? !!(await send('banner-state', { key })) : false;
+    if (!banners || !msg.isConnected) return;
+
     const notes = [];
     if (!data.sender.replyTo) notes.push(t('banner.replyToHidden'));
     notes.push(t('banner.noAuthResults'));
     const { host, root } = blockShadowBefore(anchor);
-    root.append(renderEmailBanner(result, { notes }));
-    banners.set(msg, { host, signature });
+    const box = document.createElement('div');
+    root.append(box);
+    // Clicks and keys on Aspida's buttons stay inside the banner.
+    for (const type of ['click', 'mousedown', 'keydown']) box.addEventListener(type, (e) => e.stopPropagation());
+
+    const draw = (min, focusToggle) => {
+      const view = min
+        ? renderEmailPill(result.summary, { onExpand: safe(() => toggle(false), 'expand') })
+        : renderEmailBanner(result, {
+            notes,
+            senderInfo: data.sender,
+            onMinimize: warn && key ? safe(() => toggle(true), 'minimize') : null,
+            onReportSender: reportOn ? safe((b) => openSenderReport(b, result.sender, data.sender), 'report sender') : null,
+            onReportLink: reportOn ? safe((v, b) => openLinkReport(b, v), 'report link') : null,
+          });
+      if (focusToggle) view.classList.add('tl-enter');
+      box.replaceChildren(view);
+      if (focusToggle) view.querySelector(min ? '.tl-pill' : '.tl-minimize')?.focus({ preventScroll: true });
+    };
+    const toggle = (min) => {
+      closeReportPopover({ restoreFocus: false });
+      draw(min, true);
+      send('banner-state', { key, minimized: min }).catch(() => {});
+    };
+    draw(minimized, false);
+    const entry = { host, signature, extras: reportOn ? addInlineReports(msg, data, result) : [] };
+    banners.set(msg, entry);
+  }
+
+  // A small "Report" button after each flagged link in the body (the links
+  // themselves are not touched).
+  // result.links[i] is the verdict for data.links[i].
+  function addInlineReports(msg, data, result) {
+    const body = first(site.body, msg);
+    if (!body) return [];
+    const flagged = new Map();
+    data.links.forEach(({ url }, i) => {
+      const v = result.links?.[i];
+      if (v && canReport(v)) flagged.set(url, v);
+    });
+    if (!flagged.size) return [];
+    const hosts = [];
+    for (const a of body.querySelectorAll('a[href]')) {
+      const v = flagged.get(httpHref(a));
+      if (!v) continue;
+      const { host, root } = inlineShadow(a);
+      const view = renderInlineReport(v, { onOpen: safe((b) => openLinkReport(b, v), 'report link') });
+      for (const type of ['click', 'mousedown', 'keydown']) view.addEventListener(type, (e) => e.stopPropagation());
+      root.append(view);
+      hosts.push(host);
+      if (hosts.length >= 50) break;
+    }
+    return hosts;
+  }
+
+  function removeEntry(entry) {
+    if (!entry) return;
+    entry.host?.remove();
+    for (const h of entry.extras || []) h.remove();
   }
 
   function scanMessages() {
@@ -171,8 +275,9 @@ export function createGmail(site) {
 
   return {
     banner: {
-      start() {
+      start(settings) {
         if (banners) return;
+        reportOn = settings?.reportButton !== false;
         banners = new Map();
         const run = debounce(safe(scanMessages, 'gmail scan'), SCAN_DEBOUNCE_MS);
         bannerMo = new MutationObserver(run);
@@ -180,11 +285,19 @@ export function createGmail(site) {
         run();
         debug(`${site.id}: banner started`);
       },
+      // reportButton switched: draw the banners again with or without buttons.
+      update(settings) {
+        const want = settings?.reportButton !== false;
+        if (!banners || want === reportOn) return;
+        this.stop();
+        this.start(settings);
+      },
       stop() {
         if (!banners) return;
         bannerMo.disconnect();
-        for (const { host } of banners.values()) host?.remove();
+        for (const entry of banners.values()) removeEntry(entry);
         banners = null;
+        destroyReportPopover();
       },
     },
     inbox: {

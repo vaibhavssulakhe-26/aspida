@@ -36,14 +36,16 @@ demo server), use `npm run demo -- 8081`. Stage walkthrough: [DEMO.md](DEMO.md).
 | QR code hover: decode locally, show contents, check the link, never open it; UPI payee shown | all http(s) pages | QR code hover (on) |
 | Chat links: background pre-check so the hover verdict is instant | WhatsApp Web, Telegram Web, Instagram DMs | one per app (on) |
 | Inline risk badges next to chat links (verdicts are otherwise shown only on hover/focus) | same chat apps | Show inline badges in chat (**off**) |
-| Opened-email banner: sender, Reply-To (if visible), links | Gmail | Gmail: opened email (on) |
+| Opened-email banner: sender, Reply-To (if visible), links. **Minimize** turns it into a small coloured pill (remembered per email for the browser session) | Gmail | Gmail: opened email (on) |
+| Report in emails: **Report sender** (Suspicious / High risk sender) and a small **Report** button after each flagged link in the body; same confirm step as the tooltip, new tab only on click | Gmail | Report buttons (on) |
+| In-page colours (tooltips, QR tooltip, email banner, warning page): "Clean Blue" palette, light / dark from the settings-page theme; risk colours stay red / yellow / green | everywhere | follows the theme setting |
 | Inbox row highlighting from the listed sender (weak signal) | Gmail | Gmail: inbox highlighting (**off**) |
 | Warning page before loading known-malicious sites | navigation | Warning page (on), Warning page for High risk (on) |
 | Cracked / pirated software: host on a pirated-software list (HaGeZi Anti-Piracy, bundled demo list), 2+ cracked-software words (crack, keygen, activator, …), or a direct .exe/.msi/.zip/.iso/.scr/.apk download from an unknown site. Suspicious at most on its own, tooltip only, never a warning page | all http(s) pages | Cracked / pirated software (on) |
 | Toolbar icon colour for the current page: green no known threats found, orange suspicious, red high risk / known malicious, black not checked (non-web pages) | toolbar | Toolbar icon reflects the current site (on) |
 | Settings page: title "ASPIDA – Your digital shield" and a circular navbar (About, Features, Threat feeds, Allowlist, Local counter, Your data; About first). Click a section or use ←/→ and it slides to the centre | options page | n/a |
 | Settings page theme: light / dark "Clean Blue" palette, sun/moon button top-right | options page | follows the system (`auto`) |
-| "Report this link" on warning tooltips and the warning page: shows the exact URL (query/#fragment removed by default), Copy URL, and opens Google Safe Browsing (prefilled), Netcraft or cybercrime.gov.in in a new tab only when clicked; "Report a wrong warning" opens a prefilled GitHub issue or copies the details. Nothing is sent automatically | tooltips (risky tiers only), warning page | Report this link button (on) |
+| "Report this link" on warning tooltips, the warning page and email banners: shows the exact URL (query/#fragment removed by default), Copy URL, and opens Google Safe Browsing (prefilled), Netcraft or cybercrime.gov.in in a new tab only when clicked; "Report a wrong warning" opens a prefilled GitHub issue or copies the details. Nothing is sent automatically | tooltips (risky tiers only), warning page, email | Report buttons (on) |
 | Interface language: English or Kannada (ಕನ್ನಡ, **DRAFT** translation) for tier names, buttons, settings, warning page, tooltip/banner text and advice. Reason sentences from the checks stay in English | options page, EN / ಕನ್ನಡ switch top-right | English |
 
 Every feature has its own switch so it can be turned off instantly (e.g. on stage)

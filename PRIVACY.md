@@ -58,8 +58,17 @@ URL leaves your browser only if **you** then:
   page with the URL, verdict tier and signal ids prefilled, for you to submit or
   discard.
 
+In an opened email (Gmail and the demo mailbox) the same rules apply to:
+
+- **Report sender** (Suspicious / High risk senders): shows the sender address and
+  display name. **Copy address** only copies it; a reporting-site button copies
+  the address and opens that site's plain form in a new tab. Nothing about the
+  email is put in the new tab's address.
+- the small **Report** button after each flagged link in the email body: the same
+  confirm step as the tooltip (URL shown, query/#fragment removed by default).
+
 The extension makes no network request for any of this; opening a tab needs no
-extra permission. The button can be turned off in settings ("Report this link button").
+extra permission. All report buttons can be turned off in settings ("Report buttons").
 
 ## What is stored (on this device only)
 
@@ -72,6 +81,7 @@ extra permission. The button can be turned off in settings ("Report this link bu
 | Detection counters (numbers only, no URLs) | `chrome.storage.local` | Clear all data |
 | "Already counted" set: truncated SHA-256 hashes, so the same link isn't counted twice | `chrome.storage.session` (gone when the browser closes) | Clear all data / browser exit |
 | "Proceed anyway" bypasses (per tab, registrable domain) | `chrome.storage.session` | closing the tab / browser exit |
+| Minimized email banners: a hashed key per email (from Gmail's message id, or sender + subject); no address or subject is stored | `chrome.storage.session` | expanding the banner / browser exit |
 | Per-page verdict cache | content-script memory | leaving the page |
 
 **Clear all data** (options page, click twice) deletes all of the above and

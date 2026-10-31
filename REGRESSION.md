@@ -50,7 +50,7 @@ only when every box below is green.
       cybercrime.gov.in copy the URL ("paste it into the form") and open in a new tab;
       Open a GitHub issue / Copy details work; Close and Escape close it. DevTools
       Network (extension service worker) shows no request when clicking any of these.
-      Warning page: same button and step. Setting "Report this link button" off →
+      Warning page: same button and step. Setting "Report buttons" off →
       no button, without reload.
 - [ ] m3: Turn off "Link hover verdict" in options → tooltips stop without reload.
 - [ ] m3: http://localhost:8080/heavy.html scrolls smoothly; a link near the bottom shows a tooltip.
@@ -136,3 +136,22 @@ only when every box below is green.
 - [ ] m12: Updating from a build that had URLhaus: settings keep every other
       choice; `chrome.storage.local` no longer has `urlhausAuthKey`, `feeds.urlhaus`
       or `feedStatus:urlhaus`.
+- [ ] m13: mail.html#kyc: banner has Minimize, "Report sender" and "Report this link";
+      the body link has a small "Report" right after it, and the email text does not
+      reflow beyond that one button. "Report sender" → address + display name, Copy
+      address (clipboard holds the address), three destination buttons, 1930 line;
+      a destination opens one new tab (Netcraft / cybercrime.gov.in: plain form;
+      Safe Browsing: plain form). Inline "Report" → same step as the tooltip, Safe
+      Browsing prefilled with the stripped URL. Escape / click elsewhere closes and
+      focus returns to the button.
+- [ ] m13: Minimize → pill "High risk, show" (aria-expanded=false; Tab + Enter
+      expands it). Reload keeps it minimized; other emails stay expanded; a new
+      browser session starts expanded. Reduced motion: no fade.
+- [ ] m13: mail.html#meeting (clean): no Minimize, no report buttons. "Report
+      buttons" off: report buttons gone live (tooltips, warning page, emails).
+- [ ] m13: Colours: tooltip, QR tooltip, report steps, email banner, pill and the
+      warning page use navy / teal / grey / white; Suspicious stays yellow, High /
+      Known malicious red, "No known threats found" green. Settings → theme dark /
+      light switches them too (banners live, tooltips on next hover); auto follows
+      the OS. Check a dark website and a light one: panels are opaque and readable.
+

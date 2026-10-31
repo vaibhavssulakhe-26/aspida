@@ -150,6 +150,22 @@ it unchanged.
 | `#newsletter` "The Weekly Byte" (`weeklybyte.example`) | No known threats found | none | unchanged |
 | `#order` "Your order CW-20417 has shipped" (`cartwheel.example`) | No known threats found | none | unchanged |
 
+Reporting and minimizing (open `mail.html#kyc`):
+
+- **Report sender** (right of the sender line in the banner): a small step shows
+  `kyc-alerts@secure-notice.test` and the display name, **Copy address**, and
+  Google Safe Browsing / Netcraft / cybercrime.gov.in buttons that open a new tab
+  only when clicked (the address is copied first), plus the 1930 helpline line.
+  Escape or a click elsewhere closes it.
+- Each flagged link in the email body has a small **Report** button right after
+  it: the same "Report as suspicious" step as the hover tooltip (exact URL,
+  "Remove query string and #fragment" ticked, Copy URL, destinations).
+- **Minimize** (banner top-right) shrinks the banner to a coloured pill
+  ("High risk, show"). Reload: it stays minimized. Click the pill to expand.
+  Other emails are unaffected. Clean emails have no Minimize or Report buttons.
+- Settings → Features → **Report buttons** off: the report buttons disappear
+  without reload; Minimize stays.
+
 Notes: the KYC email shows its Reply-To as if "show details" were open, so the
 Reply-To check is demonstrated; the others say Reply-To wasn't visible. The
 parcel lure's link *text* looks like a bit.ly short link while its destination is

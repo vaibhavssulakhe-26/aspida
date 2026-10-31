@@ -1,20 +1,24 @@
-:root { --bg: #fbfbfc; --fg: #1f2328; --muted: #59636e; --border: #d0d7de; --danger: #b91c1c; --btn: #ffffff; color-scheme: light dark; }
-@media (prefers-color-scheme: dark) { :root { --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --border: #3d444d; --danger: #f87171; --btn: #161b22; } }
+/* Warning page. Colours are the shared --tl-* palette variables from
+   src/ui/render.js (themeCss(':root'), injected by warning.js), so the page,
+   the verdict and the report step follow the same light/dark theme. */
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-main { max-width: 680px; margin: 0 auto; padding: 48px 16px; }
-.brand { font-weight: 700; letter-spacing: .02em; color: var(--muted); margin: 0 0 8px; }
-h1 { font-size: 26px; line-height: 1.25; margin: 0 0 8px; color: var(--danger); }
-.lede { color: var(--muted); margin: 0 0 20px; }
+body { margin: 0; background: var(--tl-bg2, #e9ecef); color: var(--tl-fg, #1d3557); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+main { max-width: 720px; margin: 32px auto; padding: 32px 28px; background: var(--tl-bg, #fff); border: 1px solid var(--tl-border, #a8dadc); border-top: 6px solid var(--tl-high-accent, #d32f2f); border-radius: 14px; box-shadow: 0 8px 28px var(--tl-shadow, rgba(29, 53, 87, 0.2)); }
+@media (max-width: 760px) { main { margin: 0; border-radius: 0; border-left: 0; border-right: 0; padding: 28px 16px; } }
+.brand { font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--tl-fg); margin: 0 0 10px; font-size: 13px; }
+h1 { font-size: 26px; line-height: 1.25; margin: 0 0 8px; color: var(--tl-high-text, #b42318); }
+.lede { color: var(--tl-muted); margin: 0 0 20px; }
 .target { display: flex; flex-direction: column; gap: 4px; margin: 0 0 16px; }
-.target-label { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-.target code { font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--btn); }
+.target-label { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--tl-muted); }
+.target code { font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; padding: 8px 10px; border: 1px solid var(--tl-border); border-radius: 6px; background: var(--tl-bg2); color: var(--tl-fg); }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 12px; }
-button { font: inherit; padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--btn); color: var(--fg); cursor: pointer; }
-button.primary { background: #1f6feb; border-color: #1f6feb; color: #fff; font-weight: 600; }
-button.quiet { background: transparent; color: var(--muted); }
-button:focus-visible { outline: 2px solid #1f6feb; outline-offset: 2px; }
-.fine { color: var(--muted); font-size: 13px; }
+button { font: inherit; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--tl-border); background: var(--tl-hover); color: var(--tl-fg); cursor: pointer; }
+button:hover { border-color: var(--tl-control); }
+button.primary { background: var(--tl-primary); border-color: var(--tl-primary); color: var(--tl-primary-fg); font-weight: 600; }
+button.quiet { background: transparent; border-color: transparent; color: var(--tl-muted); text-decoration: underline; }
+button:disabled { opacity: .55; cursor: default; }
+button:focus-visible { outline: 2px solid var(--tl-focus); outline-offset: 2px; }
+.fine { color: var(--tl-muted); font-size: 13px; }
 /* Kannada interface: local fonts only (no web fonts are loaded). */
 html:lang(kn) body, html:lang(kn) button { font-family: "Noto Sans Kannada", "Nirmala UI", "Tunga", "Kedage", system-ui, sans-serif; }
 html:lang(kn) h1 { line-height: 1.4; }

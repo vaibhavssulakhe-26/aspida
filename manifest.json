@@ -63,6 +63,7 @@
         "src/qr/decode.js",
         "src/core/qr-payload.js",
         "src/core/report.js",
+        "src/core/email-key.js",
         "src/ui/clipboard.js",
         "vendor/jsqr/jsQR.js",
         "src/content/sites/*"

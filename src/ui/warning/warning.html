@@ -4,11 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title data-i18n="warning.pageTitle">Aspida warning</title>
+  <!-- Applies the remembered settings-page theme before first paint. -->
+  <script src="../options/theme-boot.js"></script>
   <link rel="stylesheet" href="warning.css">
   <script type="module" src="warning.js"></script>
 </head>
 <body>
-  <main>
+  <main class="sheet">
     <p class="brand">Aspida</p>
     <h1 id="heading" data-i18n="warning.heading">This page was stopped before it loaded</h1>
     <p class="lede" data-i18n="warning.lede">Aspida found risk signals for the address below. Nothing from that site has been loaded.</p>
