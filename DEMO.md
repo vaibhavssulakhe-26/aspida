@@ -203,12 +203,21 @@ the normal icon straight away; turn it on and the icons come back.
 Click the Aspida toolbar icon (or open the extension's options).
 
 - Top: **ASPIDA**, "Your digital shield", and a navbar with About, Features,
-  Threat feeds, Allowlist, Local counter, Your data. **About** opens first, in
-  the centre. Click **Features**: it slides to the centre (bigger, filled) and the
-  card below fades to the feature switches. Keep clicking to the right: the bar
-  loops (Your data → About → …), always with sections on both sides. ←/→ keys
-  do the same once a tab has focus. On a phone-width window only one neighbour
-  shows each side.
+  Threat feeds, Allowlist, Local counter, Your data. The page opens in **idle
+  mode**: About in the centre, no section shown, the navbar advancing one item
+  every 2 seconds, and a slideshow of Aspida screenshots below (a new one every
+  second, cross-faded).
+- Click any item, even while it is moving: rotation stops, it slides to the
+  centre (bigger, filled), the slideshow goes and that section fades in. Keep
+  clicking: the bar loops (Your data → About → …), always with sections on both
+  sides. ←/→ / Enter do the same once a tab has focus. On a phone-width window
+  only one neighbour shows each side.
+- Leave the mouse alone for 10 seconds (moving or scrolling doesn't count, only
+  clicks): the section hides, the slideshow comes back from the first slide and
+  the navbar starts rotating again. While you type in the allowlist box it stays
+  open; the 10 seconds start when you leave the box.
+- Slides: `slides/slide1.png` … in numeric order. After adding or removing one,
+  run `npm run slides` to rewrite `slides/slides.json`.
 - Theme: the sun/moon button top-right switches light ↔ dark and is remembered.
   Default follows the system setting.
 - Language: click **ಕನ್ನಡ** top-right. The settings page switches at once;

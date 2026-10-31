@@ -120,13 +120,26 @@ only when every box below is green.
       render (no boxes). Switch back to English: everything returns without reload.
 - [ ] m7: README, FEEDS, PRIVACY and DEMO match behaviour (permissions table equals
       manifest.json; feed URLs equal src/config/feeds.js).
-- [ ] m12: Settings page: "ASPIDA" / "Your digital shield" centred; About selected
-      and centred on open. Click each navbar item: it slides to the centre (bigger,
-      bold) and the card swaps with a short fade; the loop wraps both ways (left of
-      About is Your data) and there are always items on both sides. Tab to the
-      navbar, then ←/→ / Home / End move the selection; focus ring visible.
-      Narrow window (~380 px): one neighbour each side, same behaviour. With the OS
-      "reduce motion" setting on, the swap is instant.
+- [ ] m12: Settings page opens idle: "ASPIDA" / "Your digital shield", About centred
+      but no tab selected and no section card; the navbar advances one item every
+      2 s (smooth slide) and the screenshot slideshow below changes every second
+      (cross-fade, no layout jump, no dimming, rounded corners, navy shadow in
+      light / teal glow in dark). Moving the mouse or scrolling changes nothing; a
+      click outside the navbar changes nothing.
+- [ ] m12: Click a navbar item (also while it moves): rotation stops at once, the
+      item slides to the centre, the slideshow disappears and the section fades in.
+      Click each item: the loop wraps both ways (left of About is Your data) and
+      there are always items on both sides. Tab to the navbar, then ←/→ / Home /
+      End / Enter select (and leave idle); focus ring visible. Narrow window
+      (~380 px): one neighbour each side, same behaviour.
+- [ ] m12: Wait 10 s without clicking: the section hides, the slideshow returns
+      from slide 1 and rotation resumes from the current item. Clicks restart the
+      10 s. Type in the Allowlist box and wait > 10 s: the section stays; 10 s
+      after leaving the box it goes idle. Switch to another tab for a while and
+      back: no burst of rotations. Theme and language buttons still work in both
+      modes; ಕನ್ನಡ gives Kannada slide alt text. OS "reduce motion" on: slides and
+      navbar swap instantly, timers unchanged. Delete slides/slides.json: no
+      slideshow, everything else works.
 - [ ] m12: Every switch on the Features tab still saves (toggle, reload the page,
       it stays) and takes effect on the demo page without reload. Feed switches,
       Refresh, allowlist add/remove, counters and Clear all data still work.

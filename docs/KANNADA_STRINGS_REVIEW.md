@@ -17,7 +17,7 @@ Rules for reviewers:
   Y") are **not** translated in this version and stay in English.
 
 Regenerate this file after changing either table: `node tools/kannada-review.mjs`.
-176 strings.
+177 strings.
 
 ## Verdict tiers
 
@@ -158,6 +158,7 @@ Regenerate this file after changing either table: `node tools/kannada-review.mjs
 | `options.tab.allowlist` | Allowlist | ಅನುಮತಿ ಪಟ್ಟಿ |
 | `options.tab.stats` | Local counter | ಸ್ಥಳೀಯ ಎಣಿಕೆ |
 | `options.tab.data` | Your data | ನಿಮ್ಮ ಡೇಟಾ |
+| `options.slideAlt` | Aspida screenshot {n} of {m} | Aspida ಸ್ಕ್ರೀನ್‌ಶಾಟ್ {m} ರಲ್ಲಿ {n} |
 | `options.about` | About Aspida | Aspida ಬಗ್ಗೆ |
 | `options.about.intro` | Aspida is a quiet guard for your browser. It looks at the links, messages and emails you see and warns you when something looks like a scam or a fake website. | Aspida ನಿಮ್ಮ ಬ್ರೌಸರ್‌ಗೆ ಒಂದು ಸದ್ದಿಲ್ಲದ ಕಾವಲುಗಾರ. ನೀವು ನೋಡುವ ಲಿಂಕ್‌ಗಳು, ಸಂದೇಶಗಳು ಮತ್ತು ಇಮೇಲ್‌ಗಳನ್ನು ಅದು ಗಮನಿಸುತ್ತದೆ, ಮತ್ತು ಏನಾದರೂ ವಂಚನೆ ಅಥವಾ ನಕಲಿ ವೆಬ್‌ಸೈಟ್‌ನಂತೆ ಕಂಡರೆ ನಿಮ್ಮನ್ನು ಎಚ್ಚರಿಸುತ್ತದೆ. |
 | `options.about.hover` | Hover over a link and it tells you what looks wrong and why. | ಲಿಂಕ್ ಮೇಲೆ ಮೌಸ್ ಇಟ್ಟರೆ, ಏನು ಸರಿಯಿಲ್ಲ ಮತ್ತು ಏಕೆ ಎಂದು ಅದು ತಿಳಿಸುತ್ತದೆ. |

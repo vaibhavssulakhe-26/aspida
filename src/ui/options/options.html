@@ -40,8 +40,11 @@
       </div>
     </nav>
 
-    <div class="card">
-      <section id="panel-about" class="panel" role="tabpanel" aria-labelledby="tab-about" tabindex="0">
+    <!-- Idle mode: screenshots of Aspida (slides/slides.json), filled by options.js. -->
+    <div id="slideshow" class="slideshow" aria-live="off" hidden></div>
+
+    <div class="card" id="content" hidden>
+      <section id="panel-about" class="panel" role="tabpanel" aria-labelledby="tab-about" tabindex="0" hidden>
         <h2 id="h-about" data-i18n="options.about">About Aspida</h2>
         <p class="lead" data-i18n="options.about.intro"></p>
         <p data-i18n="options.about.hover"></p>

@@ -110,6 +110,7 @@ export default {
   'options.tab.allowlist': 'Allowlist',
   'options.tab.stats': 'Local counter',
   'options.tab.data': 'Your data',
+  'options.slideAlt': 'Aspida screenshot {n} of {m}',
   'options.about': 'About Aspida',
   'options.about.intro': 'Aspida is a quiet guard for your browser. It looks at the links, messages and emails you see and warns you when something looks like a scam or a fake website.',
   'options.about.hover': 'Hover over a link and it tells you what looks wrong and why.',

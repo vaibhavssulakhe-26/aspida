@@ -27,6 +27,7 @@
   --danger: #b42318;
   --ok: #1a7f37;
   --shadow: 0 1px 2px rgba(29, 53, 87, 0.08), 0 6px 24px rgba(29, 53, 87, 0.08);
+  --slide-shadow: 0 10px 32px rgba(29, 53, 87, 0.18);
   color-scheme: light;
 }
 /* Dark tokens: applied for 'dark', and for 'auto' when the system is dark. */
@@ -50,6 +51,7 @@
     --danger: #ff9b91;
     --ok: #7ee2a0;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 8px 28px rgba(0, 0, 0, 0.25);
+    --slide-shadow: 0 0 32px rgba(168, 218, 220, 0.15);
     color-scheme: dark;
   }
 }
@@ -72,6 +74,7 @@
   --danger: #ff9b91;
   --ok: #7ee2a0;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 8px 28px rgba(0, 0, 0, 0.25);
+  --slide-shadow: 0 0 32px rgba(168, 218, 220, 0.15);
   color-scheme: dark;
 }
 
@@ -111,12 +114,12 @@ h1 { margin: 0; font-size: clamp(34px, 7vw, 52px); letter-spacing: 0.18em; font-
   transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease-out;
 }
 .tabs [role="tab"][data-dist="1"] { opacity: 0.9; transform: translateX(calc(var(--d, 0) * var(--slot))) scale(0.92); }
-.tabs [role="tab"][aria-selected="true"] {
+.tabs [role="tab"][data-centre] {
   background: var(--tab-sel-bg); color: var(--tab-sel-fg); font-weight: 700; opacity: 1;
   transform: translateX(0) scale(1.12); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
 .tabs [role="tab"][data-out] { opacity: 0; pointer-events: none; }
-.tabs [role="tab"]:hover:not([aria-selected="true"]) { border-color: var(--control); }
+.tabs [role="tab"]:hover:not([data-centre]) { border-color: var(--control); }
 .tabs [role="tab"]:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .tabs.no-anim [role="tab"] { transition: none; }
 
@@ -133,9 +136,19 @@ h1 { margin: 0; font-size: clamp(34px, 7vw, 52px); letter-spacing: 0.18em; font-
 @keyframes panel-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (max-width: 640px) { .card { padding: 16px; } }
 
+/* Idle-mode slideshow: images stacked in one box (no layout jump), each
+   sized to its own aspect ratio so the rounded corners and the shadow follow
+   the picture; a 400 ms cross-fade (opacity only). */
+.slideshow { position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 60vh; margin: 8px auto 0; }
+.slideshow img { position: absolute; inset: 0; margin: auto; max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; border-radius: 14px; box-shadow: var(--slide-shadow); opacity: 0; transition: opacity 400ms ease-in-out; }
+.slideshow img.prev { opacity: 1; z-index: 1; transition: none; }
+.slideshow img.on { opacity: 1; z-index: 2; }
+.slideshow.entering, .card.entering { animation: panel-in 220ms ease-out; }
+
 @media (prefers-reduced-motion: reduce) {
   .tabs [role="tab"] { transition: none; }
-  .panel.entering { animation: none; }
+  .panel.entering, .slideshow.entering, .card.entering { animation: none; }
+  .slideshow img { transition: none; }
 }
 
 h2 { font-size: 19px; margin: 0 0 6px; }

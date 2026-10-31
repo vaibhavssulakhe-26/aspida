@@ -5,6 +5,7 @@ import { send } from '../../platform/messaging.js';
 import { manifestVersion } from '../../platform/browser.js';
 import { t, setLanguage } from '../../config/strings/index.js';
 import { step, offsets, wrapped } from './carousel.js';
+import { createIdleMode } from '../../core/idle-mode.js';
 
 // Feature switches in display order. Labels and descriptions are the
 // 'feature.<key>' and 'feature.<key>.desc' strings.
@@ -55,6 +56,7 @@ function applyLanguage(lang) {
   $('version').textContent = t('options.version', { v: manifestVersion() });
   for (const b of document.querySelectorAll('[data-lang]')) b.setAttribute('aria-pressed', String(b.dataset.lang === code));
   if (!clearArmed) $('clear').textContent = t('options.clear');
+  slideAlts();
   showTheme();
 }
 
@@ -135,32 +137,138 @@ function layoutTabs(animate) {
   lastOffsets = next;
 }
 
-function select(i, { focus = false, animate = true } = {}) {
+// Move item i to the centre of the navbar (no section change).
+function centre(i, { animate = true, focus = false } = {}) {
   const n = tabs.length;
   i = step(i, 0, n);
   const changed = i !== selected;
   selected = i;
   tabs.forEach((tab, k) => {
-    const on = k === i;
-    tab.setAttribute('aria-selected', String(on));
-    tab.tabIndex = on ? 0 : -1;
-    const panel = $(tab.getAttribute('aria-controls'));
-    if (on && panel.hidden) {
-      panel.hidden = false;
-      if (animate && !reducedMotion.matches) {
-        panel.classList.remove('entering');
-        void panel.offsetWidth;
-        panel.classList.add('entering');
-      }
-    } else if (!on) panel.hidden = true;
+    tab.tabIndex = k === i ? 0 : -1;
+    tab.toggleAttribute('data-centre', k === i); // enlarged look; aria-selected only in active mode
   });
   layoutTabs(animate && changed);
   if (focus) tabs[i].focus();
-  if (changed) history.replaceState(null, '', `#${TAB_IDS[i]}`);
+}
+
+// Show section i (active mode), or none (idle mode: no tab is selected, every
+// tabpanel is hidden).
+let shown = null;
+function showSection(i, { animate = true } = {}) {
+  const fade = (node) => {
+    if (!animate || reducedMotion.matches) return;
+    node.classList.remove('entering');
+    void node.offsetWidth;
+    node.classList.add('entering');
+  };
+  tabs.forEach((tab, k) => {
+    const on = k === i;
+    tab.setAttribute('aria-selected', String(on));
+    const panel = $(tab.getAttribute('aria-controls'));
+    if (on && panel.hidden) {
+      panel.hidden = false;
+      fade(panel);
+    } else if (!on) panel.hidden = true;
+  });
+  const content = $('content');
+  const wasHidden = content.hidden;
+  content.hidden = i === null;
+  if (i !== null && wasHidden) fade(content);
+  shown = i;
+  history.replaceState(null, '', i === null ? location.pathname + location.search : `#${TAB_IDS[i]}`);
+}
+
+// ---- Idle mode: rotating navbar + slideshow until a section is chosen ----
+// Slides come from slides/slides.json (written by `npm run slides`); if it is
+// missing or empty there is simply no slideshow.
+const slideshow = { box: $('slideshow'), imgs: [], index: 0 };
+
+// Cross-fade: the new slide fades in on top while the previous one stays
+// fully visible underneath, so the picture never dims to the background.
+function showSlide(k, { fade = true } = {}) {
+  const { imgs } = slideshow;
+  if (!imgs.length) return;
+  const prev = slideshow.index;
+  slideshow.index = ((k % imgs.length) + imgs.length) % imgs.length;
+  imgs.forEach((img, j) => {
+    const on = j === slideshow.index;
+    img.classList.toggle('on', on);
+    img.classList.toggle('prev', fade && j === prev && !on);
+    img.setAttribute('aria-hidden', String(!on));
+  });
+}
+
+function slideAlts() {
+  const m = slideshow.imgs.length;
+  slideshow.imgs.forEach((img, j) => (img.alt = t('options.slideAlt', { n: j + 1, m })));
+}
+
+async function loadSlides() {
+  let names = [];
+  try {
+    const res = await fetch('../../../slides/slides.json', { cache: 'no-store' });
+    if (res.ok) names = await res.json();
+  } catch {
+    names = [];
+  }
+  names = Array.isArray(names) ? names.filter((f) => typeof f === 'string' && /^slide\d+\.png$/i.test(f)) : [];
+  // Preload all images before showing any, so nothing flashes; files that
+  // fail to load are dropped.
+  const loaded = await Promise.all(
+    names.map(async (f) => {
+      const img = el('img', { src: `../../../slides/${f}`, decoding: 'async', draggable: false });
+      try {
+        await img.decode();
+        return img;
+      } catch {
+        return null;
+      }
+    }),
+  );
+  slideshow.imgs = loaded.filter(Boolean);
+  slideAlts();
+  slideshow.box.replaceChildren(...slideshow.imgs);
+  showSlide(0, { fade: false });
+  if (idle.mode === 'idle') slideshow.box.hidden = !slideshow.imgs.length;
+}
+
+// While someone types in a text field of the shown section, don't snap back
+// to idle (checked again when the field loses focus). Remove this one
+// condition to drop the exception.
+function isEditingInContent() {
+  const a = document.activeElement;
+  return !!a && $('content').contains(a) && a.matches('input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]), textarea, select');
+}
+
+const idle = createIdleMode({
+  isEditing: isEditingInContent,
+  onIdle: () => {
+    showSection(null, { animate: false });
+    showSlide(0, { fade: false });
+    const box = slideshow.box;
+    box.hidden = !slideshow.imgs.length;
+    if (!box.hidden && !reducedMotion.matches) {
+      box.classList.remove('entering');
+      void box.offsetWidth;
+      box.classList.add('entering');
+    }
+  },
+  onActive: () => {
+    slideshow.box.hidden = true;
+  },
+  onRotate: () => centre(selected + 1),
+  onSlide: () => showSlide(slideshow.index + 1),
+});
+
+// Choosing an item (click or keyboard) shows it and leaves idle mode.
+function activate(i, { focus = true } = {}) {
+  centre(i, { focus });
+  idle.activate();
+  showSection(selected);
 }
 
 tabs.forEach((tab, i) => {
-  tab.addEventListener('click', () => select(i, { focus: true }));
+  tab.addEventListener('click', () => activate(i));
   tab.addEventListener('keydown', (e) => {
     const n = tabs.length;
     let to = null;
@@ -171,17 +279,31 @@ tabs.forEach((tab, i) => {
     else if (e.key === 'Enter' || e.key === ' ') to = i;
     if (to === null) return;
     e.preventDefault();
-    select(to, { focus: true });
+    activate(to);
   });
 });
-for (const p of document.querySelectorAll('[role="tabpanel"]')) p.addEventListener('animationend', () => p.classList.remove('entering'));
+for (const node of [...document.querySelectorAll('[role="tabpanel"]'), $('content'), slideshow.box]) node.addEventListener('animationend', () => node.classList.remove('entering'));
+// Only mouse clicks count as activity (not movement, hover or scrolling).
+document.addEventListener('click', () => idle.click(), { capture: true, passive: true });
+$('content').addEventListener('focusout', () => idle.focusLeft());
+document.addEventListener('visibilitychange', () => idle.setHidden(document.visibilityState === 'hidden'));
 // The number of neighbours shown changes with the width.
 matchMedia('(max-width: 640px)').addEventListener('change', () => layoutTabs(false));
 
-// options.html#feeds etc. opens that section; About otherwise.
+// Start: About centred, idle. options.html#feeds etc. opens that section
+// directly (active mode), as before.
 const fromHash = () => TAB_IDS.indexOf(location.hash.slice(1));
-select(Math.max(fromHash(), 0), { animate: false });
-addEventListener('hashchange', () => fromHash() >= 0 && select(fromHash()));
+centre(0, { animate: false });
+if (fromHash() >= 0) {
+  centre(fromHash(), { animate: false });
+  idle.activate();
+  showSection(selected, { animate: false });
+} else {
+  idle.start();
+}
+idle.setHidden(document.visibilityState === 'hidden');
+addEventListener('hashchange', () => fromHash() >= 0 && fromHash() !== shown && activate(fromHash(), { focus: false }));
+loadSlides();
 
 async function renderFeatures() {
   const s = await getSettings();
